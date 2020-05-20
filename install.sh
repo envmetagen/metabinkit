@@ -78,7 +78,7 @@ function install_taxonkit {
     tar xzvf tmp.tar.gz
     mkdir -p $INSTALL_DIR
     chmod +x taxonkit
-    mv taxonkit $INSTALL_DIR
+    mv taxonkit $INSTALL_DIR/bin
     rm -f tmp.tar.gz
     pinfo "Installing taxonkit..done."
 }

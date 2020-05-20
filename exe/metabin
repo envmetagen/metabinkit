@@ -1,0 +1,114 @@
+#!/usr/bin/env Rscript
+# -*- mode: R;-*-
+# =========================================================
+# Copyright 2020
+#
+#
+# This is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this file.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# =========================================================
+# generate one HTML page with QC report
+###########################################################
+
+###################################################################
+## Load auxiliary code
+dir2script <- normalizePath(dirname(strsplit(split="=",x=grep("--file=",fixed=TRUE,value=TRUE,x=commandArgs(trailingOnly = FALSE)))[[1]][2]))
+##
+mbk.local.lib.path <- paste0(dir2script,"/../R")
+source(paste(dir2script,"/../R/metabinkit.R",sep=""))
+
+
+
+library(optparse)
+############################################################
+
+option_list = list(
+    make_option(c("-i", "--input"), type="character", default=NULL, 
+                help="TSV file name", metavar="filename"),
+    make_option(c("-o", "--out"), type="character", default=NULL, 
+                help="output file prefix ", metavar="filename"),
+    make_option(c("-s", "--subspecies"), type="double", default=99.5, 
+                help="subspecies %id threshold [default= %default]", metavar="double"),
+    make_option(c("-S", "--Species"), type="double", default=96.0, 
+                help="species %id threshold [default= %default]", metavar="double"),
+    make_option(c("-G", "--Genus"), type="double", default=82.0, 
+                help="genus %id threshold [default= %default]", metavar="double"),
+    make_option(c("-F", "--Family"), type="double", default=90.0, 
+                help="family %id threshold [default= %default]", metavar="double"),
+
+    make_option(c("-A", "--AboveF"), type="double", default=90.0, 
+                help="above family %id threshold [default= %default]", metavar="double"),
+
+    make_option(c("-D", "--db"), type="character", default="~/.taxonkit", 
+                help="directory containing the taxonomy db (nodes.dmp and names.dmp) [default= %default]", metavar="double"),
+
+    make_option(c("--SpeciesBL"), type="character", default=NULL, 
+                help="species blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
+    make_option(c("--GenusBL"), type="character", default=NULL, 
+                help="genera blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
+    make_option(c("--FamilyBL"), type="character", default=NULL, 
+                help="families blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
+    ## tops,tpoS,topG,topF,topAbs
+    make_option(c("--TopSpecies"), type="integer", default=1, 
+                help="TODO [default= %default]", metavar="integer"),
+    make_option(c("--TopGenus"), type="integer", default=1, 
+                help="TODO [default= %default]", metavar="intefer"),
+    make_option(c("--TopFamily"), type="integer", default=1, 
+                help="TODO [default= %default]", metavar="integer"),
+    make_option(c("--TopAF"), type="integer", default=1, 
+                help="TODO above family? [default= %default]", metavar="integer"),
+
+    ## discard sp
+    make_option(c("--discard_sp"), action = "store_true", default = FALSE,
+                help = "Discard species with sp., numbers or more than one space [%default]"),
+
+    ##make_option(c("-O", "--Order"), type="double", default=75.0, 
+    ##            help="Order %id threshold [default= %default]", metavar="double"),
+    ##make_option(c("-C", "--Class"), type="double", default=65.0, 
+    ##            help="Class %id threshold [default= %default]", metavar="double")
+    make_option(c("-h","--help"), action = "store_true", default = FALSE,
+                help = "Print usage information")
+
+); 
+ 
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+if (is.null(opt$input)){
+  print_help(opt_parser)
+  stop("--input parameter should be provided.\n", call.=FALSE)
+}
+
+## call metabin
+## 
+message("Starting Binning")
+t1<-Sys.time()
+  
+##   filtered_blastfile<-gsub(".fasta",".blast.filt.txt",catted_file)
+
+##   message(paste("binning filtered blast results for",filtered_blastfile))
+##   binfile<-gsub(".blast.filt.txt",".bins.txt",filtered_blastfile)
+  
+##   bin.blast3(filtered_blastfile = filtered_blastfile,ncbiTaxDir = ncbiTaxDir, out = binfile,
+##              spident = spident, gpident = gpident, fpident = fpident, abspident = abspident,
+##              topS=topS,topG=topG,topF=topF,topAbs=topAbs,
+##              disabledTaxaFiles = disabledTaxaFiles)
+  
+t2<-Sys.time()
+t3<-round(difftime(t2,t1,units = "mins"),digits = 2)
+message("Binning complete in ", t3, " min")
+
+sessionInfo()
+q(status=0)

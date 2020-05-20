@@ -39,7 +39,7 @@ source(paste0(mbk.local.lib.path,"/lca.R"))
 
 
 
-metabin <- function(filtered_blastfile,
+metabin <- function(ifile,
                     ncbiTaxDir,
                     out,
                     spident=98,
@@ -72,7 +72,7 @@ metabin <- function(filtered_blastfile,
     t1<-Sys.time()
     ## would prefer that file was loader prior to this function being called
     ## lets keep it for now
-    btab<-data.table::fread(filtered_blastfile,sep="\t",data.table = F)
+    btab<-data.table::fread(ifile,sep="\t",data.table = F)
 
     ## TODO: validate table
     ## are the expected columns present?
@@ -268,6 +268,64 @@ get.top <- function(tab,topN) {
     topdf <- get.topdf(tab[,"pident"],tab$qseqid,topN)
     tab$min_pident <- topdf[match(tab$qseqid,tab$qseqid),"min_pident",drop=FALSE]
     tab<-tab[tab$pident>tab$min_pident,drop=FALSE]
+}
+
+
+add.lineage.df<-function(dframe,taxDir,taxCol="taxids",as.taxids=FALSE){
+  
+    if(!taxCol %in% colnames(dframe)) {stop(paste0("No column called ",taxCol))}
+
+    ##write taxids to file
+    taxids_fileA<-paste0("taxids",as.numeric(Sys.time()),".txt")
+    write.table(unique(dframe[,taxCol]),file = taxids_fileA,row.names = F,col.names = F,quote = F)
+    
+    ##get taxonomy from taxids and format in 7 levels
+    taxids_fileB<-paste0("taxids",as.numeric(Sys.time()),".txt")
+    system2(command = "taxonkit",args =  c("lineage","-r",taxids_fileA,"-c","--data-dir",ncbiTaxDir)
+           ,stdout = taxids_fileB,stderr = "",wait = T)
+    taxids_fileC<-paste0("taxids",as.numeric(Sys.time()),".txt")
+    if(as.taxids==F){
+        system2(command = "taxonkit",args =  c("reformat",taxids_fileB,"-i",3,"--data-dir",taxDir)
+               ,stdout = taxids_fileC,stderr = "",wait = T)
+    } else {
+        system2(command = "taxonkit",args =  c("reformat","-t", taxids_fileB,"-i",3,"--data-dir",taxDir)
+               ,stdout = taxids_fileC,stderr = "",wait = T)
+    }
+    lineage<-as.data.frame(data.table::fread(file = taxids_fileC,sep = "\t"))
+    colnames(lineage)<-gsub("V1","taxids",colnames(lineage))
+    colnames(lineage)<-gsub("V2","new_taxids",colnames(lineage))
+    if(as.taxids==F){
+        colnames(lineage)<-gsub("V5","path",colnames(lineage))
+    } else {
+    colnames(lineage)<-gsub("V6","path",colnames(lineage))
+    }
+    
+    ##merge with df
+    ##message("replacing taxids with updated taxids. Saving old taxids in old_taxids.")
+    dframe<-merge(dframe,lineage[,c("taxids","new_taxids","path")],by.x = taxCol,by.y = "taxids")
+    dframe$old_taxids<-dframe[,taxCol]
+    dframe$taxids<-dframe$new_taxids
+    dframe$new_taxids=NULL
+    dframe<-cbind(dframe,do.call(rbind, stringr::str_split(dframe$path,";")))
+    colnames(dframe)[(length(dframe)-6):length(dframe)]<-c("K","P","C","O","F","G","S")
+    if(as.taxids==F){
+        dframe$K<-as.character(dframe$K)
+        dframe$P<-as.character(dframe$P)
+        dframe$C<-as.character(dframe$C)
+        dframe$O<-as.character(dframe$O)
+        dframe$F<-as.character(dframe$F)
+        dframe$G<-as.character(dframe$G)
+        dframe$S<-as.character(dframe$S)
+        
+                                        #change empty cells to "unknown"
+        dframe[,(length(dframe)-6):length(dframe)][dframe[,(length(dframe)-6):length(dframe)]==""]<- "unknown"
+    }
+    
+    dframe$path=NULL
+    unlink(taxids_fileA)
+    unlink(taxids_fileB)
+    unlink(taxids_fileC)
+    return(dframe)
 }
 
 get.taxids.children <-function(taxids,taxonomy_data_dir=NULL){

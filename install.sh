@@ -191,6 +191,7 @@ function create_metabinkit_env {
 alias use_blast_${blast_VERSION}='export PATH="$BLAST_IDIR/bin:\$PATH"'
 export PATH=$INSTALL_DIR/python/bin/:$INSTALL_DIR/bin:$INSTALL_DIR/exe::\$PATH
 export LD_LIBRARY_PATH=$INSTALL_DIR/lib:\$LD_LIBRARY_PATH
+export R_LIBS_USER=$INSTALL_DIR/Rlibs:$R_LIBS_USER
 EOF
 
 cat <<EOF 

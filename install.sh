@@ -30,7 +30,7 @@ SYSTEM_DEPENCIES="R bash"
 blast_VERSION=2.10.0
 blast_URL=ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-${blast_VERSION}+-x64-linux.tar.gz
 
-TAXONKIT_VERSION=0.5.0
+TAXONKIT_VERSION=0.6.0
 TAXONKIT_URL=https://github.com/shenwei356/taxonkit/releases/download/v${TAXONKIT_VERSION}/taxonkit_linux_amd64.tar.gz
 
 fastq_utils_VERSION=0.23.0
@@ -170,7 +170,7 @@ if (version\$major > 3 || (version\$major == 3 && version\$minor>5)) {
 message("_____________________________________________________")
 
 message("Installing packages")
-packages2install<-c("Matrix","data.table")
+packages2install<-c("Matrix","data.table","optparse")
 
 for (p in packages2install ) {
   message("PACKAGE:",p,"\n")

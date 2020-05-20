@@ -20,6 +20,11 @@
 
 metabinkit.version <- "0.0.1"
 
+## should be defined
+if ( is.null(mbk.local.lib.path) ) {
+    mbk.local.lib.path <- "."
+}
+source(paste0(mbk.local.lib.path,"/lca.R"))
 
 metabin <- function(filtered_blastfile,
                     ncbiTaxDir,

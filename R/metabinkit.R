@@ -18,7 +18,8 @@
 #
 # =========================================================
 
-SuppressPackageStartupMessages(library("optparse"))
+metabinkit.version <- "0.0.1"
+
 
 metabin <- function(filtered_blastfile,
                     ncbiTaxDir,
@@ -201,11 +202,12 @@ metabin <- function(filtered_blastfile,
 
 
 get.lowest.common.ancestor <- function(tab) {
+
     colnames <- c("qseqid","K","P","C","O","F","G","S")
     
     if(nrow(tab)==0) {
         lcasp<-data.frame(matrix(nrow=1,ncol = 8))
-        colnames(lcasp)<-c("qseqid","K","P","C","O","F","G","S")
+        colnames(lcasp)<-colnames
         return(lcasp)
     }
         
@@ -215,7 +217,7 @@ get.lowest.common.ancestor <- function(tab) {
     lcasp<-add.unknown.lca(lcasp)
     mat<-do.call(rbind,stringr::str_split(lcasp$binpath,";"))
     lcasp<-as.data.frame(cbind(lcasp$qseqid,mat[,1],mat[,2],mat[,3],mat[,4],mat[,5],mat[,6],mat[,7]))
-    colnames(lcasp)<-c("qseqid","K","P","C","O","F","G","S")    
+    colnames(lcasp)<-colnames
     return(lcasp)
 }
 
@@ -252,7 +254,7 @@ get.top <- function(tab,topN) {
 
 get.taxids.children <-function(taxids,taxonomy_data_dir=NULL){
 
-    if(is.null(taxids)) return NULL;
+    if(is.null(taxids)) return(NULL);
     
     staxids<-as.integer(as.character(unique(taxids)))
 

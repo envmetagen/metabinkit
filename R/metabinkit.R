@@ -40,7 +40,7 @@ source(paste0(mbk.local.lib.path,"/lca.R"))
 
 
 metabin <- function(ifile,
-                    ncbiTaxDir,
+                    taxDir,
                     out,
                     spident=98,
                     gpident=95,
@@ -62,7 +62,7 @@ metabin <- function(ifile,
     ####################
     ## validate arguments
     if(is.null(out)) stop("out not specified")
-    if(is.null(ncbiTaxDir)) stop("ncbiTaxDir not specified")
+    if(is.null(taxDir)) stop("taxDir not specified")
     ## TODO!!!!!!!!!!!!!
     
     ## all arguments look ok, carry on...
@@ -76,7 +76,7 @@ metabin <- function(ifile,
 
     ## TODO: validate table
     ## are the expected columns present?
-    ## qseqid pident taxid 
+    ## qseqid pident taxids 
     ##preparing some things for final step
     total_hits<-length(btab$qseqid) #for info later
     total_queries<-length(unique(btab$qseqid))
@@ -270,7 +270,7 @@ get.top <- function(tab,topN) {
     tab<-tab[tab$pident>tab$min_pident,drop=FALSE]
 }
 
-
+## Bastian: old taxids? what do you don when you have multiple taxids in staxids?
 add.lineage.df<-function(dframe,taxDir,taxCol="taxids",as.taxids=FALSE){
   
     if(!taxCol %in% colnames(dframe)) {stop(paste0("No column called ",taxCol))}
@@ -281,7 +281,7 @@ add.lineage.df<-function(dframe,taxDir,taxCol="taxids",as.taxids=FALSE){
     
     ##get taxonomy from taxids and format in 7 levels
     taxids_fileB<-paste0("taxids",as.numeric(Sys.time()),".txt")
-    system2(command = "taxonkit",args =  c("lineage","-r",taxids_fileA,"-c","--data-dir",ncbiTaxDir)
+    system2(command = "taxonkit",args =  c("lineage","-r",taxids_fileA,"-c","--data-dir",taxDir)
            ,stdout = taxids_fileB,stderr = "",wait = T)
     taxids_fileC<-paste0("taxids",as.numeric(Sys.time()),".txt")
     if(as.taxids==F){
@@ -360,26 +360,6 @@ get.taxids.children <-function(taxids,taxonomy_data_dir=NULL){
 }
 
 
-get.children.taxonkit<-function(df,column){
-
-    if(is.null(df$taxids)) {stop("No column called taxids")}
-  df$taxids<-as.integer(as.character(df$taxids)) 
-  #write taxids to file
-  taxids_fileA<-paste0("taxids",as.numeric(Sys.time()),".txt")
-  write.table(unique(df$taxids),file = taxids_fileA,row.names = F,col.names = F,quote = F)
-  
-  #get children 
-  taxids_fileB<-paste0("taxids",as.numeric(Sys.time()),".txt")
-  system2(command = "taxonkit",args =  c("list","--ids",paste(as.character(df$taxids),collapse = ","),"--indent", "''","--data-dir",ncbiTaxDir)
-          ,stdout = taxids_fileB,stderr = "",wait = T)
-  
-  children<-data.table::fread(file = taxids_fileB,sep = "\t",data.table = F)
-  children<-children[!is.na(children$V1),]
-  
-  unlink(taxids_fileA)
-  unlink(taxids_fileB)
-  return(children)
-}
 
 ##########################################################
 ## original code

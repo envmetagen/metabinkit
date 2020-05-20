@@ -101,6 +101,7 @@ t1<-Sys.time()
 
 metabin(ifile=opt$input,
         out=paste0(opt$out,".tsv"),
+        taxDir=opt$db,
         spident=opt$Species,
         gpident=opt$Genus,
         fpident=opt$Family,

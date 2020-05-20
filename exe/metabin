@@ -114,9 +114,6 @@ metabin(ifile=opt$input,
         family.blacklist=NULL,
         consider_sp.=!opt$discard_sp)
             
-##   bin.blast3(filtered_blastfile = filtered_blastfile,ncbiTaxDir = ncbiTaxDir, out = binfile,
-##              spident = spident, gpident = gpident, fpident = fpident, abspident = abspident,
-##              topS=topS,topG=topG,topF=topF,topAbs=topAbs,
 ##              disabledTaxaFiles = disabledTaxaFiles)
   
 t2<-Sys.time()

@@ -72,14 +72,12 @@ option_list = list(
 
     ## discard sp
     make_option(c("--discard_sp"), action = "store_true", default = FALSE,
-                help = "Discard species with sp., numbers or more than one space [%default]"),
+                help = "Discard species with sp., numbers or more than one space [%default]")
 
     ##make_option(c("-O", "--Order"), type="double", default=75.0, 
     ##            help="Order %id threshold [default= %default]", metavar="double"),
     ##make_option(c("-C", "--Class"), type="double", default=65.0, 
     ##            help="Class %id threshold [default= %default]", metavar="double")
-    make_option(c("-h","--help"), action = "store_true", default = FALSE,
-                help = "Print usage information")
 
 ); 
  

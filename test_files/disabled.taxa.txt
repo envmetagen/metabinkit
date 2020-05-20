@@ -1,2 +1,0 @@
-pathofinterest	contributors	taxids	disable_species	disable_genus	disable_family
-Eukaryota;Mollusca;Bivalvia;Veneroida;Corbiculidae;Corbicula;NA	Eukaryota;Mollusca;Bivalvia;Veneroida;Corbiculidae;Corbicula;Corbicula largillierti	173500	T	F	F

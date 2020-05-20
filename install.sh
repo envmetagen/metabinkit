@@ -23,7 +23,7 @@ INSTALL_DIR=/opt/bin
 
 ###########################################
 
-ALL_TOOLS="taxonkit blast metabinkit r_packages"
+ALL_TOOLS="taxonkit blast metabinkit r_packages taxonomy_db"
 
 SYSTEM_DEPENCIES="R bash"
 
@@ -81,6 +81,17 @@ function install_taxonkit {
     mv taxonkit $INSTALL_DIR/bin
     rm -f tmp.tar.gz
     pinfo "Installing taxonkit..done."
+}
+
+function install_taxonomy_db {
+    pinfo "Installing taxonomy database..."
+    rm -f taxdump.tar.gz
+    wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz
+    mkdir -p $INSTALL_DIR/db
+    tar xzvf taxdump.tar.gz -C $INSTALL_DIR/db
+    echo Downloaded `date` > $INSTALL_DIR/db/taxonomy.info
+    rm -f taxdump.tar.gz
+    pinfo "Installing taxonomy database...done"
 }
 
 function install_blast {

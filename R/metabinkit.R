@@ -20,11 +20,24 @@
 
 metabinkit.version <- "0.0.1"
 
+## Ensure that we are using a recent version of R
+##
+R.version <- getRversion()
+currentVersion <- sprintf("%d.%d", R.version$major, R.version$minor)
+if ( R.version$major < 3 || (R.version$major=3 && R.version$minor<6) ) {
+    message("R version:",currentVersion)
+    cat("ERROR: R version should be 3.6 or above\n")
+    q(status=1)
+}
+
+####################
 ## should be defined
 if ( is.null(mbk.local.lib.path) ) {
     mbk.local.lib.path <- "."
 }
 source(paste0(mbk.local.lib.path,"/lca.R"))
+
+
 
 metabin <- function(filtered_blastfile,
                     ncbiTaxDir,
@@ -42,8 +55,8 @@ metabin <- function(filtered_blastfile,
                     family.blacklist=NULL,
                     #disabledTaxaFiles=NULL,
                     disabledTaxaOut=NULL, ## file prefix
-                    force=F,
-                    full.force=F,
+                    force=F, ## ??
+                    full.force=F, ##??
                     consider_sp.=F) {
 
     ####################
@@ -614,21 +627,3 @@ bin.blast3<-function(filtered_blastfile,
                  Queries that had no BLAST hits, or did not pass the filter.blast step will not appear in results.  ")
 }
 
-
-## message("STEP9 - Bin")
-  
-##   t1<-Sys.time()
-  
-##   filtered_blastfile<-gsub(".fasta",".blast.filt.txt",catted_file)
-
-##   message(paste("binning filtered blast results for",filtered_blastfile))
-##   binfile<-gsub(".blast.filt.txt",".bins.txt",filtered_blastfile)
-  
-##   bin.blast3(filtered_blastfile = filtered_blastfile,ncbiTaxDir = ncbiTaxDir, out = binfile,
-##              spident = spident, gpident = gpident, fpident = fpident, abspident = abspident,
-##              topS=topS,topG=topG,topF=topF,topAbs=topAbs,
-##              disabledTaxaFiles = disabledTaxaFiles)
-  
-##   t2<-Sys.time()
-##   t3<-round(difftime(t2,t1,units = "mins"),digits = 2)
-##   message("STEP9 COMPLETE in ", t3, " min")

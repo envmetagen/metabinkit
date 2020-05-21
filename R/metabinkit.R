@@ -222,9 +222,6 @@ metabin <- function(ifile,
     #######################################################################
     ##combine
     print("combining")
-    print(binned.htf)
-    ftab <- rbind(binned.sp,binned.g,binned.f,btab.u[,colnames(binned.sp),drop=FALSE])
-    print("combining2")
     ftab <- rbind(binned.sp,binned.g,binned.f,binned.htf,btab.u[,colnames(binned.sp),drop=FALSE])
     colnames(ftab)
     ## Bastian: do we need to export unknown as NA?
@@ -248,8 +245,6 @@ metabin <- function(ifile,
 
 get.binned <- function(tab,lca,taxlevel,taxcols=c("K","P","C","O","F","G","S")) {
     get.binned.ids <- function(lca,taxlevel) {
-        print(lca)
-        print(taxlevel)
         return(lca[lca[,taxlevel]!="unknown","qseqid"])
     }
     binned.ids <- unique(unlist(lapply(taxlevel,FUN=get.binned.ids,lca=lca)))  

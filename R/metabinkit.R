@@ -38,7 +38,9 @@ if ( is.null(mbk.local.lib.path) ) {
 source(paste0(mbk.local.lib.path,"/lca.R"))
 
 
-
+##
+## Binning
+##
 metabin <- function(ifile,
                     taxDir,
                     out,
@@ -49,15 +51,15 @@ metabin <- function(ifile,
                     topS=1,
                     topG=1,
                     topF=1,
-                    topAbs=1, # Bastian: what is this parameter
+                    topAbs=1, # 
                     species.blacklist=NULL,
                     genus.blacklist=NULL,
                     family.blacklist=NULL,
                     #disabledTaxaFiles=NULL,
                     disabledTaxaOut=NULL, ## file prefix
-                    force=F, ## ??
-                    full.force=F, ##??
-                    consider_sp.=F) {
+                    ## force=F, ## ??
+                    ## full.force=F, ##??
+                    consider_sp.=FALSE) {
 
     ####################
     ## validate arguments
@@ -72,11 +74,28 @@ metabin <- function(ifile,
     t1<-Sys.time()
     ## would prefer that file was loader prior to this function being called
     ## lets keep it for now
-    btab<-data.table::fread(ifile,sep="\t",data.table = F)
+    btab.o<-data.table::fread(ifile,sep="\t",data.table = F)
 
-    ## TODO: validate table
     ## are the expected columns present?
-    ## qseqid pident taxids 
+    ## qseqid pident taxids
+    expected.cols <- c("qseqid","pident","taxids")
+    not.found <- expected.cols[!expected.cols%in%colnames(btab.o)]
+    if ( length(not.found) > 0 ) stop(paste0("missing columns in input table:",paste(not.found,collapse=",")))
+
+    ## check if lineage information is available
+    expected.tax.cols <- c("K","P","C","O","F","G","S")
+    not.found <- expected.tax.cols[!expected.tax.cols%in%colnames(btab.o)]
+    if ( length(not.found) > 0 ) {
+        message("missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
+        ## TODO: implement
+        quit(status=1)
+    }
+    
+    
+    ## keep only the necessary columns
+    btab <- btab.o[,append(expected.cols,expected.tax.cols),drop=FALSE]
+    ##save.image("t.Rdata")
+    ##load("t.Rdata")
     ##preparing some things for final step
     total_hits<-length(btab$qseqid) #for info later
     total_queries<-length(unique(btab$qseqid))
@@ -84,6 +103,7 @@ metabin <- function(ifile,
     qseqids$qseqid<-qseqids$`unique(btab$qseqid)`
     qseqids$`unique(btab$qseqid)`=NULL
 
+    ##
     blacklists <- list(species.level=species.blacklist,
                   family.level=family.blacklist,
                   genus.level=genus.blacklist)
@@ -98,49 +118,58 @@ metabin <- function(ifile,
     message("The following taxa are disabled at family level")
     #
 
-    ######################################################
+    ##################################################################
     ##species-level assignments
     message("binning at species level")
-    message("applying species top threshold of ",topS)
     btabsp<-btab[btab$S!="unknown",,drop=FALSE]
-    btabsp<-get.top(btabsp,topN=topS)
-    
-    ## Bastian: shouldnt all  blacklisted ids be removed before get thetop hits??
-    btabsp<-apply.blacklists(btabsp,blacklists.children,level="species")
-    
+    ## apply filters
+    btabsp<-btabsp[btabsp$pident>spident,,drop=FALSE]
     if(consider_sp.==F){
         message("Not considering species with 'sp.', numbers or more than one space")
-        if(length(grep(" sp\\.",btabsp$S,ignore.case = T))>0) btabsp<-btabsp[-grep(" sp\\.",btabsp$S,ignore.case = T),]
-        if(length(grep(" .* .*",btabsp$S,ignore.case = T))>0) btabsp<-btabsp[-grep(" .* .*",btabsp$S,ignore.case = T),]
-        if(length(grep("[0-9]",btabsp$S))>0) btabsp<-btabsp[-grep("[0-9]",btabsp$S),]
+        btabsp<-btabsp[-grep(" sp\\.",btabsp$S,ignore.case = T),,drop=FALSE]
+        btabsp<-btabsp[-grep(" .* .*",btabsp$S,ignore.case = T),,drop=FALSE]
+        # shouldn't the number be a diffent option?
+        btabsp<-btabsp[-grep("[0-9]",btabsp$S),,drop=FALSE]
     } else(message("Considering species with 'sp.', numbers or more than one space"))
-
-    # filter - why isn't this applied first?
-    btabsp<-btabsp[btabsp$pident>spident,,drop=FALSE]
+    
+    btabsp<-apply.blacklists(btabsp,blacklists.children,level="species")
+    ## get top
+    message("applying species top threshold of ",topS)
+    btabsp<-get.top(btabsp,topN=topS)
     ## LCA
     lcasp <- get.lowest.common.ancestor(btabsp)
+    binned.sp <- get.binned(btabsp,lcasp,"S",expected.tax.cols)
+
+    nrow(btab)
+    btab <- btab[!btab$qseqid%in%binned.sp$qseqid,,drop=FALSE]
+    nrow(btab)
     rm(btabsp)
-    
+    rm(lcasp)
     ##################################################################
     ##genus-level assignments
     message("binning at genus level") 
-    btabg<-btab[btab$G!="unknown",,drop=FALSE]  
     ##reason - can have g=unknown and s=known (e.g. Ranidae isolate), these should be removed
     ##can have g=unknown and s=unknown (e.g. Ranidae), these should be removed
     ##can have g=known and s=unknown (e.g. Leiopelma), these should be kept
-  
+    btabg<-btab[btab$G!="unknown",,drop=FALSE]  
+    
+    ## apply filters
+    btabg<-btabg[btabg$pident>gpident,,drop=FALSE]
+    btabg<-apply.blacklists(btabg,blacklists.children,level="genus")
+    ## get top
     message("applying genus top threshold of ",topG)
     btabg<-get.top(btabg,topN=topG)
-    btabg<-apply.blacklists(btabg,blacklists.children,level="genus")
-    # filter
-    btabg<-btabg[btabg$pident>gpident,,drop=FALSE] 
     ## LCA
-    lcag <- get.lowest.common.ancestor(btabg)  
+    lcag <- get.lowest.common.ancestor(btabg)
+    binned.g <- get.binned(btabg,lcag,"G",expected.tax.cols)
+
+    btab <- btab[!btab$qseqid%in%binned.g$qseqid,,drop=FALSE]
+
     rm(btabg)
-    #############################
+    rm(lcag)
+    #################################################################
     ##family-level assignments
     message("binning at family level")
-    message("applying family top threshold of ",topF)
     ##can have f=known, g=unknown, s=unknown, these should be kept
     ##can have f=unknown, g=known, s=known, these should be kept
     ##can have f=unknown, g=known, s=unknown, these should be kept
@@ -150,57 +179,55 @@ metabin <- function(ifile,
     ##can have f=known, g=unknown, s=known, these should be kept    
     ##can have f=unknown, g=unknown, s=known, these should be removed - 
     ##assumes that this case would be a weird entry (e.g. Ranidae isolate)  
-    ##can have f=unknown, g=unknown, s=unknown, these should be removed
-  
+    ##can have f=unknown, g=unknown, s=unknown, these should be removed  
     btabf<-btab[!(btab$F=="unknown" & btab$G=="unknown" & btab$S=="unknown"),,drop=FALSE]  ####line changed 
     btabf<-btabf[!(btabf$F=="unknown" & btabf$G=="unknown"),,drop=FALSE] ####line changed 
-  
-    btabf<-get.top(btabf,topN=topF)
-    btabf<-apply.blacklists(btabf,blacklists.children,level="family")
-    # filter
-    btabf<-btabf[btabf$pident>fpident,,drop=FALSE]
-    lcaf <- get.lowest.common.ancestor(btabf)  
-    rm(btabf)
 
-    #####################################
+    ## apply filters
+    btabf<-btabf[btabf$pident>fpident,,drop=FALSE]
+    btabf<-apply.blacklists(btabf,blacklists.children,level="family")
+    message("applying family top threshold of ",topF)
+    btabf<-get.top(btabf,topN=topF)
+    ## LCA
+    lcaf <- get.lowest.common.ancestor(btabf)
+    binned.f <- get.binned(btabf,lcaf,"F",expected.tax.cols)
+    btab <- btab[!btab$qseqid%in%binned.f$qseqid,,drop=FALSE]
+    rm(btabf)
+    rm(lcaf)
+
+##################################################################
     ##higher-than-family-level assignments
     message("binning at higher-than-family level")
-    message("applying htf top threshold of ",topAbs)
     btabhtf<-btab[btab$K!="unknown",,drop=FALSE]
-  
-    btabhtf<-get.top(btabhtf,topN=topAbs)
-    ## filter
+    ## apply filters
     btabhtf<-btabhtf[btabhtf$pident>abspident,,drop=FALSE]
+    message("applying htf top threshold of ",topAbs)
+    btabhtf<-get.top(btabhtf,topN=topAbs)
     ## LCA
-    lcahtf <- get.lowest.common.ancestor(btabhtf)  
-    rm(btabhtf)
-  
-    ###################################################
+    lcahtf <- get.lowest.common.ancestor(btabhtf)
+
+    binned.htf <- get.binned(btabhtf,lcahtf,c("O","C","P","K"),expected.tax.cols)
+    rm(lcahtf)
+
+    ###################################################################
+    ## unassigned/not binned
+    btab.u <- btabhtf[!duplicated(btabhtf$qseqid),,drop=FALSE]
+    ## remove the binned qseqid
+    btab.u <- btab.u[!btab.u$qseqid%in%binned.htf$qseqid,,drop=FALSE]
+    if (nrow(btab.u)>0)
+        btab.u[,expected.tax.cols] <- "unknown"
+    ## remove the extra column
+    btab.u <- btab.u[,!colnames(btab.u)%in%c("taxids"),drop=FALSE]
+
+    #######################################################################
     ##combine
-    sp_level<-lcasp[lcasp$S!="unknown",]
-    g_level<-lcag[lcag$G!="unknown",]
-    if(nrow(g_level)>0) g_level$S<-NA
-    g_level<-g_level[!g_level$qseqid %in% sp_level$qseqid,]
-    f_level<-lcaf[lcaf$F!="unknown",]
-    if(nrow(f_level)>0) {
-        f_level$G<-NA
-        f_level$S<-NA
-    }
-    f_level<-f_level[!f_level$qseqid %in% sp_level$qseqid,]
-    f_level<-f_level[!f_level$qseqid %in% g_level$qseqid,]
-    
-    abs_level<-lcahtf
-    if(nrow(abs_level)>0) {
-        abs_level$G<-NA
-        abs_level$S<-NA
-        abs_level$F<-NA
-    }
-    abs_level<-abs_level[!abs_level$qseqid %in% sp_level$qseqid,]
-    abs_level<-abs_level[!abs_level$qseqid %in% g_level$qseqid,]
-    abs_level<-abs_level[!abs_level$qseqid %in% f_level$qseqid,]
-    
-    com_level<-rbind(sp_level,g_level,f_level,abs_level)
-    com_level<-merge(x=qseqids, y = com_level, by = "qseqid",all.x = T)
+    print("combining")
+    print(binned.htf)
+    ftab <- rbind(binned.sp,binned.g,binned.f,btab.u[,colnames(binned.sp),drop=FALSE])
+    print("combining2")
+    ftab <- rbind(binned.sp,binned.g,binned.f,binned.htf,btab.u[,colnames(binned.sp),drop=FALSE])
+    colnames(ftab)
+    ## Bastian: do we need to export unknown as NA?
 
     ############################################################
     ## Wrapping up
@@ -215,9 +242,23 @@ metabin <- function(ifile,
     message("Note: If none of the hits for a BLAST query pass the binning thesholds, the results will be NA for all levels.
                  If the LCA for a query is above kingdom, e.g. cellular organisms or root, the results will be 'unknown' for all levels.
                  Queries that had no BLAST hits, or did not pass the filter.blast step will not appear in results.  ")
-    return(com_level)
+    return(ftab)
 }
 
+
+get.binned <- function(tab,lca,taxlevel,taxcols=c("K","P","C","O","F","G","S")) {
+    get.binned.ids <- function(lca,taxlevel) {
+        print(lca)
+        print(taxlevel)
+        return(lca[lca[,taxlevel]!="unknown","qseqid"])
+    }
+    binned.ids <- unique(unlist(lapply(taxlevel,FUN=get.binned.ids,lca=lca)))  
+    #binned.ids <- lca[lca[,taxlevel]!="unknown","qseqid"]
+    binned <- tab[tab$qseqid%in%binned.ids,c("qseqid","pident","min_pident")]
+    binned <- binned[!duplicated(binned$qseqid),,drop=FALSE]
+    binned <- cbind(binned,lca[match(binned$qseqid,lca$qseqid),taxcols,drop=FALSE])
+    return(binned)
+}
 
 get.lowest.common.ancestor <- function(tab) {
 
@@ -229,7 +270,7 @@ get.lowest.common.ancestor <- function(tab) {
         return(lcasp)
     }
         
-    tab$path<-paste(btabsp$K,tab$P,tab$C,tab$O,tab$F,tab$G,tab$S,sep = ";")
+    tab$path<-paste(tab$K,tab$P,tab$C,tab$O,tab$F,tab$G,tab$S,sep = ";")
     lcasp = aggregate(tab$path, by=list(tab$qseqid),function(x) lca(x,sep=";"))
     colnames(lcasp)<-c("qseqid","binpath")
     lcasp<-add.unknown.lca(lcasp)
@@ -263,11 +304,11 @@ get.topdf <- function(pident,groupby,top) {
 }
 
 get.top <- function(tab,topN) {
-
     if (nrow(tab)==0) return(tab)
     topdf <- get.topdf(tab[,"pident"],tab$qseqid,topN)
     tab$min_pident <- topdf[match(tab$qseqid,tab$qseqid),"min_pident",drop=FALSE]
-    tab<-tab[tab$pident>tab$min_pident,drop=FALSE]
+    tab<-tab[tab$pident>tab$min_pident,,drop=FALSE]
+    return(tab)
 }
 
 ## Bastian: old taxids? what do you don when you have multiple taxids in staxids?
@@ -359,6 +400,19 @@ get.taxids.children <-function(taxids,taxonomy_data_dir=NULL){
     return(children)
 }
 
+
+add.unknown.lca<-function(lca.out){
+  
+  lca.out$binpath[is.na(lca.out$binpath)]<-"unknown;unknown;unknown;unknown;unknown;unknown;unknown"
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==5]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==5],";unknown")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==4]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==4],";unknown;unknown")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==3]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==3],";unknown;unknown;unknown")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==2]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==2],";unknown;unknown;unknown;unknown")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==1]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==1],";unknown;unknown;unknown;unknown;unknown")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==0]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==0],";unknown;unknown;unknown;unknown;unknown;unknown")
+  
+  return(lca.out)
+}
 
 
 ##########################################################

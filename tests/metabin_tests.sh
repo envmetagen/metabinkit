@@ -36,6 +36,10 @@ must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tes
 must_succeed "metabin -M -i tests/test_files/in2.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
 must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tests/test_files/out2.tsv|sort ) "
 
+#must_succeed "metabin -M -i tests/test_files/in0.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
+
+#must_succeed "metabin -M -i tests/test_files/in3.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
+
 echo Failed tests: $num_failed
 exit $num_failed
 

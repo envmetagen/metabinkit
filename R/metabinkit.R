@@ -93,6 +93,9 @@ metabin <- function(ifile,
     
     ## keep only the necessary columns
     btab <- btab.o[,append(expected.cols,expected.tax.cols),drop=FALSE]
+    ## unassigned/not binned
+    btab.u <- btab[!duplicated(btab$qseqid),,drop=FALSE]
+
     ##save.image("t.Rdata")
     ##load("t.Rdata")
     ##preparing some things for final step
@@ -120,7 +123,11 @@ metabin <- function(ifile,
     pinfo(verbose=!quiet,"binning at species level")
     btabsp<-btab[btab$S!="unknown",,drop=FALSE]
     ## apply filters
-    btabsp<-btabsp[btabsp$pident>spident,,drop=FALSE]
+    above.threshold <- btabsp$pident>=spident
+    pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",spident)
+    btab.u[btab.u$qseqid%in%unique(btabsp$qseqid[!above.threshold]),"S"] <- NA
+    btabsp<-btabsp[above.threshold,,drop=FALSE]
+
     if(consider_sp.==F){
         pinfo(verbose=!quiet,"Not considering species with 'sp.', numbers or more than one space")
         btabsp<-btabsp[-grep(" sp\\.",btabsp$S,ignore.case = T),,drop=FALSE]
@@ -153,7 +160,10 @@ metabin <- function(ifile,
     btabg<-btab[btab$G!="unknown",,drop=FALSE]  
     
     ## apply filters
-    btabg<-btabg[btabg$pident>gpident,,drop=FALSE]
+    above.threshold <- btabg$pident>=gpident
+    pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",gpident)
+    btabg<-btabg[above.threshold,,drop=FALSE]
+    btab.u[btab.u$qseqid%in%unique(btabg$qseqid[!above.threshold]),"G"] <- NA
     btabg<-apply.blacklists(btabg,blacklists.children,level="genus")
     ## get top
     pinfo(verbose=!quiet,"applying genus top threshold of ",topG)
@@ -186,7 +196,11 @@ metabin <- function(ifile,
     btabf<-btabf[!(btabf$F=="unknown" & btabf$G=="unknown"),,drop=FALSE] ####line changed 
 
     ## apply filters
-    btabf<-btabf[btabf$pident>fpident,,drop=FALSE]
+    above.threshold <- btabf$pident>=fpident
+    pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",fpident)
+    btabf<-btabf[above.threshold,,drop=FALSE]
+    btab.u[btab.u$qseqid%in%unique(btabf$qseqid[!above.threshold]),"F"] <- NA
+
     btabf<-apply.blacklists(btabf,blacklists.children,level="family")
     pinfo(verbose=!quiet,"applying family top threshold of ",topF)
     btabf<-get.top(btabf,topN=topF)
@@ -205,8 +219,11 @@ metabin <- function(ifile,
     pinfo(verbose=!quiet,"binning at higher-than-family level")
     btabhtf<-btab[btab$K!="unknown" || btab$P!="unknown" || btab$C!="unknown" || btab$O!="unknown",,drop=FALSE]
     ## apply filters
-    pinfo(verbose=!quiet,"excluding entries with pident below ",abspident)
-    btabhtf<-btabhtf[btabhtf$pident>abspident,,drop=FALSE]
+    above.threshold <- btabhtf$pident>=abspident
+    pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",abspident)
+    btabf<-btabhtf[above.threshold,,drop=FALSE]
+    btab.u[btab.u$qseqid%in%unique(btabhtf$qseqid[!above.threshold]),c("O","C","P","K")] <- NA
+    
     pinfo(verbose=!quiet,"applying htf top threshold of ",topAbs)
     btabhtf<-get.top(btabhtf,topN=topAbs)
     ## LCA
@@ -218,23 +235,27 @@ metabin <- function(ifile,
     
     #######################################################################
     ##combine binned/assigned
-    print("combining")
     atab <- rbind(binned.sp,binned.g,binned.f,binned.htf)
     ## 
     ###################################################################
     ## unassigned/not binned
-    btab.u <- btab.o[!duplicated(btab.o$qseqid),,drop=FALSE]
-    ## remove the binned qseqid
+    ## remove the binned qseqid    
     btab.u <- btab.u[!btab.u$qseqid%in%atab$qseqid,,drop=FALSE]
-    if (nrow(btab.u)>0)
-        btab.u[,expected.tax.cols] <- "unknown"
     ## remove the extra column
     btab.u <- btab.u[,!colnames(btab.u)%in%c("taxids"),drop=FALSE]
-    btab.u$min_pident <- NA
+    if (nrow(btab.u)>0) {
+        ##btab.u[,expected.tax.cols] <- "unknown"
+        btab.u$min_pident <- NA
+    } else {
+        ## empty matrix
+        d<-data.frame(matrix(nrow=0,ncol=1))
+        colnames(d) <- c("min_pident")
+        btab.u <- cbind(btab.u,d)
+    }
+
     stats$not.binned <- nrow(btab.u)
     pinfo(verbose=!quiet,"not binned ",nrow(btab.u)," sequences")
-    print(colnames(atab))
-    print(colnames(btab.u))
+
     ftab <- rbind(atab,btab.u[,colnames(atab),drop=FALSE])
     ############################################################
     ## Wrapping up

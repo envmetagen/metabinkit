@@ -43,12 +43,12 @@ option_list = list(
                 help="subspecies %id threshold [default= %default]", metavar="double"),
     make_option(c("-S", "--Species"), type="double", default=96.0, 
                 help="species %id threshold [default= %default]", metavar="double"),
-    make_option(c("-G", "--Genus"), type="double", default=82.0, 
+    make_option(c("-G", "--Genus"), type="double", default=92.0, 
                 help="genus %id threshold [default= %default]", metavar="double"),
     make_option(c("-F", "--Family"), type="double", default=90.0, 
                 help="family %id threshold [default= %default]", metavar="double"),
 
-    make_option(c("-A", "--AboveF"), type="double", default=90.0, 
+    make_option(c("-A", "--AboveF"), type="double", default=85.0, 
                 help="above family %id threshold [default= %default]", metavar="double"),
 
     make_option(c("-D", "--db"), type="character", default="~/.taxonkit", 
@@ -131,7 +131,7 @@ message("Binning complete in ", t3, " min")
 sessionInfo()
 q(status=0)
 ifile <- opt$input
-spident=98
+          spident=98
                     gpident=95;
                     fpident=92;
                     abspident=80;

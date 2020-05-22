@@ -43,7 +43,6 @@ source(paste0(mbk.local.lib.path,"/lca.R"))
 ##
 metabin <- function(ifile,
                     taxDir,
-                    out,
                     spident=98,
                     gpident=95,
                     fpident=92,
@@ -60,17 +59,16 @@ metabin <- function(ifile,
                     ## force=F, ## ??
                     ## full.force=F, ##??
                     consider_sp.=FALSE) {
-
+    
     ####################
     ## validate arguments
-    if(is.null(out)) stop("out not specified")
     if(is.null(taxDir)) stop("taxDir not specified")
     ## TODO!!!!!!!!!!!!!
     
     ## all arguments look ok, carry on...
     library(data.table)
     options(datatable.fread.input.cmd.message=FALSE)
-
+    
     t1<-Sys.time()
     ## would prefer that file was loader prior to this function being called
     ## lets keep it for now
@@ -97,11 +95,9 @@ metabin <- function(ifile,
     ##save.image("t.Rdata")
     ##load("t.Rdata")
     ##preparing some things for final step
-    total_hits<-length(btab$qseqid) #for info later
-    total_queries<-length(unique(btab$qseqid))
-    qseqids<-as.data.frame(unique(btab$qseqid))
-    qseqids$qseqid<-qseqids$`unique(btab$qseqid)`
-    qseqids$`unique(btab$qseqid)`=NULL
+    stats <- list()
+    stats$total_hits <- length(btab$qseqid) #for info later
+    stats$total_queries<- length(unique(btab$qseqid))
 
     ##
     blacklists <- list(species.level=species.blacklist,
@@ -128,7 +124,7 @@ metabin <- function(ifile,
         message("Not considering species with 'sp.', numbers or more than one space")
         btabsp<-btabsp[-grep(" sp\\.",btabsp$S,ignore.case = T),,drop=FALSE]
         btabsp<-btabsp[-grep(" .* .*",btabsp$S,ignore.case = T),,drop=FALSE]
-        # shouldn't the number be a diffent option?
+        # shouldn't the number and spaces be a diffent option?
         btabsp<-btabsp[-grep("[0-9]",btabsp$S),,drop=FALSE]
     } else(message("Considering species with 'sp.', numbers or more than one space"))
     
@@ -139,12 +135,13 @@ metabin <- function(ifile,
     ## LCA
     lcasp <- get.lowest.common.ancestor(btabsp)
     binned.sp <- get.binned(btabsp,lcasp,"S",expected.tax.cols)
-
-    nrow(btab)
     btab <- btab[!btab$qseqid%in%binned.sp$qseqid,,drop=FALSE]
-    nrow(btab)
+    if (nrow(btab)>0)
+        btab$S <- "unknown"
     rm(btabsp)
     rm(lcasp)
+    stats$binned.species.level <- nrow(binned.sp)
+    message(paste0("binned ",nrow(binned.sp)," sequences at species level"))
     ##################################################################
     ##genus-level assignments
     message("binning at genus level") 
@@ -164,9 +161,12 @@ metabin <- function(ifile,
     binned.g <- get.binned(btabg,lcag,"G",expected.tax.cols)
 
     btab <- btab[!btab$qseqid%in%binned.g$qseqid,,drop=FALSE]
-
+    if (nrow(btab)>0)
+        btab$G <- "unknown"
     rm(btabg)
     rm(lcag)
+    stats$binned.genus.level <- nrow(binned.g)
+    message(paste0("binned ",nrow(binned.g)," sequences at genus level"))
     #################################################################
     ##family-level assignments
     message("binning at family level")
@@ -192,10 +192,13 @@ metabin <- function(ifile,
     lcaf <- get.lowest.common.ancestor(btabf)
     binned.f <- get.binned(btabf,lcaf,"F",expected.tax.cols)
     btab <- btab[!btab$qseqid%in%binned.f$qseqid,,drop=FALSE]
+    if (nrow(btab)>0)
+        btab$F <- "unknown"
     rm(btabf)
     rm(lcaf)
-
-##################################################################
+    stats$binned.family.level <- nrow(binned.f)
+    message(paste0("binned ",nrow(binned.f)," sequences at family level"))
+    ##################################################################
     ##higher-than-family-level assignments
     message("binning at higher-than-family level")
     btabhtf<-btab[btab$K!="unknown",,drop=FALSE]
@@ -208,7 +211,8 @@ metabin <- function(ifile,
 
     binned.htf <- get.binned(btabhtf,lcahtf,c("O","C","P","K"),expected.tax.cols)
     rm(lcahtf)
-
+    message(paste0("binned ",nrow(binned.htf)," sequences at higher than family level"))
+    stats$binned.htf.level <- nrow(binned.htf)
     ###################################################################
     ## unassigned/not binned
     btab.u <- btabhtf[!duplicated(btabhtf$qseqid),,drop=FALSE]
@@ -218,12 +222,13 @@ metabin <- function(ifile,
         btab.u[,expected.tax.cols] <- "unknown"
     ## remove the extra column
     btab.u <- btab.u[,!colnames(btab.u)%in%c("taxids"),drop=FALSE]
-
+    stats$not.binned <- nrow(btab.u)
+    message(paste0("not binned ",nrow(btab.u)," sequences"))
+    print(head(btab.u))
     #######################################################################
     ##combine
     print("combining")
     ftab <- rbind(binned.sp,binned.g,binned.f,binned.htf,btab.u[,colnames(binned.sp),drop=FALSE])
-    colnames(ftab)
     ## Bastian: do we need to export unknown as NA?
 
     ############################################################
@@ -231,15 +236,16 @@ metabin <- function(ifile,
     ##info
     t2<-Sys.time()
     t3<-round(difftime(t2,t1,units = "mins"),digits = 2)
-  
+
     #write.table(x = com_level,file = out,sep="\t",quote = F,row.names = F)
   
-    message(c("Complete. ",total_hits, " hits from ", total_queries," queries processed in ",t3," mins."))
+    message(c("Complete. ",stats$total_hits, " hits from ", stats$total_queries," queries processed in ",t3," mins."))
     
     message("Note: If none of the hits for a BLAST query pass the binning thesholds, the results will be NA for all levels.
                  If the LCA for a query is above kingdom, e.g. cellular organisms or root, the results will be 'unknown' for all levels.
                  Queries that had no BLAST hits, or did not pass the filter.blast step will not appear in results.  ")
-    return(ftab)
+    res <- list(table=ftab,stats=stats)
+    return(res)
 }
 
 
@@ -247,9 +253,10 @@ get.binned <- function(tab,lca,taxlevel,taxcols=c("K","P","C","O","F","G","S")) 
     get.binned.ids <- function(lca,taxlevel) {
         return(lca[lca[,taxlevel]!="unknown","qseqid"])
     }
+    binned.ids <- c()
+    ##if (nrow(lca)>0) 
     binned.ids <- unique(unlist(lapply(taxlevel,FUN=get.binned.ids,lca=lca)))  
-    #binned.ids <- lca[lca[,taxlevel]!="unknown","qseqid"]
-    binned <- tab[tab$qseqid%in%binned.ids,c("qseqid","pident","min_pident")]
+    binned <- tab[tab$qseqid%in%binned.ids,c("qseqid","pident","min_pident"),drop=FALSE]
     binned <- binned[!duplicated(binned$qseqid),,drop=FALSE]
     binned <- cbind(binned,lca[match(binned$qseqid,lca$qseqid),taxcols,drop=FALSE])
     return(binned)
@@ -260,7 +267,7 @@ get.lowest.common.ancestor <- function(tab) {
     colnames <- c("qseqid","K","P","C","O","F","G","S")
     
     if(nrow(tab)==0) {
-        lcasp<-data.frame(matrix(nrow=1,ncol = 8))
+        lcasp<-data.frame(matrix(nrow=0,ncol = 8))
         colnames(lcasp)<-colnames
         return(lcasp)
     }
@@ -299,10 +306,16 @@ get.topdf <- function(pident,groupby,top) {
 }
 
 get.top <- function(tab,topN) {
-    if (nrow(tab)==0) return(tab)
+    if (nrow(tab)==0) {
+        d<-data.frame(matrix(nrow=0,ncol=1))
+        colnames(d) <- c("min_pident")
+        tab <- cbind(tab,d)
+        return(tab)
+    }
     topdf <- get.topdf(tab[,"pident"],tab$qseqid,topN)
-    tab$min_pident <- topdf[match(tab$qseqid,tab$qseqid),"min_pident",drop=FALSE]
+    tab$min_pident <- topdf[match(tab$qseqid,topdf$qseqid),"min_pident"]
     tab<-tab[tab$pident>tab$min_pident,,drop=FALSE]
+    tab <- tab[!is.na(tab$qseqid),,drop=FALSE]
     return(tab)
 }
 

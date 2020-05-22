@@ -149,7 +149,7 @@ metabin <- function(ifile,
     binned.sp <- get.binned(btab.sp,lca.sp,"S",expected.tax.cols)
     btab <- btab[!btab$qseqid%in%binned.sp$qseqid,,drop=FALSE]
     if (nrow(btab)>0)
-        btab$S <- "unknown"
+        btab$S <- NA
     rm(btab.sp)
     rm(lca.sp)
     stats$binned.species.level <- nrow(binned.sp)
@@ -179,7 +179,7 @@ metabin <- function(ifile,
 
     btab <- btab[!btab$qseqid%in%binned.g$qseqid,,drop=FALSE]
     if (nrow(btab)>0)
-        btab$G <- "unknown"
+        btab$G <- NA
     rm(btab.g)
     rm(lca.g)
     stats$binned.genus.level <- nrow(binned.g)
@@ -218,7 +218,7 @@ metabin <- function(ifile,
     binned.f <- get.binned(btab.f,lca.f,"F",expected.tax.cols)
     btab <- btab[!btab$qseqid%in%binned.f$qseqid,,drop=FALSE]
     if (nrow(btab)>0)
-        btab$F <- "unknown"
+        btab$F <- NA
     rm(btab.f)
     rm(lca.f)
     stats$binned.family.level <- nrow(binned.f)

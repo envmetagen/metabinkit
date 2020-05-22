@@ -72,8 +72,10 @@ option_list = list(
 
     ## discard sp
     make_option(c("--discard_sp"), action = "store_true", default = FALSE,
-                help = "Discard species with sp., numbers or more than one space [%default]")
+                help = "Discard species with sp., numbers or more than one space [%default]"),
+    make_option(c("-M","--minimal_cols"), action = "store_true", default = FALSE, help = "Include only the seqid and lineage information in the output table [%default]")
 
+    
     ##make_option(c("-O", "--Order"), type="double", default=75.0, 
     ##            help="Order %id threshold [default= %default]", metavar="double"),
     ##make_option(c("-C", "--Class"), type="double", default=65.0, 
@@ -96,13 +98,6 @@ t1<-Sys.time()
 
 ## TODO
 ## load blacklists?
-
-##
-#save.image("test.Rdata")
-#load("test.Rdata")
-#debug(metabin)
-#trace(metabin)
-#debug(get.top)
 binned <- metabin(ifile=opt$input,
                   taxDir=opt$db,
                   spident=opt$Species,
@@ -121,6 +116,9 @@ binned <- metabin(ifile=opt$input,
 ##              disabledTaxaFiles = disabledTaxaFiles)
 if (!is.null(binned)) {
     ofile <- paste0(opt$out,".tsv")
+    if (opt$minimal_cols) {
+        binned$table <- binned$table[,c("qseqid","K","P","C","O","F","G","S"),drop=FALSE]
+    }
     write.table(x = binned$table,file = ofile,sep="\t",quote = F,row.names = F)
     message(paste0("binned table written to ",ofile))
     print(binned$stats)
@@ -130,15 +128,3 @@ t3<-round(difftime(t2,t1,units = "mins"),digits = 2)
 message("Binning complete in ", t3, " min")
 sessionInfo()
 q(status=0)
-ifile <- opt$input
-          spident=98
-                    gpident=95;
-                    fpident=92;
-                    abspident=80;
-                    topS=1;
-                    topG=1;
-                    topF=1;
-                    topAbs=1; # 
-                    species.blacklist=NULL;
-                    genus.blacklist=NULL;
-                    family.blacklist=NULL;

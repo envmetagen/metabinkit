@@ -203,35 +203,39 @@ metabin <- function(ifile,
     ##################################################################
     ##higher-than-family-level assignments
     pinfo(verbose=!quiet,"binning at higher-than-family level")
-    btabhtf<-btab[btab$K!="unknown",,drop=FALSE]
+    btabhtf<-btab[btab$K!="unknown" || btab$P!="unknown" || btab$C!="unknown" || btab$O!="unknown",,drop=FALSE]
     ## apply filters
+    pinfo(verbose=!quiet,"excluding entries with pident below ",abspident)
     btabhtf<-btabhtf[btabhtf$pident>abspident,,drop=FALSE]
     pinfo(verbose=!quiet,"applying htf top threshold of ",topAbs)
     btabhtf<-get.top(btabhtf,topN=topAbs)
     ## LCA
     lcahtf <- get.lowest.common.ancestor(btabhtf)
-
     binned.htf <- get.binned(btabhtf,lcahtf,c("O","C","P","K"),expected.tax.cols)
     rm(lcahtf)
     pinfo(verbose=!quiet,"binned ",nrow(binned.htf)," sequences at higher than family level")
     stats$binned.htf.level <- nrow(binned.htf)
+    
+    #######################################################################
+    ##combine binned/assigned
+    print("combining")
+    atab <- rbind(binned.sp,binned.g,binned.f,binned.htf)
+    ## 
     ###################################################################
     ## unassigned/not binned
-    btab.u <- btabhtf[!duplicated(btabhtf$qseqid),,drop=FALSE]
+    btab.u <- btab.o[!duplicated(btab.o$qseqid),,drop=FALSE]
     ## remove the binned qseqid
-    btab.u <- btab.u[!btab.u$qseqid%in%binned.htf$qseqid,,drop=FALSE]
+    btab.u <- btab.u[!btab.u$qseqid%in%atab$qseqid,,drop=FALSE]
     if (nrow(btab.u)>0)
         btab.u[,expected.tax.cols] <- "unknown"
     ## remove the extra column
     btab.u <- btab.u[,!colnames(btab.u)%in%c("taxids"),drop=FALSE]
+    btab.u$min_pident <- NA
     stats$not.binned <- nrow(btab.u)
     pinfo(verbose=!quiet,"not binned ",nrow(btab.u)," sequences")
-    #######################################################################
-    ##combine
-    print("combining")
-    ftab <- rbind(binned.sp,binned.g,binned.f,binned.htf,btab.u[,colnames(binned.sp),drop=FALSE])
-    ## Bastian: do we need to export unknown as NA?
-
+    print(colnames(atab))
+    print(colnames(btab.u))
+    ftab <- rbind(atab,btab.u[,colnames(atab),drop=FALSE])
     ############################################################
     ## Wrapping up
     ##info

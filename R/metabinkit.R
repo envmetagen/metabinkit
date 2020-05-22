@@ -75,7 +75,7 @@ metabin <- function(ifile,
     ## would prefer that file was loader prior to this function being called
     ## lets keep it for now
     btab.o<-data.table::fread(ifile,sep="\t",data.table = F)
-
+    sum(is.na(btab.o$taxids))
     ## are the expected columns present?
     ## qseqid pident taxids
     expected.cols <- c("qseqid","pident","taxids")
@@ -90,7 +90,6 @@ metabin <- function(ifile,
         ## TODO: implement
         quit(status=1)
     }
-    
     
     ## keep only the necessary columns
     btab <- btab.o[,append(expected.cols,expected.tax.cols),drop=FALSE]
@@ -261,6 +260,12 @@ get.binned <- function(tab,lca,taxlevel,taxcols=c("K","P","C","O","F","G","S")) 
     binned <- tab[tab$qseqid%in%binned.ids,c("qseqid","pident","min_pident"),drop=FALSE]
     binned <- binned[!duplicated(binned$qseqid),,drop=FALSE]
     binned <- cbind(binned,lca[match(binned$qseqid,lca$qseqid),taxcols,drop=FALSE])
+    idx <- max(which(colnames(binned) %in% taxlevel))+1
+    if ( idx < length(colnames(binned)) && nrow(binned)>0) {
+        ## all levels below the one where the binned was made are set to NA
+        ## do nothing when taxlevel=S        
+        binned[,seq(idx,length(colnames(binned)))] <- NA
+    }
     return(binned)
 }
 

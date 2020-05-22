@@ -58,17 +58,19 @@ metabin <- function(ifile,
                     disabledTaxaOut=NULL, ## file prefix
                     ## force=F, ## ??
                     ## full.force=F, ##??
-                    consider_sp.=FALSE) {
+                    consider_sp.=FALSE,
+                    quiet=FALSE) {
     
     ####################
     ## validate arguments
-    if(is.null(taxDir)) stop("taxDir not specified")
+    if(is.null(taxDir)) perror(fatal=TRUE,"taxDir not specified"); 
     ## TODO!!!!!!!!!!!!!
     
     ## all arguments look ok, carry on...
     library(data.table)
     options(datatable.fread.input.cmd.message=FALSE)
-    
+
+    ## start timer
     t1<-Sys.time()
     ## would prefer that file was loader prior to this function being called
     ## lets keep it for now
@@ -78,13 +80,13 @@ metabin <- function(ifile,
     ## qseqid pident taxids
     expected.cols <- c("qseqid","pident","taxids")
     not.found <- expected.cols[!expected.cols%in%colnames(btab.o)]
-    if ( length(not.found) > 0 ) stop(paste0("missing columns in input table:",paste(not.found,collapse=",")))
+    if ( length(not.found) > 0 ) perror(fatal=TRUE,"missing columns in input table:",paste(not.found,collapse=","))
 
     ## check if lineage information is available
     expected.tax.cols <- c("K","P","C","O","F","G","S")
     not.found <- expected.tax.cols[!expected.tax.cols%in%colnames(btab.o)]
     if ( length(not.found) > 0 ) {
-        message("missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
+        perror(fatal=TRUE,"missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
         ## TODO: implement
         quit(status=1)
     }
@@ -109,28 +111,29 @@ metabin <- function(ifile,
     blacklists.children <- lapply(blacklists,get.taxids.children)
 
     ## print? save to a file?
-    message("The following taxa are disabled at species level")
-    message("The following taxa are disabled at genus level")
-    message("The following taxa are disabled at family level")
+    #pinfo("The following taxa are disabled at species level")
+    #pinfo("The following taxa are disabled at genus level")
+    #pinfo("The following taxa are disabled at family level")
     #
 
     ##################################################################
     ##species-level assignments
-    message("binning at species level")
+    pinfo(verbose=!quiet,"binning at species level")
     btabsp<-btab[btab$S!="unknown",,drop=FALSE]
     ## apply filters
     btabsp<-btabsp[btabsp$pident>spident,,drop=FALSE]
     if(consider_sp.==F){
-        message("Not considering species with 'sp.', numbers or more than one space")
+        pinfo(verbose=!quiet,"Not considering species with 'sp.', numbers or more than one space")
         btabsp<-btabsp[-grep(" sp\\.",btabsp$S,ignore.case = T),,drop=FALSE]
         btabsp<-btabsp[-grep(" .* .*",btabsp$S,ignore.case = T),,drop=FALSE]
         # shouldn't the number and spaces be a diffent option?
         btabsp<-btabsp[-grep("[0-9]",btabsp$S),,drop=FALSE]
-    } else(message("Considering species with 'sp.', numbers or more than one space"))
+    } else(
+          pinfo(verbose=!quiet,"Considering species with 'sp.', numbers or more than one space"))
     
     btabsp<-apply.blacklists(btabsp,blacklists.children,level="species")
     ## get top
-    message("applying species top threshold of ",topS)
+    pinfo(verbose=!quiet,"applying species top threshold of ",topS)
     btabsp<-get.top(btabsp,topN=topS)
     ## LCA
     lcasp <- get.lowest.common.ancestor(btabsp)
@@ -141,10 +144,10 @@ metabin <- function(ifile,
     rm(btabsp)
     rm(lcasp)
     stats$binned.species.level <- nrow(binned.sp)
-    message(paste0("binned ",nrow(binned.sp)," sequences at species level"))
+    pinfo(verbose=!quiet,"binned ",nrow(binned.sp)," sequences at species level")
     ##################################################################
     ##genus-level assignments
-    message("binning at genus level") 
+    pinfo(verbose=!quiet,"binning at genus level") 
     ##reason - can have g=unknown and s=known (e.g. Ranidae isolate), these should be removed
     ##can have g=unknown and s=unknown (e.g. Ranidae), these should be removed
     ##can have g=known and s=unknown (e.g. Leiopelma), these should be kept
@@ -154,7 +157,7 @@ metabin <- function(ifile,
     btabg<-btabg[btabg$pident>gpident,,drop=FALSE]
     btabg<-apply.blacklists(btabg,blacklists.children,level="genus")
     ## get top
-    message("applying genus top threshold of ",topG)
+    pinfo(verbose=!quiet,"applying genus top threshold of ",topG)
     btabg<-get.top(btabg,topN=topG)
     ## LCA
     lcag <- get.lowest.common.ancestor(btabg)
@@ -166,10 +169,10 @@ metabin <- function(ifile,
     rm(btabg)
     rm(lcag)
     stats$binned.genus.level <- nrow(binned.g)
-    message(paste0("binned ",nrow(binned.g)," sequences at genus level"))
+    pinfo(verbose=!quiet,"binned ",nrow(binned.g)," sequences at genus level")
     #################################################################
     ##family-level assignments
-    message("binning at family level")
+    pinfo(verbose=!quiet,"binning at family level")
     ##can have f=known, g=unknown, s=unknown, these should be kept
     ##can have f=unknown, g=known, s=known, these should be kept
     ##can have f=unknown, g=known, s=unknown, these should be kept
@@ -186,7 +189,7 @@ metabin <- function(ifile,
     ## apply filters
     btabf<-btabf[btabf$pident>fpident,,drop=FALSE]
     btabf<-apply.blacklists(btabf,blacklists.children,level="family")
-    message("applying family top threshold of ",topF)
+    pinfo(verbose=!quiet,"applying family top threshold of ",topF)
     btabf<-get.top(btabf,topN=topF)
     ## LCA
     lcaf <- get.lowest.common.ancestor(btabf)
@@ -197,21 +200,21 @@ metabin <- function(ifile,
     rm(btabf)
     rm(lcaf)
     stats$binned.family.level <- nrow(binned.f)
-    message(paste0("binned ",nrow(binned.f)," sequences at family level"))
+    pinfo(verbose=!quiet,"binned ",nrow(binned.f)," sequences at family level")
     ##################################################################
     ##higher-than-family-level assignments
-    message("binning at higher-than-family level")
+    pinfo(verbose=!quiet,"binning at higher-than-family level")
     btabhtf<-btab[btab$K!="unknown",,drop=FALSE]
     ## apply filters
     btabhtf<-btabhtf[btabhtf$pident>abspident,,drop=FALSE]
-    message("applying htf top threshold of ",topAbs)
+    pinfo(verbose=!quiet,"applying htf top threshold of ",topAbs)
     btabhtf<-get.top(btabhtf,topN=topAbs)
     ## LCA
     lcahtf <- get.lowest.common.ancestor(btabhtf)
 
     binned.htf <- get.binned(btabhtf,lcahtf,c("O","C","P","K"),expected.tax.cols)
     rm(lcahtf)
-    message(paste0("binned ",nrow(binned.htf)," sequences at higher than family level"))
+    pinfo(verbose=!quiet,"binned ",nrow(binned.htf)," sequences at higher than family level")
     stats$binned.htf.level <- nrow(binned.htf)
     ###################################################################
     ## unassigned/not binned
@@ -223,8 +226,7 @@ metabin <- function(ifile,
     ## remove the extra column
     btab.u <- btab.u[,!colnames(btab.u)%in%c("taxids"),drop=FALSE]
     stats$not.binned <- nrow(btab.u)
-    message(paste0("not binned ",nrow(btab.u)," sequences"))
-    print(head(btab.u))
+    pinfo(verbose=!quiet,"not binned ",nrow(btab.u)," sequences")
     #######################################################################
     ##combine
     print("combining")
@@ -239,9 +241,9 @@ metabin <- function(ifile,
 
     #write.table(x = com_level,file = out,sep="\t",quote = F,row.names = F)
   
-    message(c("Complete. ",stats$total_hits, " hits from ", stats$total_queries," queries processed in ",t3," mins."))
+    pinfo(verbose=!quiet,"Complete. ",stats$total_hits, " hits from ", stats$total_queries," queries processed in ",t3," mins.")
     
-    message("Note: If none of the hits for a BLAST query pass the binning thesholds, the results will be NA for all levels.
+    pinfo(verbose=!quiet,"Note: If none of the hits for a BLAST query pass the binning thesholds, the results will be NA for all levels.
                  If the LCA for a query is above kingdom, e.g. cellular organisms or root, the results will be 'unknown' for all levels.
                  Queries that had no BLAST hits, or did not pass the filter.blast step will not appear in results.  ")
     res <- list(table=ftab,stats=stats)
@@ -261,6 +263,16 @@ get.binned <- function(tab,lca,taxlevel,taxcols=c("K","P","C","O","F","G","S")) 
     binned <- cbind(binned,lca[match(binned$qseqid,lca$qseqid),taxcols,drop=FALSE])
     return(binned)
 }
+
+pinfo <- function(verbose=TRUE,...) {
+    if (verbose) message(paste0("[info] ",...,""))
+}
+
+perror <- function(fatal=FALSE,...) {
+    message(paste0("[ERROR] ",...,""))
+    if (fatal) quit(status=1)
+}
+
 
 get.lowest.common.ancestor <- function(tab) {
 

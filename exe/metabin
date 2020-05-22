@@ -48,7 +48,7 @@ option_list = list(
     make_option(c("-F", "--Family"), type="double", default=90.0, 
                 help="family %id threshold [default= %default]", metavar="double"),
 
-    make_option(c("-A", "--AboveF"), type="double", default=85.0, 
+    make_option(c("-A", "--AboveF"), type="double", default=89.0, 
                 help="above family %id threshold [default= %default]", metavar="double"),
 
     make_option(c("-D", "--db"), type="character", default="~/.taxonkit", 

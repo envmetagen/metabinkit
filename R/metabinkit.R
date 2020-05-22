@@ -86,13 +86,13 @@ metabin <- function(ifile,
     expected.tax.cols <- c("K","P","C","O","F","G","S")
     not.found <- expected.tax.cols[!expected.tax.cols%in%colnames(btab.o)]
     if ( length(not.found) > 0 ) {
-        perror(fatal=TRUE,"missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
+        perror(fatal=TRUE," TODO: missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
         ## TODO: implement
-        quit(status=1)
     }
     
     ## keep only the necessary columns
     btab <- btab.o[,append(expected.cols,expected.tax.cols),drop=FALSE]
+    rm(btab.o)
     ## unassigned/not binned
     btab.u <- btab[!duplicated(btab$qseqid),,drop=FALSE]
 

@@ -98,28 +98,47 @@ t1<-Sys.time()
 ## load blacklists?
 
 ##
-
-metabin(ifile=opt$input,
-        out=paste0(opt$out,".tsv"),
-        taxDir=opt$db,
-        spident=opt$Species,
-        gpident=opt$Genus,
-        fpident=opt$Family,
-        abspident=opt$AboveF,
-        topS=opt$TopSpecies,
-        topF=opt$TopFamily,
-        topG=opt$TopGenus,
-        topAbs=opt$TopAF,
-        species.blacklist=NULL,
-        genus.blacklist=NULL,
-        family.blacklist=NULL,
-        consider_sp.=!opt$discard_sp)
+#save.image("test.Rdata")
+#load("test.Rdata")
+#debug(metabin)
+#trace(metabin)
+#debug(get.top)
+binned <- metabin(ifile=opt$input,
+                  taxDir=opt$db,
+                  spident=opt$Species,
+                  gpident=opt$Genus,
+                  fpident=opt$Family,
+                  abspident=opt$AboveF,
+                  topS=opt$TopSpecies,
+                  topF=opt$TopFamily,
+                  topG=opt$TopGenus,
+                  topAbs=opt$TopAF,
+                  species.blacklist=NULL,
+                  genus.blacklist=NULL,
+                  family.blacklist=NULL,
+                  consider_sp.=!opt$discard_sp)
             
 ##              disabledTaxaFiles = disabledTaxaFiles)
-  
+if (!is.null(binned)) {
+    ofile <- paste0(opt$out,".tsv")
+    write.table(x = binned$table,file = ofile,sep="\t",quote = F,row.names = F)
+    message(paste0("binned table written to ",ofile))
+    print(binned$stats)
+}
 t2<-Sys.time()
 t3<-round(difftime(t2,t1,units = "mins"),digits = 2)
 message("Binning complete in ", t3, " min")
-
 sessionInfo()
 q(status=0)
+ifile <- opt$input
+spident=98
+                    gpident=95;
+                    fpident=92;
+                    abspident=80;
+                    topS=1;
+                    topG=1;
+                    topF=1;
+                    topAbs=1; # 
+                    species.blacklist=NULL;
+                    genus.blacklist=NULL;
+                    family.blacklist=NULL;

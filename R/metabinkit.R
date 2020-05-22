@@ -121,34 +121,37 @@ metabin <- function(ifile,
     ##################################################################
     ##species-level assignments
     pinfo(verbose=!quiet,"binning at species level")
-    btabsp<-btab[btab$S!="unknown",,drop=FALSE]
+    btab.sp<-btab[btab$S!="unknown",,drop=FALSE]
     ## apply filters
-    above.threshold <- btabsp$pident>=spident
+    above.threshold <- btab.sp$pident>=spident
     pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",spident)
-    btab.u[btab.u$qseqid%in%unique(btabsp$qseqid[!above.threshold]),"S"] <- NA
-    btabsp<-btabsp[above.threshold,,drop=FALSE]
+
+    not.passing.ids <- unique(btab.sp$qseqid[!above.threshold])
+    btab.sp<-btab.sp[above.threshold,,drop=FALSE]
+    not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.sp$qseqid]
+    btab.u[btab.u$qseqid%in%not.passing.ids,"S"] <- NA
 
     if(consider_sp.==F){
         pinfo(verbose=!quiet,"Not considering species with 'sp.', numbers or more than one space")
-        btabsp<-btabsp[-grep(" sp\\.",btabsp$S,ignore.case = T),,drop=FALSE]
-        btabsp<-btabsp[-grep(" .* .*",btabsp$S,ignore.case = T),,drop=FALSE]
+        btab.sp<-btab.sp[-grep(" sp\\.",btab.sp$S,ignore.case = T),,drop=FALSE]
+        btab.sp<-btab.sp[-grep(" .* .*",btab.sp$S,ignore.case = T),,drop=FALSE]
         # shouldn't the number and spaces be a diffent option?
-        btabsp<-btabsp[-grep("[0-9]",btabsp$S),,drop=FALSE]
+        btab.sp<-btab.sp[-grep("[0-9]",btab.sp$S),,drop=FALSE]
     } else(
           pinfo(verbose=!quiet,"Considering species with 'sp.', numbers or more than one space"))
     
-    btabsp<-apply.blacklists(btabsp,blacklists.children,level="species")
+    btab.sp<-apply.blacklists(btab.sp,blacklists.children,level="species")
     ## get top
     pinfo(verbose=!quiet,"applying species top threshold of ",topS)
-    btabsp<-get.top(btabsp,topN=topS)
+    btab.sp<-get.top(btab.sp,topN=topS)
     ## LCA
-    lcasp <- get.lowest.common.ancestor(btabsp)
-    binned.sp <- get.binned(btabsp,lcasp,"S",expected.tax.cols)
+    lca.sp <- get.lowest.common.ancestor(btab.sp)
+    binned.sp <- get.binned(btab.sp,lca.sp,"S",expected.tax.cols)
     btab <- btab[!btab$qseqid%in%binned.sp$qseqid,,drop=FALSE]
     if (nrow(btab)>0)
         btab$S <- "unknown"
-    rm(btabsp)
-    rm(lcasp)
+    rm(btab.sp)
+    rm(lca.sp)
     stats$binned.species.level <- nrow(binned.sp)
     pinfo(verbose=!quiet,"binned ",nrow(binned.sp)," sequences at species level")
     ##################################################################
@@ -157,26 +160,28 @@ metabin <- function(ifile,
     ##reason - can have g=unknown and s=known (e.g. Ranidae isolate), these should be removed
     ##can have g=unknown and s=unknown (e.g. Ranidae), these should be removed
     ##can have g=known and s=unknown (e.g. Leiopelma), these should be kept
-    btabg<-btab[btab$G!="unknown",,drop=FALSE]  
+    btab.g<-btab[btab$G!="unknown",,drop=FALSE]  
     
     ## apply filters
-    above.threshold <- btabg$pident>=gpident
+    above.threshold <- btab.g$pident>=gpident
     pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",gpident)
-    btabg<-btabg[above.threshold,,drop=FALSE]
-    btab.u[btab.u$qseqid%in%unique(btabg$qseqid[!above.threshold]),"G"] <- NA
-    btabg<-apply.blacklists(btabg,blacklists.children,level="genus")
+    not.passing.ids <- unique(btab.g$qseqid[!above.threshold])
+    btab.g<-btab.g[above.threshold,,drop=FALSE]
+    not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.g$qseqid]
+    btab.u[btab.u$qseqid%in%not.passing.ids,"G"] <- NA
+    btab.g<-apply.blacklists(btab.g,blacklists.children,level="genus")
     ## get top
     pinfo(verbose=!quiet,"applying genus top threshold of ",topG)
-    btabg<-get.top(btabg,topN=topG)
+    btab.g<-get.top(btab.g,topN=topG)
     ## LCA
-    lcag <- get.lowest.common.ancestor(btabg)
-    binned.g <- get.binned(btabg,lcag,"G",expected.tax.cols)
+    lca.g <- get.lowest.common.ancestor(btab.g)
+    binned.g <- get.binned(btab.g,lca.g,"G",expected.tax.cols)
 
     btab <- btab[!btab$qseqid%in%binned.g$qseqid,,drop=FALSE]
     if (nrow(btab)>0)
         btab$G <- "unknown"
-    rm(btabg)
-    rm(lcag)
+    rm(btab.g)
+    rm(lca.g)
     stats$binned.genus.level <- nrow(binned.g)
     pinfo(verbose=!quiet,"binned ",nrow(binned.g)," sequences at genus level")
     #################################################################
@@ -191,51 +196,59 @@ metabin <- function(ifile,
     ##can have f=known, g=unknown, s=known, these should be kept    
     ##can have f=unknown, g=unknown, s=known, these should be removed - 
     ##assumes that this case would be a weird entry (e.g. Ranidae isolate)  
-    ##can have f=unknown, g=unknown, s=unknown, these should be removed  
-    btabf<-btab[!(btab$F=="unknown" & btab$G=="unknown" & btab$S=="unknown"),,drop=FALSE]  ####line changed 
-    btabf<-btabf[!(btabf$F=="unknown" & btabf$G=="unknown"),,drop=FALSE] ####line changed 
+    ##can have f=unknown, g=unknown, s=unknown, these should be removed
+
+    ## Bastian: not sure if the following conditions are correct
+    btab.f<-btab[btab$F!="unknown" || btab$G!="unknown" || btab$S!="unknown",,drop=FALSE]
 
     ## apply filters
-    above.threshold <- btabf$pident>=fpident
+    above.threshold <- btab.f$pident>=fpident
     pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",fpident)
-    btabf<-btabf[above.threshold,,drop=FALSE]
-    btab.u[btab.u$qseqid%in%unique(btabf$qseqid[!above.threshold]),"F"] <- NA
 
-    btabf<-apply.blacklists(btabf,blacklists.children,level="family")
+    not.passing.ids <- unique(btab.f$qseqid[!above.threshold])
+    btab.f<-btab.f[above.threshold,,drop=FALSE]
+    not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.f$qseqid]
+    btab.u[btab.u$qseqid%in%not.passing.ids,"F"] <- NA
+
+    btab.f<-apply.blacklists(btab.f,blacklists.children,level="family")
     pinfo(verbose=!quiet,"applying family top threshold of ",topF)
-    btabf<-get.top(btabf,topN=topF)
+    btab.f<-get.top(btab.f,topN=topF)
     ## LCA
-    lcaf <- get.lowest.common.ancestor(btabf)
-    binned.f <- get.binned(btabf,lcaf,"F",expected.tax.cols)
+    lca.f <- get.lowest.common.ancestor(btab.f)
+    binned.f <- get.binned(btab.f,lca.f,"F",expected.tax.cols)
     btab <- btab[!btab$qseqid%in%binned.f$qseqid,,drop=FALSE]
     if (nrow(btab)>0)
         btab$F <- "unknown"
-    rm(btabf)
-    rm(lcaf)
+    rm(btab.f)
+    rm(lca.f)
     stats$binned.family.level <- nrow(binned.f)
     pinfo(verbose=!quiet,"binned ",nrow(binned.f)," sequences at family level")
     ##################################################################
     ##higher-than-family-level assignments
     pinfo(verbose=!quiet,"binning at higher-than-family level")
-    btabhtf<-btab[btab$K!="unknown" || btab$P!="unknown" || btab$C!="unknown" || btab$O!="unknown",,drop=FALSE]
+    btab.htf<-btab[btab$K!="unknown",,drop=FALSE]
     ## apply filters
-    above.threshold <- btabhtf$pident>=abspident
+    above.threshold <- btab.htf$pident>=abspident
     pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",abspident)
-    btabf<-btabhtf[above.threshold,,drop=FALSE]
-    btab.u[btab.u$qseqid%in%unique(btabhtf$qseqid[!above.threshold]),c("O","C","P","K")] <- NA
-    
+    not.passing.ids <- unique(btab.htf$qseqid[!above.threshold])
+    btab.htf<-btab.htf[above.threshold,,drop=FALSE]
+    not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.htf$qseqid]
+    btab.u[btab.u$qseqid%in%not.passing.ids,c("O","C","P","K")] <- NA
     pinfo(verbose=!quiet,"applying htf top threshold of ",topAbs)
-    btabhtf<-get.top(btabhtf,topN=topAbs)
+    btab.htf<-get.top(btab.htf,topN=topAbs)
     ## LCA
-    lcahtf <- get.lowest.common.ancestor(btabhtf)
-    binned.htf <- get.binned(btabhtf,lcahtf,c("O","C","P","K"),expected.tax.cols)
-    rm(lcahtf)
+    lca.htf <- get.lowest.common.ancestor(btab.htf)
+    binned.htf <- get.binned(btab.htf,lca.htf,c("O","C","P","K"),expected.tax.cols)
+    rm(lca.htf)
+    rm(btab.htf)
     pinfo(verbose=!quiet,"binned ",nrow(binned.htf)," sequences at higher than family level")
     stats$binned.htf.level <- nrow(binned.htf)
     
     #######################################################################
     ##combine binned/assigned
     atab <- rbind(binned.sp,binned.g,binned.f,binned.htf)
+    pinfo(verbose=!quiet,"Total number of binned ",nrow(atab)," sequences")
+    
     ## 
     ###################################################################
     ## unassigned/not binned

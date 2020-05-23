@@ -16,7 +16,7 @@
 # along with this file.  If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
 
-set -ex -o pipefail
+set -e -o pipefail
 
 ## default installation folder (bin)
 INSTALL_DIR=/opt/bin

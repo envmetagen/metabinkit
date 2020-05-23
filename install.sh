@@ -23,7 +23,7 @@ INSTALL_DIR=/opt/bin
 
 ###########################################
 
-ALL_TOOLS="taxonkit blast metabinkit r_packages taxonomy_db"
+ALL_TOOLS="taxonkit blast metabinkit R_packages taxonomy_db"
 
 SYSTEM_DEPENCIES="R bash"
 

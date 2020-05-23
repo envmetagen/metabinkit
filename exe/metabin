@@ -19,17 +19,16 @@
 #
 #
 # =========================================================
-# generate one HTML page with QC report
-###########################################################
+
 
 ###################################################################
 ## Load auxiliary code
 dir2script <- normalizePath(dirname(strsplit(split="=",x=grep("--file=",fixed=TRUE,value=TRUE,x=commandArgs(trailingOnly = FALSE)))[[1]][2]))
 ##
 mbk.local.lib.path <- paste0(dir2script,"/../R")
-source(paste(dir2script,"/../R/metabinkit.R",sep=""))
+source(paste0(dir2script,"/../R/metabinkit.R"))
 
-
+default.taxonkit.db.dir <- paste0(dir2script,"/../db/")
 
 library(optparse)
 ############################################################
@@ -51,7 +50,7 @@ option_list = list(
     make_option(c("-A", "--AboveF"), type="double", default=89.0, 
                 help="above family %id threshold [default= %default]", metavar="double"),
 
-    make_option(c("-D", "--db"), type="character", default="~/.taxonkit", 
+    make_option(c("-D", "--db"), type="character", default=default.taxonkit.db.dir, 
                 help="directory containing the taxonomy db (nodes.dmp and names.dmp) [default= %default]", metavar="double"),
 
     make_option(c("--SpeciesBL"), type="character", default=NULL, 
@@ -91,13 +90,29 @@ if (is.null(opt$input)){
   stop("--input parameter should be provided.\n", call.=FALSE)
 }
 
-## call metabin
-## 
-message("Starting Binning")
+## Blacklisting
+##
+species.blacklist <- NULL
+genus.blacklist <- NULL
+family.blacklist <- NULL
+
+## load blacklists
+if (!is.null(opt$SpeciesBL)) {
+    if (!file.exists(opt$SpeciesBL) ) perror(fatal=TRUE,"file ",opt$SpeciesBL, " not found")
+    species.blacklist <- as.vector(read.table(file=opt$SpeciesBL,header=F,comment.char = "#",sep="\t",quote=""))
+}
+if (!is.null(opt$GenusBL)) {
+    if (!file.exists(opt$GenusBL) ) perror(fatal=TRUE,"file ",opt$GenusBL, " not found")
+    genus.blacklist <- as.vector(read.table(file=opt$GenusBL,header=F,comment.char = "#",sep="\t",quote=""))
+}
+if (!is.null(opt$FamilyBL)) {
+    if (!file.exists(opt$FamilyBL) ) perror(fatal=TRUE,"file ",opt$FamilyBL, " not found")
+    family.blacklist <- as.vector(read.table(file=opt$FamilyBL,header=F,comment.char = "#",sep="\t",quote=""))
+}
+
+pinfo("Starting Binning")
 t1<-Sys.time()
 
-## TODO
-## load blacklists?
 binned <- metabin(ifile=opt$input,
                   taxDir=opt$db,
                   spident=opt$Species,
@@ -108,9 +123,9 @@ binned <- metabin(ifile=opt$input,
                   topF=opt$TopFamily,
                   topG=opt$TopGenus,
                   topAbs=opt$TopAF,
-                  species.blacklist=NULL,
-                  genus.blacklist=NULL,
-                  family.blacklist=NULL,
+                  species.blacklist=species.blacklist,
+                  genus.blacklist=genus.blacklist,
+                  family.blacklist=family.blacklist,
                   consider_sp.=!opt$discard_sp)
             
 ##              disabledTaxaFiles = disabledTaxaFiles)
@@ -120,11 +135,11 @@ if (!is.null(binned)) {
         binned$table <- binned$table[,c("qseqid","K","P","C","O","F","G","S"),drop=FALSE]
     }
     write.table(x = binned$table,file = ofile,sep="\t",quote = F,row.names = F)
-    message(paste0("binned table written to ",ofile))
+    pinfo("binned table written to ",ofile)
     print(binned$stats)
 }
 t2<-Sys.time()
 t3<-round(difftime(t2,t1,units = "mins"),digits = 2)
-message("Binning complete in ", t3, " min")
+pinfo("Binning complete in ", t3, " min")
 sessionInfo()
 q(status=0)

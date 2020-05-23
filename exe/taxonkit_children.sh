@@ -36,7 +36,7 @@ if [ "$OFILE-" == "-" ]; then
     exit 1
 fi
 
-set -eux -o pipefail
+set -eu -o pipefail
 
 EXTRA=
 if [ "$PATH2DB-" == "-" ]; then
@@ -66,7 +66,7 @@ split -l 400 $IFILE ${OFILE}_i_
 touch $OFILE.tmp
 ls -1 ${OFILE}_i_* | while read f; do
     LIST=$(cat $f|tr "\n" ",")
-    taxonkit list  --ids $LIST $EXTRA --indent '' >>  $OFILE.tmp
+    taxonkit list  --ids $LIST $EXTRA --indent '' --show-names | cut -f 2- -d\ >>  $OFILE.tmp
 done
 mv $OFILE.tmp $OFILE
 rm -f ${OFILE}_i_*

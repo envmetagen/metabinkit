@@ -33,9 +33,6 @@ blast_URL=ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-
 TAXONKIT_VERSION=0.6.0
 TAXONKIT_URL=https://github.com/shenwei356/taxonkit/releases/download/v${TAXONKIT_VERSION}/taxonkit_linux_amd64.tar.gz
 
-fastq_utils_VERSION=0.23.0
-fastq_utils_URL=https://github.com/nunofonseca/fastq_utils/archive/$fastq_utils_VERSION.tar.gz
-
 ###########################################
 #
 function pinfo {
@@ -118,19 +115,6 @@ function install_blast {
 	pinfo "Installing blast...done."
 }
 
-function install_fastq_utils {
-    pinfo "Installing fastq_utils..."
-    rm -f tmp.tar.gz
-    wget -c $fastq_utils_URL -O tmp.tar.gz
-    tar -zxvf tmp.tar.gz
-    pushd fastq_utils-${fastq_utils_VERSION}
-    CFLAGS=  ./install_deps.sh
-    make install
-    cp bin/fast* bin/bam*  $INSTALL_BIN
-    popd
-    rm -rf fastq_utils-${fastq_utils_VERSION} tmp.tar.gz
-    pinfo "Installing fastq_utils...done."
-}
 
 function install_R_packages {
     pinfo "Installing R packages to $INSTALL_DIR/Rlibs ..."

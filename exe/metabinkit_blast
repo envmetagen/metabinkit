@@ -159,7 +159,7 @@ fi
 BLAST_CMD=blastn
 ## Subject Scientific Name(s) are separated by a ';'
 $BLAST_CMD $params  -query $infasta  -out $outfile.tmp -outfmt "$outfmt"
-echo "INFO: blast query complete."
+echo "INFO: blast finished."
 
 HH=$(echo $outfmt| cut -f 2- -d\ |tr " " "\t")
 sed -i  "1i$HH" $outfile.tmp

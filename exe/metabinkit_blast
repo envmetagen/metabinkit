@@ -1,0 +1,162 @@
+#!/bin/env bash
+# =========================================================
+# Copyright 2020
+#
+#
+# This is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this file.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# =========================================================
+metabinkit_version=0.0.1
+
+PATH2SCRIPT=$(dirname "${BASH_SOURCE[0]}" )
+## load shell functions
+#source $PATH2SCRIPT/metabinkit_shared.sh
+PATH=$PATH:$PATH2SCRIPT/
+
+set -eu -o pipefail
+
+
+###############################################
+# Default values
+taxids_blacklist=
+outfmt="6 qseqid evalue pident qcovs saccver staxid ssciname sseq"
+threads=2
+max_hsps=1
+word_size=6
+evalue=1
+perc_identity=50
+qcov_hsp_perc=98
+gapopen=0
+gapextend=2
+reward=1
+penalty=-1
+max_target_seqs=100
+
+taxdir=
+infasta=
+refdb=
+outfile=
+
+
+# using this directory as default
+taxdir=$PATH2SCRIPT/../db/
+
+###############################################
+## Check if all tools/commands needed are present
+COMMANDS_NEEDED="blastn taxonkit taxonkit_children.sh"
+# 
+# 
+for cmd in $COMMANDS_NEEDED; do
+    command -v $cmd  >/dev/null 2>&1 || { echo "ERROR: $cmd  does not seem to be installed.  Aborting." >&2; exit 1; }
+done
+
+###############################################
+## TODO
+function usage {
+    cat <<EOF
+metabibkit_blast -f fasta file -D reference_DB -o outfile [options]
+ -f fasta_file 
+ -D reference_db    - reference Blast indexed database
+ -o outfile
+ -T taxdir          - folder with NCBI's taxonomy database (default:$taxdir)
+ -t threads         - maximum number of threads (default:$threads)
+ -m max_hsps        - BLAST's max_hsps paramater (default:$max_hsps)
+ -w word_size       - BLAST's word_size paramater (default:$word_size)
+ -e evalue          - BLAST's evalue paramater (default:$evalue)
+ -I perc_identity   - BLAST's perc_identity paramater (default:$perc_identity)
+ -q qcov_hsp_perc   - BLASTS's qcov_hsp_perc paramater (default:$qcov_hsp_perc)
+ -G gapopen         - BLASTS's gapopen paramater (default:$gapopen)
+ -E gapextend       - BLASTS's gapextend paramater (default:$gapextend)
+ -r reward
+ -p penalty
+ -M max_target_seqs
+ -N taxids_blacklist_files - filenames (separated by comma) with the taxids that should be excluded
+ -h                 - provides usage information
+
+EOF
+}
+
+
+####################################################
+#
+
+
+while getopts "e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vh"  Option; do
+    case $Option in
+	f ) infasta=$OPTARG;;
+	d ) set -x;;
+	D ) refdb=$OPTARG;;
+	o ) outfile=$OPTARG;;
+	T ) taxdir=$OPTARG;;
+	t ) threads=$OPTARG;;
+	m ) max_hsps=$OPTARG;;
+	w ) word_size=$OPTARG;;
+	I ) perc_identity=$OPTARG;;
+	q ) qcov_hsp_perc=$OPTARG;;
+	G ) gapopen=$OPTARG;;
+	E ) gapextend=$OPTARG;;
+	r ) reward=$OPTARG;;
+	e ) evalue=$OPTARG;;
+	p ) penalty=$OPTARG;;
+	M ) max_target_seqs=$OPTARG;;
+	N ) taxids_blacklist_files=$OPTARG;;
+	V ) set -x;;
+	h) usage; exit;;
+    esac
+done
+
+echo "matabinkit $metabinkit_version" > /dev/stderr
+
+## check mandatory arguments
+
+if [ "$infasta-" == "-" ] || [ ! -e $infasta ]; then
+    echo "ERROR: file (-f) not given or not found"
+    exit 1
+fi
+
+if [ ! -e "$taxdir" ]; then
+    echo "ERROR: taxdir folder $taxdir not found"
+    exit 1
+fi
+
+if [ ! -d "$refdb" ]; then
+    echo "ERROR: refdb folder $refdb not found"
+    exit 1
+fi
+
+
+if [ "$outfile-" == "-" ]; then
+    echo "ERROR: missing -o parameter"
+    exit 1
+fi
+
+#./exe/metabinkit_blast   -o aaa -f t -T tmp/metabinkit/db -D ./
+
+####################################################################
+## 
+params="-max_hsps  $max_hsps  -task megablast  -perc_identity $perc_identity  -word_size $word_size -qcov_hsp_perc $qcov_hsp_perc -gapopen $gapopen -gapextend $gapextend -reward $reward -evalue $evalue -max_target_seqs $max_target_seqs -num_threads $threads"
+
+
+
+
+BLAST_CMD=blastn
+## Subject Scientific Name(s) are separated by a ';'
+$BLAST_CMD $params  -query $infasta  -out $outfile.tmp -outfmt "$outfmt"
+echo "INFO: blast query complete."
+
+HH=$(echo $outfmt| cut -f 2- -d\ |tr " " "\t")
+sed -i  "1i$HH" $out.tmp
+mv $out.tmp $out
+exit 0

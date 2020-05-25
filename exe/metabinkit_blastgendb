@@ -1,0 +1,132 @@
+#!/bin/env bash
+# =========================================================
+# Copyright 2020
+#
+#
+# This is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this file.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# =========================================================
+metabinkit_version=0.0.1
+
+PATH2SCRIPT=$(dirname "${BASH_SOURCE[0]}" )
+## load shell functions
+#source $PATH2SCRIPT/metabinkit_shared.sh
+PATH=$PATH:$PATH2SCRIPT/
+
+set -eu -o pipefail
+
+###################################
+infasta=
+taxid_mapfile=
+outfile=
+threads=2
+
+
+function fasta2taxid_mapping {
+    local fasta_file=$1
+    local map_file=$2
+    grep "^>" $fasta_file | sed -E "s/>([^ |]+)(|[^ ]+)? .*taxid=([0-9]+);.*/\1 \3/" | tr " " "\t"  > $map_file.tmp
+    ## check if all is ok
+    local NL1=$(grep "^>" $fasta_file|wc -l)
+    local NL2=$(cut -f 2 $map_file.tmp|grep -c -v "^$")
+    #echo $NL1
+    #echo $NL2
+    if [ "$NL1-" != "$NL2-" ]; then
+	echo "ERROR while creating taxid mapping file: some entries without taxid=xxx;?"
+	exit 1
+    fi
+    mv $map_file.tmp $map_file
+}
+
+###############################################
+## Check if all tools/commands needed are present
+COMMANDS_NEEDED="makeblastdb"
+# 
+# 
+for cmd in $COMMANDS_NEEDED; do
+    command -v $cmd  >/dev/null 2>&1 || { echo "ERROR: $cmd  does not seem to be installed.  Aborting." >&2; exit 1; }
+done
+
+###############################################
+## TODO
+function usage {
+    cat <<EOF
+metabibkit_blastgendb -f fasta file -t taxid_map -o db [options]
+ -f fasta_file 
+ -T seqid_taxid_map - mapping between the sequence id and the taxid (tab separted). if none is found it will look for taxid=xxxx; in the fasta header after the first space and consider the word up to the first space or | as the sequence id.
+ -o outfile
+ -t threads         - maximum number of threads (default:$threads)
+ -h                 - provides usage information
+
+EOF
+}
+
+
+####################################################
+#
+
+while getopts "f:T:o:t:Vdh"  Option; do
+    case $Option in
+	f ) infasta=$OPTARG;;
+	T ) taxid_mapfile=$OPTARG;;
+	o ) outfile=$OPTARG;;
+	t ) threads=$OPTARG;;
+	V ) set -x;;
+	d ) set -x;;
+	h) usage; exit;;
+    esac
+done
+
+echo "matabinkit $metabinkit_version" > /dev/stderr
+
+## check mandatory arguments
+
+
+
+if [ "$infasta-" == "-" ]; then
+    echo "ERROR: missing -f parameter"
+    exit 1
+fi
+
+if [ ! -e $infasta ]; then
+    echo "ERROR: File $infasta not found"
+    exit 1
+fi
+
+
+if [ "$outfile-" == "-" ]; then
+    echo "ERROR: missing -o parameter"
+    exit 1
+fi
+
+
+if [ "$taxid_mapfile-" == "-" ]; then
+    taxid_mapfile=$outfile.taxid_map.tsv
+    fasta2taxid_mapping $infasta  $taxid_mapfile
+else
+    if [ ! -e $taxid_mapfile ]; then
+	echo "ERROR: file $taxid_mapfile not found" 
+	exit 1
+    fi
+fi
+
+
+####################################################################
+## 
+CMD=makeblastdb
+## Subject Scientific Name(s) are separated by a ';'
+$CMD -in $infasta -dbtype nucl -out $outfile -taxid_map $taxid_mapfile -parse_seqids
+echo "INFO: blast db generation complete."
+exit 0

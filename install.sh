@@ -109,9 +109,7 @@ function install_blast {
 	rm -f taxdb.tar.gz
 	popd
 	popd
-	##
-	echo "READ: To enable blast version $blast_VERSION run in the terminal or add the following line to the end of your .bashrc file"
-	echo "PATH=$BLAST_IDIR/bin:\$PATH"	
+	##      
 	pinfo "Installing blast...done."
 }
 
@@ -173,15 +171,20 @@ function create_metabinkit_env {
     pinfo "Creating $INSTALL_DIR/metabinkit_env.sh..."
     cat <<EOF  > $INSTALL_DIR/metabinkit_env.sh
 export PATH=$BLAST_IDIR/bin:\$PATH
-export PATH=$INSTALL_DIR/python/bin/:$INSTALL_DIR/bin:$INSTALL_DIR/exe::\$PATH
+export PATH=$INSTALL_DIR/python/bin/:$INSTALL_DIR/bin:$INSTALL_DIR/exe:\$PATH
 export LD_LIBRARY_PATH=$INSTALL_DIR/lib:\$LD_LIBRARY_PATH
 export R_LIBS_USER=$INSTALL_DIR/Rlibs:$R_LIBS_USER
+export BLASTDB=$BLAST_IDIR/db
 EOF
 
 cat <<EOF 
 You may want to consider adding the following line to your .bash_profile file.
 
 source $INSTALL_DIR/metabinkit_env.sh
+
+
+
+
 EOF
     pinfo "Creating $INSTALL_DIR/metabinkit_env.sh...done."
 }
@@ -206,8 +209,8 @@ DEBUG=0
 while getopts "i:x:thH"  Option
 do
     case $Option in
-	i) INSTALL_DIR=$OPTARG;;
-	x) MODE=$OPTARG;;
+	i ) INSTALL_DIR=$OPTARG;;
+	x ) MODE=$OPTARG;;
 	h ) usage; exit;;
 	H ) usage; exit;;
 	* ) usage; exit 1;;
@@ -238,5 +241,6 @@ fi
  
 
 echo "---------------------------------------------------"
+echo "metabinkit and dependecies installed on $INSTALL_DIR"
 echo "All done."
 exit 0

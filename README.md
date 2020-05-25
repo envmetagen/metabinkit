@@ -16,15 +16,22 @@ Usage: metabin -i xxx ...
 
 #### metabinblast -
 
-### Installation
+### Docker
 
-A docker image with metabinkit is avalilable at DockerHub (). Alternatively you may install the software from source following the instructions provided next. A  64bit computer with an up to date Linux OS installed will be required.
+A docker image that includes everything required to run with metabinkit is available at DockerHub (xxxxxxxxxxxxxxxxx). This facilitates the setup and installation of metabinkit, makes it easy to track all software versions used in the analyses, and ensures that only dependency versions compatible with metabinkit are used. See the [Docker userguide](https://docs.docker.com/) for more details.
 
-#### Building from source
+Alternatively you may install the software from source following the instructions provided next. A  64bit computer with an up to date Linux OS installed will be required.
+We provide a container that wraps everything required to run a BUSCO analysis. T(v4.0.5_cv1 identifies all components at once). 
 
-##### Dependencies
 
-##### Getting sources
+### Manual installation
+
+#### Supported OS
+
+metabinkit is developed and tested on multiple distributions of Linux (e.g. Fedora, Ubuntu). Consider the Docker container if you use a non-supported OS or OS version.
+
+
+#### Getting sources
 
 Option 1: download the latest source release tarball from https://github.com/envmetagen/metabinkit/releases, and then from your download directory type:
 
@@ -37,11 +44,9 @@ Option 2: to use git to download the repository  with the entire code history, t
     cd metabinkit
 
 
-##### Installing metabinkit and some dependencies
+##### Installing metabinkit and dependencies
 
-A script (install.sh) is provided to facilitate the installation of
-metabinkit and some dependencies, namely a few R packages, taxonkit,
-BLAST and taxonomy database (from NCBI).
+A full installation of metabinkit requires third-party components. A script (install.sh) is provided to facilitate the installation of metabinkit and some dependencies, others need to be already installed in the system (R 3.6.0 or above). 
 
 To install metabinkit, type:
 

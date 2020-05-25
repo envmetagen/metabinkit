@@ -5,7 +5,7 @@
 Set of programs to perform taxonomic binning.
 
 1. [Docker](#Docker)
-2. [Manual installation](#Manual installation)
+2. [Manual installation](#Manual-installation)
 3. [Metabinkit programs](#Programs)
 
 

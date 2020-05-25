@@ -18,7 +18,7 @@
 #
 # =========================================================
 
-metabinkit.version <- "0.0.1"
+metabinkit.version <- "0.0.2"
 
 message("metabinkit v",metabinkit.version)
 ## Ensure that we are using a recent version of R
@@ -59,6 +59,8 @@ metabin <- function(ifile,
                     disabledTaxaOut=NULL, ## file prefix
                     ## force=F, ## ??
                     ## full.force=F, ##??
+                    filter.col=NULL,
+                    filter=NULL,
                     consider_sp.=FALSE,
                     quiet=FALSE) {
     
@@ -66,7 +68,7 @@ metabin <- function(ifile,
     ## validate arguments
     if(is.null(taxDir)) perror(fatal=TRUE,"taxDir not specified");
     if(!file.exists(ifile)) perror(fatal=TRUE,"file ", ifile, "not found"); 
-    
+
     ## all arguments look ok, carry on...
     library(data.table)
     options(datatable.fread.input.cmd.message=FALSE)
@@ -81,9 +83,20 @@ metabin <- function(ifile,
     ## are the expected columns present?
     ## qseqid pident taxids
     expected.cols <- c("qseqid","pident","taxids")
+    if(!is.null(filter.col) && !is.null(filter)) {
+        expected.cols <- c(expected.cols,filter.col)
+    }
     not.found <- expected.cols[!expected.cols%in%colnames(btab.o)]
     if ( length(not.found) > 0 ) perror(fatal=TRUE,"missing columns in input table:",paste(not.found,collapse=","))
 
+    ## Filter
+    if(!is.null(filter.col) && !is.null(filter)) {
+        pinfo("Filtering table (",nrow(btab.o),") using ",filter.col," column.")
+        btab.o <- btab.o[!btab.o[,filter.col]%in%filter,,drop=FALSE]
+        pinfo("Filtered table (",nrow(btab.o),") using ",filter.col," column.")
+    }
+
+    
     ## check if lineage information is available
     expected.tax.cols <- c("K","P","C","O","F","G","S")
     not.found <- expected.tax.cols[!expected.tax.cols%in%colnames(btab.o)]

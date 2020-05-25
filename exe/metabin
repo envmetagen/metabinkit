@@ -59,6 +59,11 @@ option_list = list(
                 help="genera blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
     make_option(c("--FamilyBL"), type="character", default=NULL, 
                 help="families blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
+    make_option(c("--Filter"), type="character", default=NULL, 
+                help="file name with the entries from the input to exclude (on entry per line)  [default= %default]", metavar="filename"),
+    make_option(c("--FilterCol"), type="character", default="sseqid", 
+                help="Column name to look for the values found the the file provided in the --Filter parameter  [default= %default]", metavar="filename"),
+
     ## tops,tpoS,topG,topF,topAbs
     make_option(c("--TopSpecies"), type="integer", default=1, 
                 help="TODO [default= %default]", metavar="integer"),
@@ -110,6 +115,16 @@ if (!is.null(opt$FamilyBL)) {
     family.blacklist <- as.vector(read.table(file=opt$FamilyBL,header=F,comment.char = "#",sep="\t",quote=""))
 }
 
+if(is.null(opt$FilterCol) && !is.null(opt$Filter)) {
+    stop("--Filter needs to be provided with --FilterCol")
+}
+
+filter.list <- NULL
+if (!is.null(opt$Filter)) {    
+    if (!file.exists(opt$Filter) ) perror(fatal=TRUE,"file ",opt$Filter, " not found!!!")
+    filter.list <- as.vector(read.table(file=opt$Filter,header=F,comment.char = "#",sep="\t",quote=""))
+    if (length(filter.list)==0) { filter.list <- NULL }
+}
 pinfo("Starting Binning")
 t1<-Sys.time()
 
@@ -122,10 +137,12 @@ binned <- metabin(ifile=opt$input,
                   topS=opt$TopSpecies,
                   topF=opt$TopFamily,
                   topG=opt$TopGenus,
-                  topAbs=opt$TopAF,
+                  topAbs=opt$TopAF,                  
                   species.blacklist=species.blacklist,
                   genus.blacklist=genus.blacklist,
                   family.blacklist=family.blacklist,
+                  filter.col=opt$FilterCol,
+                  filter=filter.list,
                   consider_sp.=!opt$discard_sp)
             
 ##              disabledTaxaFiles = disabledTaxaFiles)

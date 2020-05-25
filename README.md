@@ -4,17 +4,10 @@
 
 Set of programs to perform taxonomic binning.
 
-### Programs
+1. [Docker](# Docker)
+2. [Manual installation](# Manual installation)
+3. [Metabinkit programs](# Programs)
 
-#### metabin -
-
-Usage: metabin -i xxx ...
-
-##### Expected file formats and contents
-
-##### Examples
-
-#### metabinblast -
 
 ### Docker
 
@@ -58,5 +51,15 @@ to install the software to the home folder. A file metabinkit_env.sh will be cre
 
 or add the above line to the $HOME/.bash_profile file.
 
+### Programs
 
+#### metabin -
+
+Usage: metabin -i xxx ...
+
+##### Expected file formats and contents
+
+##### Examples
+
+#### metabinblast -
 

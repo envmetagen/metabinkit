@@ -59,7 +59,7 @@ option_list = list(
                 help="genera blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
     make_option(c("--FamilyBL"), type="character", default=NULL, 
                 help="families blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
-    make_option(c("--Filter"), type="character", default=NULL, 
+    make_option(c("--FilterFile"), type="character", default=NULL, 
                 help="file name with the entries from the input to exclude (on entry per line)  [default= %default]", metavar="filename"),
     make_option(c("--FilterCol"), type="character", default="sseqid", 
                 help="Column name to look for the values found the the file provided in the --Filter parameter  [default= %default]", metavar="filename"),
@@ -115,14 +115,14 @@ if (!is.null(opt$FamilyBL)) {
     family.blacklist <- as.vector(read.table(file=opt$FamilyBL,header=F,comment.char = "#",sep="\t",quote=""))
 }
 
-if(is.null(opt$FilterCol) && !is.null(opt$Filter)) {
-    stop("--Filter needs to be provided with --FilterCol")
+if(is.null(opt$FilterCol) && !is.null(opt$FilterFile)) {
+    stop("--FilterFile needs to be provided with --FilterCol")
 }
 
 filter.list <- NULL
-if (!is.null(opt$Filter)) {    
-    if (!file.exists(opt$Filter) ) perror(fatal=TRUE,"file ",opt$Filter, " not found!!!")
-    filter.list <- as.vector(read.table(file=opt$Filter,header=F,comment.char = "#",sep="\t",quote=""))
+if (!is.null(opt$FilterFile)) {    
+    if (!file.exists(opt$FilterFile) ) perror(fatal=TRUE,"file ",opt$Filter, " not found!!!")
+    filter.list <- as.vector(read.table(file=opt$FilterFile,header=F,comment.char = "#",sep="\t",quote=""))
     if (length(filter.list)==0) { filter.list <- NULL }
 }
 pinfo("Starting Binning")

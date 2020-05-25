@@ -60,8 +60,6 @@ must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out 
 must_succeed "[ `grep -c 'Sinanodonta woodiana' .metabin.test.out.tsv` == 0 ]"
 
 ## FilterFile and FilterCol
-echo 45949 > .blacklist.txt
-
 echo 45949 > ./blacklist.txt
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FilterFile ./blacklist.txt --FilterCol taxids"
 must_succeed "[ $(cat .metabin.test.out.tsv|grep -c "Corbicula fluminea") == 0 ]"

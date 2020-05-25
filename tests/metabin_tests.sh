@@ -26,6 +26,8 @@ must_fail "metabin -i _file_does_not_exist  &> /dev/null"
 must_fail "metabin -i tests/test_files/in1.blast.tsv --SpeciesBL _file_does_not_exist  &> /dev/null"
 must_fail "metabin -i tests/test_files/in1.blast.tsv --GenusBL _file_does_not_exist  &> /dev/null"
 must_fail "metabin -i tests/test_files/in1.blast.tsv --FamilyBL _file_does_not_exist  &> /dev/null"
+must_fail "metabin -i tests/test_files/in1.blast.tsv --FamilyBL   &> /dev/null"
+
 
 ## percentage identity thresholds used
 ## 99 % for species level
@@ -57,6 +59,22 @@ must_succeed "[ `grep -c 'Sinanodonta woodiana' .metabin.test.out.tsv` == 0 ]"
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --SpeciesBL tests/test_files/ids2exclude.txt --GenusBL tests/test_files/genera2exclude.txt"
 must_succeed "[ `grep -c 'Sinanodonta woodiana' .metabin.test.out.tsv` == 0 ]"
 
+## FilterFile and FilterCol
+echo 45949 > .blacklist.txt
+
+echo 45949 > ./blacklist.txt
+must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FilterFile ./blacklist.txt --FilterCol taxids"
+must_succeed "[ $(cat .metabin.test.out.tsv|grep -c "Corbicula fluminea") == 0 ]"
+
+## File not present or not give
+must_fail "metabin -i tests/test_files/in1.blast.tsv --Filter   &> /dev/null"
+must_fail "metabin -i tests/test_files/in1.blast.tsv --Filter  _file_does_not_exist  &> /dev/null"
+
+# column not present
+must_fail "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FilterFile ./blacklist.txt --FilterCol taxids_typo"
+must_fail "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FilterFile ./blacklist.txt --FilterCol "
+
 echo Failed tests: $num_failed
+echo Number of tests: $num_tests
 exit $num_failed
 

@@ -18,7 +18,7 @@
 #
 #
 # =========================================================
-metabinkit_version=0.0.1
+metabinkit_version=0.0.2
 
 PATH2SCRIPT=$(dirname "${BASH_SOURCE[0]}" )
 ## load shell functions
@@ -30,8 +30,8 @@ set -eu -o pipefail
 
 ###############################################
 # Default values
-taxids_blacklist=
-outfmt="6 qseqid evalue pident qcovs saccver staxid ssciname sseq"
+taxids_blacklist_files=
+outfmt="6 qseqid evalue pident qcovs saccver staxids ssciname sseqid"
 threads=2
 max_hsps=1
 word_size=6
@@ -93,7 +93,7 @@ EOF
 #
 
 
-while getopts "e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vh"  Option; do
+while getopts "N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vdh"  Option; do
     case $Option in
 	f ) infasta=$OPTARG;;
 	d ) set -x;;
@@ -131,24 +131,29 @@ if [ ! -e "$taxdir" ]; then
     exit 1
 fi
 
-if [ ! -d "$refdb" ]; then
-    echo "ERROR: refdb folder $refdb not found"
-    exit 1
-fi
-
+#if [ ! -e "$refdb" ]; then
+#    echo "ERROR: refdb $refdb not found"
+#    exit 1
+#fi
 
 if [ "$outfile-" == "-" ]; then
     echo "ERROR: missing -o parameter"
     exit 1
 fi
 
-#./exe/metabinkit_blast   -o aaa -f t -T tmp/metabinkit/db -D ./
+
+
 
 ####################################################################
 ## 
-params="-max_hsps  $max_hsps  -task megablast  -perc_identity $perc_identity  -word_size $word_size -qcov_hsp_perc $qcov_hsp_perc -gapopen $gapopen -gapextend $gapextend -reward $reward -evalue $evalue -max_target_seqs $max_target_seqs -num_threads $threads"
+params="-max_hsps  $max_hsps  -task megablast  -perc_identity $perc_identity  -word_size $word_size -qcov_hsp_perc $qcov_hsp_perc -gapopen $gapopen -gapextend $gapextend -reward $reward -evalue $evalue -max_target_seqs $max_target_seqs -num_threads $threads -db $refdb"
 
-
+if [ "$taxids_blacklist_files-" != "-" ]; then
+    ## assumes that the number of files is relative small
+    ## and the files may contain comments (#)
+    cat $(echo $taxids_blacklist_files | tr "," " ") | sed "s/^#.*//"|grep -v "^$" > $outfile.taxidsblacklisted
+    params="$params -negative_taxidlist $outfile.taxidsblacklisted"
+fi
 
 
 BLAST_CMD=blastn
@@ -157,6 +162,6 @@ $BLAST_CMD $params  -query $infasta  -out $outfile.tmp -outfmt "$outfmt"
 echo "INFO: blast query complete."
 
 HH=$(echo $outfmt| cut -f 2- -d\ |tr " " "\t")
-sed -i  "1i$HH" $out.tmp
-mv $out.tmp $out
+sed -i  "1i$HH" $outfile.tmp
+mv $outfile.tmp $outfile
 exit 0

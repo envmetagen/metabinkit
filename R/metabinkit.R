@@ -79,7 +79,7 @@ metabin <- function(ifile,
     ## would prefer that file was loader prior to this function being called
     ## lets keep it for now
     btab.o<-data.table::fread(ifile,sep="\t",data.table = F)
-
+    pinfo(verbose=!quiet,"Read ",nrow(btab.o)," entries from ",ifile)
     ## are the expected columns present?
     ## qseqid pident taxids
     expected.cols <- c("qseqid","pident","taxids")
@@ -106,7 +106,7 @@ metabin <- function(ifile,
         btab.o <- add.lineage.df(btab.o,taxDir=taxDir,taxCol="taxids")
         not.found <- expected.tax.cols[!expected.tax.cols%in%colnames(btab.o)]
         if ( length(not.found) > 0 ) {
-            perror(fatal=TRUE," TODO: missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
+            perror(fatal=TRUE," Missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
         }
     }
     
@@ -155,14 +155,27 @@ metabin <- function(ifile,
         
         if(consider_sp.==F){
             pinfo(verbose=!quiet,"Not considering species with 'sp.', numbers or more than one space")
-            btab.sp<-btab.sp[-grep(" sp\\.",btab.sp$S,ignore.case = T),,drop=FALSE]
-            btab.sp<-btab.sp[-grep(" .* .*",btab.sp$S,ignore.case = T),,drop=FALSE]
-                                        # shouldn't the number and spaces be a diffent option?
-            btab.sp<-btab.sp[-grep("[0-9]",btab.sp$S),,drop=FALSE]
-        } else(
-              pinfo(verbose=!quiet,"Considering species with 'sp.', numbers or more than one space"))
-        
+            count.bef <- nrow(btab.sp)
+            toremove <- -grep(" sp\\.",btab.sp$S,ignore.case = TRUE,invert=FALSE)
+            if (length(toremove)>0)
+                btab.sp<-btab.sp[toremove,,drop=FALSE]
 
+            ## More than two spaces
+            toremove <- -grep("[^\\s]+\\s+[^\\s]+\\s+[^\\s].*",btab.sp$S,ignore.case = TRUE,perl=TRUE,invert=FALSE)
+            if (length(toremove)>0)
+                btab.sp <- btab.sp[toremove,,drop=FALSE]
+
+            ## shouldn't the number and spaces be a diffent option?
+            toremove <- -grep("\\d",btab.sp$S,perl=TRUE,invert=FALSE)
+            if (length(toremove)>0)
+                btab.sp<- btab.sp[toremove,,drop=FALSE]
+            count.aft <- nrow(btab.sp)
+            sp.filter.n <- count.bef-count.aft
+            pinfo(verbose=!quiet,"Excluded ",sp.filter.n," entries")
+        } else {
+            pinfo(verbose=!quiet,"Considering species with 'sp.', numbers or more than one space")
+        }
+        
         ## get top
         pinfo(verbose=!quiet,"applying species top threshold of ",topS)
         btab.sp<-get.top(btab.sp,topN=topS)

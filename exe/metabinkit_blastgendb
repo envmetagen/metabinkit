@@ -89,7 +89,7 @@ while getopts "f:T:o:t:Vdh"  Option; do
     esac
 done
 
-echo "matabinkit $metabinkit_version" > /dev/stderr
+echo "metabinkit $metabinkit_version" > /dev/stderr
 
 ## check mandatory arguments
 

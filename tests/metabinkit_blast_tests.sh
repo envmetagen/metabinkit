@@ -35,6 +35,7 @@ must_fail "metabinkit_blast -f _file_does_not_exist&> /dev/null"
 must_fail "metabinkit_blastgendb -f _file_does_not_exist &> /dev/null"
 
 must_fail "metabinkit_blast -f tests/test_files/test_db.fasta &> /dev/null"
+
 must_fail "metabinkit_blastgendb -f tests/test_files/test_db.fasta &> /dev/null"
 
 must_fail "metabinkit_blastgendb -f tests/test_files/test_db.fasta -o &> /dev/null"
@@ -49,6 +50,14 @@ must_succeed "metabinkit_blastgendb -f tests/test_files/test_db.fasta -o test2 -
 must_fail "metabinkit_blast -f tests/test_files/test_db.fasta -D test &> /dev/null"
 must_succeed "metabinkit_blast -f tests/test_files/query.fasta  -D test -o res1 "
 must_succeed "metabinkit_blast -f tests/test_files/query.fasta  -D test -o res2  -M 5"
+echo 228297 > .postaxids.txt
+must_succeed "metabinkit_blast -f tests/test_files/query2.fasta  -D test -o res1 "
+must_succeed "metabinkit_blast -f tests/test_files/query2.fasta  -D test -o res1 -P .postaxids.txt"
+must_succeed "[ $(cat res1|wc -l ) == 10 ]"
+must_succeed "metabinkit_blast -f tests/test_files/query2.fasta  -D test -o res1 -N .postaxids.txt"
+must_succeed " [ $(grep -c -f .postaxids.txt res1) == 0 ]"
+must_fail "metabinkit_blast -f tests/test_files/query2.fasta  -D test -o res1 -N .postaxids.txt -P .postaxids.txt &> /dev/null"
+rm -f .postaxids.txt res1 res2
 
 echo Failed tests: $num_failed
 echo Number of tests: $num_tests

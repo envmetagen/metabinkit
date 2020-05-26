@@ -31,6 +31,7 @@ set -eu -o pipefail
 ###############################################
 # Default values
 taxids_blacklist_files=
+taxids_poslist_files=
 outfmt="6 qseqid evalue pident qcovs saccver staxids ssciname sseqid"
 threads=2
 max_hsps=1
@@ -82,7 +83,8 @@ metabinkit_blast -f fasta file -D reference_DB -o outfile [options]
  -r reward
  -p penalty
  -M max_target_seqs
- -N taxids_blacklist_files - filenames (separated by comma) with the taxids that should be excluded
+ -N taxids_blacklist_files - restrict search to taxids not present in the files provided (separated by comma). This options is incompatible with -P.
+ -P taxids_positive_files - restrict search to taxids present in the files provided (separated by comma). This option is incompatible with -N.
  -h                 - provides usage information
 
 EOF
@@ -93,7 +95,7 @@ EOF
 #
 
 
-while getopts "N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vdh"  Option; do
+while getopts "P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vdh"  Option; do
     case $Option in
 	f ) infasta=$OPTARG;;
 	d ) set -x;;
@@ -112,6 +114,7 @@ while getopts "N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vdh"  Option; do
 	p ) penalty=$OPTARG;;
 	M ) max_target_seqs=$OPTARG;;
 	N ) taxids_blacklist_files=$OPTARG;;
+	P ) taxids_poslist_files=$OPTARG;;
 	V ) set -x;;
 	h) usage; exit;;
     esac
@@ -141,8 +144,12 @@ if [ "$outfile-" == "-" ]; then
     exit 1
 fi
 
-
-
+if [ "$taxids_blacklist_files-" != "-" ] &&  \
+       [ "$taxids_poslist_files-" != "-" ] ; then
+    echo "ERROR: option -N and -P cannot be used simultaneously"
+    exit 1
+fi
+	 
 
 ####################################################################
 ## 
@@ -154,6 +161,14 @@ if [ "$taxids_blacklist_files-" != "-" ]; then
     cat $(echo $taxids_blacklist_files | tr "," " ") | sed "s/^#.*//"|grep -v "^$" > $outfile.taxidsblacklisted
     params="$params -negative_taxidlist $outfile.taxidsblacklisted"
 fi
+
+if [ "$taxids_poslist_files-" != "-" ]; then
+    ## assumes that the number of files is relative small
+    ## and the files may contain comments (#)
+    cat $(echo $taxids_poslist_files | tr "," " ") | sed "s/^#.*//"|grep -v "^$" > $outfile.taxids
+    params="$params -taxidlist $outfile.taxids"
+fi
+
 
 
 BLAST_CMD=blastn

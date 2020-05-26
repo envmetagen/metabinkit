@@ -45,6 +45,10 @@ must_succeed "metabin -M -i tests/test_files/in0.blast.tsv -o .metabin.test.out 
 
 #must_succeed "metabin -M -i tests/test_files/in3.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
 
+must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --discard_sp -M "
+# check output
+must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tests/test_files/out4.tsv|sort ) "
+
 #############################
 ## blacklisting
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FamilyBL tests/test_files/families2exclude.txt"

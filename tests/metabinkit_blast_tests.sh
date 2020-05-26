@@ -44,7 +44,9 @@ must_fail "metabinkit_blastgendb -f tests/test_files/test_db.fasta -o &> /dev/nu
 must_succeed "metabinkit_blastgendb -f tests/test_files/test_db.fasta -o test"
 ## test.taxid_map.tsv generated before
 must_succeed "metabinkit_blastgendb -f tests/test_files/test_db.fasta -o test2 -T test.taxid_map.tsv"
-must_succeed "metabinkit_blastgendb -f tests/test_files/test_db.fasta -o test2 -T test.taxid_map.tsv -n 4"
+must_succeed "metabinkit_blastgendb -f tests/test_files/test_db.fasta -o test2 -T test.taxid_map.tsv -t 4"
+
+must_succeed "metabinkit_blastgendb -f tests/test_files/test_db.fasta -o test2 -T test.taxid_map.tsv -t 4 -c"
 
 
 must_fail "metabinkit_blast -f tests/test_files/test_db.fasta -D test &> /dev/null"

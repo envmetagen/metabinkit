@@ -32,8 +32,32 @@ infasta=
 taxid_mapfile=
 outfile=
 threads=2
+check=0
 
+function check_db {
 
+    db=$1
+    fasta=$2
+    
+    echo "Checking database..."
+    set +e
+    blastdbcheck -verbosity 2 -db $1 -must_have_taxids
+    if [ $? != 0 ]; then
+	echo "ERROR: blast db check failed"
+	exit 1
+    fi
+    set -e
+    ## Quick query
+    tmpfile=$(mktemp)
+    head -n 2 $fasta > $tmpfile
+    metabinkit_blast -f $tmpfile  -D $db -o $tmpfile.res -M 1
+    if  [ "$(cut -f 2,3,4 $tmpfile.res | tail -n 1 | tr '\t' ' ')" != "0.0 100.000 100" ]; then
+	echo "ERROR: query newly created database with $tmpfile did not work as expected"
+	cat $tmpfile.res
+	exit 1
+    fi
+    echo "Checking database...all ok."
+}
 function fasta2taxid_mapping {
     local fasta_file=$1
     local map_file=$2
@@ -67,6 +91,7 @@ metabibkit_blastgendb -f fasta file -t taxid_map -o db [options]
  -f fasta_file 
  -T seqid_taxid_map - mapping between the sequence id and the taxid (tab separted). if none is found it will look for taxid=xxxx; in the fasta header after the first space and consider the word up to the first space or | as the sequence id.
  -o outfile
+ -c                 - check database after creating it
  -t threads         - maximum number of threads (default:$threads)
  -h                 - provides usage information
 
@@ -77,12 +102,13 @@ EOF
 ####################################################
 #
 
-while getopts "f:T:o:t:Vdh"  Option; do
+while getopts "f:T:o:t:cVdh"  Option; do
     case $Option in
 	f ) infasta=$OPTARG;;
 	T ) taxid_mapfile=$OPTARG;;
 	o ) outfile=$OPTARG;;
 	t ) threads=$OPTARG;;
+	c ) check=1;;
 	V ) set -x;;
 	d ) set -x;;
 	h) usage; exit;;
@@ -128,5 +154,9 @@ fi
 CMD=makeblastdb
 ## Subject Scientific Name(s) are separated by a ';'
 $CMD -in $infasta -dbtype nucl -out $outfile -taxid_map $taxid_mapfile -parse_seqids
+
+if [ $check == 1 ]; then
+    check_db $outfile $infasta
+fi
 echo "INFO: blast db generation complete."
 exit 0

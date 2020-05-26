@@ -117,7 +117,7 @@ while getopts "N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vdh"  Option; do
     esac
 done
 
-echo "matabinkit $metabinkit_version" > /dev/stderr
+echo "metabinkit $metabinkit_version" > /dev/stderr
 
 ## check mandatory arguments
 

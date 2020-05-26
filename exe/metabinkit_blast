@@ -63,10 +63,10 @@ for cmd in $COMMANDS_NEEDED; do
 done
 
 ###############################################
-## TODO
+## 
 function usage {
     cat <<EOF
-metabibkit_blast -f fasta file -D reference_DB -o outfile [options]
+metabinkit_blast -f fasta file -D reference_DB -o outfile [options]
  -f fasta_file 
  -D reference_db    - reference Blast indexed database
  -o outfile

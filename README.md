@@ -14,7 +14,7 @@ Set of programs to perform taxonomic binning.
 A docker image that includes everything required to run with metabinkit is available at DockerHub (https://hub.docker.com/r/envmetagen/metabinkit/tags/). This facilitates the setup and installation of metabinkit, makes it easy to track all software versions used in the analyses, and ensures that only dependency versions compatible with metabinkit are used. See the [Docker userguide](https://docs.docker.com/) for more details.
 
 Alternatively you may install the software from source following the instructions provided next. A  64bit computer with an up to date Linux OS installed will be required.
-We provide a container that wraps everything required to run a BUSCO analysis. T(v4.0.5_cv1 identifies all components at once). 
+
 
 
 ### Manual installation

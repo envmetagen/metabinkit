@@ -65,14 +65,22 @@ Usage: metabin -i xxx ...
 
 The minimum required input for metabin is:
 
--i : a tab-separated file with two compulsory columns: qseqid, pident and EITHER one column, taxid, OR seven columns, K,P,C,O,F,G,S
-        qseqid: id of the query sequence
-        pident: the percentage identity of the alignment
-        taxids: NCBI taxid of the alignment subject sequence        
-        K,P,C,O,F,G,S: kingdom, pylum, class, order, family, genus, species
-        
+`--input`: a tab-separated file with two compulsory columns: qseqid, pident and EITHER one column, taxid, OR seven columns, K,P,C,O,F,G,S
+ - qseqid: id of the query sequence
+ - pident: the percentage identity of the alignment
+ - taxids: NCBI taxid of the alignment subject sequence        
+ - K,P,C,O,F,G,S: kingdom, pylum, class, order, family, genus, species        
 
 Using K,P,C,O,F,G,S does not require using NCBI taxonomy.
+
+
+##### How it works
+
+1. The `--input` file is loaded and the headers are checked
+2. (optional) if a `FilterFile` has been provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid]
+   - This is useful, for example, to remove any known or suspected erroneous database entries
+3. Check if K,P,C,O,F,G,S are provided. If not, create them using `taxids` column and NCBI taxonomy folder (specified by `-D`)
+
 
 Optional inputs include:
 

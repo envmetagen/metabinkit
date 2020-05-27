@@ -18,11 +18,10 @@
 #
 #
 # =========================================================
-metabinkit_version="0.0.4"
 
 PATH2SCRIPT=$(dirname "${BASH_SOURCE[0]}" )
 ## load shell functions
-#source $PATH2SCRIPT/metabinkit_shared.sh
+source $PATH2SCRIPT/metabinkit_shared.sh
 PATH=$PATH:$PATH2SCRIPT/
 
 set -eu -o pipefail
@@ -63,6 +62,8 @@ for cmd in $COMMANDS_NEEDED; do
     command -v $cmd  >/dev/null 2>&1 || { echo "ERROR: $cmd  does not seem to be installed.  Aborting." >&2; exit 1; }
 done
 
+check_blastn_version 
+
 ###############################################
 ## 
 function usage {
@@ -85,6 +86,7 @@ metabinkit_blast -f fasta file -D reference_DB -o outfile [options]
  -M max_target_seqs
  -N taxids_blacklist_files - restrict search to taxids not present in the files provided (separated by comma). This options is incompatible with -P.
  -P taxids_positive_files - restrict search to taxids present in the files provided (separated by comma). This option is incompatible with -N.
+ -v                       - print metabinkit version and exits
  -h                 - provides usage information
 
 EOF
@@ -95,7 +97,7 @@ EOF
 #
 
 
-while getopts "P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vdh"  Option; do
+while getopts "P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vvdh"  Option; do
     case $Option in
 	f ) infasta=$OPTARG;;
 	d ) set -x;;
@@ -116,11 +118,12 @@ while getopts "P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vdh"  Option; do
 	N ) taxids_blacklist_files=$OPTARG;;
 	P ) taxids_poslist_files=$OPTARG;;
 	V ) set -x;;
+	v ) print_metabinkit_version && exit 0;;
 	h) usage; exit;;
     esac
 done
 
-echo "metabinkit $metabinkit_version" > /dev/stderr
+print_metabinkit_version
 
 ## check mandatory arguments
 

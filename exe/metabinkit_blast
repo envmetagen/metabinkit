@@ -62,7 +62,7 @@ for cmd in $COMMANDS_NEEDED; do
     command -v $cmd  >/dev/null 2>&1 || { echo "ERROR: $cmd  does not seem to be installed.  Aborting." >&2; exit 1; }
 done
 
-check_blastn_version 
+check_blast_version 
 
 ###############################################
 ## 
@@ -96,7 +96,7 @@ EOF
 ####################################################
 #
 
-
+OPTERR=0
 while getopts "P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vvdh"  Option; do
     case $Option in
 	f ) infasta=$OPTARG;;
@@ -120,6 +120,7 @@ while getopts "P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vvdh"  Option; do
 	V ) set -x;;
 	v ) print_metabinkit_version && exit 0;;
 	h) usage; exit;;
+	*) echo "ERROR: invalid option." ; usage; exit 1;;
     esac
 done
 

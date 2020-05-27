@@ -4,10 +4,14 @@
 
 Set of programs to perform taxonomic binning.
 
-1. [Docker](#Docker)
+1. [Overview](#Overview)
+2. [Docker](#Docker)
 2. [Manual installation](#Manual-installation)
 3. [Metabinkit programs](#Programs)
 
+
+### Overview
+From metagenomic or metabarcoding data, it is often necessary to assign taxonomy to DNA sequences. This is generally performed by aligning sequences to a reference database, usually resulting in multiple database alignments for each query sequence. Based on alignment results, metabinkit provides functionality to assign a single taxon to a query sequence, using user-defined percentage identity thresholds. Functionality is also available to create BLAST databases and perform BLAST alignments.  
 
 ### Docker
 
@@ -58,6 +62,20 @@ or add the above line to the $HOME/.bash_profile file.
 Usage: metabin -i xxx ...
 
 ##### Expected file formats and contents
+
+The minimum required input for metabin is:
+
+-i : a tab-separated file with three columns: qseqid, taxids, pident
+        qseqid: id of the query sequence
+        taxids: NCBI taxid of the alignment subject sequence
+        pident: the percentage identity of the alignment
+-D : a path to a local copy of the NCBI taxonomy folder (installed by metabinkit by default)
+
+Optional inputs include:
+
+--SpeciesBL : a file with one taxid per line 
+                This is used to essentially ignore particular species when performing the binning
+
 
 ##### Examples
 

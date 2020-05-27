@@ -77,9 +77,17 @@ Using K,P,C,O,F,G,S does not require using NCBI taxonomy.
 ##### How it works
 
 1. The `--input` file is loaded and the headers are checked
-2. (optional) if a `FilterFile` has been provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid]
-   - This is useful, for example, to remove any known or suspected erroneous database entries
-3. Check if K,P,C,O,F,G,S are provided. If not, create them using `taxids` column and NCBI taxonomy folder (specified by `-D`)
+2. (optional) if a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid]
+   - This is useful, for example, to remove any known or suspected erroneous database entries by their Accession Number
+3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and NCBI taxonomy folder (specified by `-D`, installed by metabinkit by default)
+4. (optional) blacklisting
+   - if a `species.blacklist` file was provided to the `--SpeciesBL` argument, remove all rows that contain this species
+   - if a `genus.blacklist` file was provided to the `--GenusBL` argument, remove all rows that contain this genus
+   - if a `family.blacklist` file was provided to the `--FamilyBL` argument, remove all rows that contain this family
+     - Useful to exclude particular taxa that are present in alignment results, but are known *for certain* not to occur in the DNA samples
+
+
+, `genus.blacklist` or `family.blacklist` files have been provided to any of `--SpeciesBL`, `--GenusBL` or `--FamilyBL` arguments, then 
 
 
 Optional inputs include:

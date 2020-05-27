@@ -135,7 +135,7 @@ phy1	cla1	ord2	fam3	74
 phy1	cla1	ord2	fam3	70
 phy1	cla2	ord3	fam4	60
 
-settings	bin
+settings			bin
 --TopFamily=1,--Family=70	fam1
 --TopFamily=2,--Family=70	fam1
 --TopFamily=5,--Family=70	fam1

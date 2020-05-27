@@ -68,8 +68,11 @@ The minimum required input for metabin is:
  - `qseqid`: id of the query sequence
  - `pident`: the percentage identity of the alignment
  - `taxids`: NCBI taxid of the database subject sequence        
- - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the database subject sequence         
-
+ - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the database subject sequence 
+ 
+ Other columns may be present and will be ignored, unless specified by the `--FilterCol` argument (see How it Works)
+ 
+ 
 ##### How it works
 
 1. The `--input` file is loaded and the headers are checked.

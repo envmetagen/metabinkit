@@ -98,6 +98,7 @@ The minimum required input for metabin is:
     - For the final, above_family, binning, report the lowest common ancestor, regardless of the rank.  
     
 *The "Top.." thresholds*
+
 The main %identity thresholds (`--Species`,`--Genus`,`--Family`,`--AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 would correspond to 97.8, so alignments below 97.8 would be discarded prio to binning. In the example below, a "Top.." of 5 would correspond to 94.8, so alignments below 93.8 would be discarded prio to binning.    
 
 ```

@@ -119,6 +119,31 @@ query1 123456 94.8
 query1 123456 94.8
 query1 123456 93.6
 ```
+
+"Top.." will mainly affect the resolution of the results. The lower the "Top.." value, the greater the number of alignments discarded. As is also required for the main %identity thresholds, "Top.." thresholds should be identifed empirically. Below is an illustration of how "Top.." can affect results, when using an identical main %identity. 
+
+```
+#Query1
+P	C	O	F	pident
+phy1	cla1	ord1	fam1	85
+phy1	cla1	ord1	fam1	84
+phy1	cla1	ord1	fam1	84
+phy1	cla1	ord1	fam1	83
+phy1	cla1	ord1	fam2	79
+phy1	cla1	ord1	fam2	78
+phy1	cla1	ord2	fam3	74
+phy1	cla1	ord2	fam3	70
+phy1	cla2	ord3	fam4	60
+
+settings	bin
+--TopFamily=1,--Family=70	fam1
+--TopFamily=2,--Family=70	fam1
+--TopFamily=5,--Family=70	fam1
+--TopFamily=8,--Family=70	ord1
+--TopFamily=10,--Family=70	ord1
+--TopFamily=15,--Family=70	cla1
+--TopFamily=30,--Family=70	phy1
+```
                 
 
 

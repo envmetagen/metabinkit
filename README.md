@@ -77,32 +77,41 @@ Using K,P,C,O,F,G,S does not require using NCBI taxonomy.
 ##### How it works
 
 1. The `--input` file is loaded and the headers are checked
-2. (optional) if a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid]
+2. (optional) If a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid]
    - This is useful, for example, to remove any known or suspected erroneous database entries by their Accession Number
 3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and NCBI taxonomy folder (specified by `-D`, installed by metabinkit by default)
-4. (optional) blacklisting
-   - if a `species.blacklist` file was provided to the `--SpeciesBL` argument, remove all rows that contain this species
-   - if a `genus.blacklist` file was provided to the `--GenusBL` argument, remove all rows that contain this genus
-   - if a `family.blacklist` file was provided to the `--FamilyBL` argument, remove all rows that contain this family
+4. (optional) Blacklisting
+   - If a `species.blacklist` file was provided to the `--SpeciesBL` argument, remove all rows that contain this species
+   - If a `genus.blacklist` file was provided to the `--GenusBL` argument, remove all rows that contain this genus
+   - If a `family.blacklist` file was provided to the `--FamilyBL` argument, remove all rows that contain this family
      - Useful to exclude particular taxa that are present in alignment results, but are known *for certain* not to occur in the DNA samples
-
-
-, `genus.blacklist` or `family.blacklist` files have been provided to any of `--SpeciesBL`, `--GenusBL` or `--FamilyBL` arguments, then 
-
-
-Optional inputs include:
-
-     
--D : a path to a local copy of the NCBI taxonomy folder (installed by metabinkit by default), required if K,P,C,O,F,G,S  are not provided
-
---SpeciesBL : a file with one taxid per line 
-                This is used to remove particular species when performing the binning, requires -i to have taxids column
-                Useful to exclude particular species that are present in alignment results, but are known not to occur in the DNA samples
-             
-  --GenusBL : similar to SpeciesBL. Providing a genus-level taxid will disable all taxa within this genus
-                #what happens if species-level taxid provided here?
-  --FamilyBL : similar to SpeciesBL. Providing a genus-level taxid will disable all taxa within this family
-                
+     **but see issues**
+5. Binning at species level
+    - Remove alignments below the `--Species` %identity threshold
+    - (optional) If `--discard_sp` is TRUE, remove species with "sp.", numbers or more than one space in their names
+      - Useful to avoid species-level assignations such as "Rana sp.", "Rana isolate X4", ...
+    - Remove alignments below the `--TopSpecies` %identity threshold (for more on `--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF` see below)
+    - For each query, get the lowest common ancestor of alignments passing the filters
+    - If the lowest common ancestor is a species-level ancestor, consider complete, otherwise carry over to genus-level binning.
+ 6. Binning at genus level
+    - Applied only to queries that were not already binned at species level
+    - Remove alignments below the `--Genus` %identity threshold
+    - Remove alignments below the `--TopGenus` %identity threshold 
+    - For each query, get the lowest common ancestor of alignments passing the filters
+    - If the lowest common ancestor is a genus-level ancestor, consider complete, otherwise carry over to family-level binning.
+ 7. Binning at family level
+    - Applied only to queries that were not already binned at species or genus level
+    - Remove alignments below the `--Family` %identity threshold
+    - Remove alignments below the `--TopFamily` %identity threshold 
+    - For each query, get the lowest common ancestor of alignments passing the filters
+    - If the lowest common ancestor is a family-level ancestor, consider complete, otherwise carry over to Above_family-level binning.
+ 7. Binning at above family level
+    - Applied only to queries that were not already binned at species, genus or family level
+    - Remove alignments below the `--AboveF` %identity threshold
+    - Remove alignments below the `--TopAF` %identity threshold 
+    - For each query, get the lowest common ancestor of alignments passing the filters
+    - Report the lowest common ancestor, regardless of the taxonomic level 
+        
                 
 
 

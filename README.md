@@ -64,22 +64,18 @@ Usage: metabin -i xxx ...
 ##### Expected file formats and contents
 
 The minimum required input for metabin is:
-
-`--input`: a tab-separated file with two compulsory columns: qseqid, pident and EITHER one column, taxid, OR seven columns, K,P,C,O,F,G,S
+`--input`: a tab-separated file with two compulsory columns: qseqid, pident AND `taxid` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
  - qseqid: id of the query sequence
  - pident: the percentage identity of the alignment
- - taxids: NCBI taxid of the alignment subject sequence        
- - K,P,C,O,F,G,S: kingdom, pylum, class, order, family, genus, species        
-
-Using K,P,C,O,F,G,S does not require using NCBI taxonomy.
-
+ - taxids: NCBI taxid of the database subject sequence        
+ - K,P,C,O,F,G,S: kingdom, pylum, class, order, family, genus, species of the database subject sequence         
 
 ##### How it works
 
 1. The `--input` file is loaded and the headers are checked.
 2. (optional) If a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid].
    - This is useful, for example, to remove any known or suspected erroneous database entries by their Accession Number.
-3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and NCBI taxonomy folder (specified by `-D`, installed by metabinkit by default).
+3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and the NCBI taxonomy folder (specified by `-D`, installed by metabinkit by default).
 4. (optional) Blacklisting
    - If a `species.blacklist` file was provided to the `--SpeciesBL` argument, remove all rows that contain this species.
    - If a `genus.blacklist` file was provided to the `--GenusBL` argument, remove all rows that contain this genus.
@@ -89,17 +85,32 @@ Using K,P,C,O,F,G,S does not require using NCBI taxonomy.
 5. Binning at species rank
     - Remove alignments below the `--Species` %identity threshold.
     - (optional) If `--discard_sp` is TRUE, remove species with "sp.", numbers or more than one space in their names.
-      - Useful to avoid species-level assignations such as "Rana sp.", "Rana isolate X4", ...
-    - Remove alignments below the `--TopSpecies` %identity threshold (for more on `--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF` see below).
-    - For each query, get the lowest common ancestor of alignments passing the filters.
-    - If the lowest common ancestor is a species-level ancestor, consider complete, otherwise carry over to genus-level binning.
+      - Useful to avoid final species-level bins such as "Rana sp.", "Rana isolate X4", ...
+    - Remove alignments below the `--TopSpecies` %identity threshold (for more on the "Top.." arguments see **below**).
+    - For each query, get the lowest common ancestor of all alignments that passed the previous filters.
+    - If the lowest common ancestor is at the species rank, this will be the final bin, otherwise carry over to genus-level binning.
  6. Binning at genus, family and above_family ranks. For each rank:
     - Apply only to queries that were not already binned at previous rank.
-    - Remove alignments below the respective %identity threshold; `--Genus`, `--Family`, `--AboveF`.
-    - Remove alignments below the respective "Top" %identity threshold; `--TopGenus`, `--TopFamily`, `--TopAF`.  
-    - For each query, get the lowest common ancestor of alignments passing the filters.
+    - Remove alignments below the respective %identity threshold;`--Genus`,`--Family`,`--AboveF`.
+    - Remove alignments below the respective "Top" %identity threshold;`--TopGenus`,`--TopFamily`,`--TopAF`.  
+    - For each query, get the lowest common ancestor of all alignments passing the filters.
     - If the lowest common ancestor is at the respective binning rank, consider complete, otherwise carry over to the next binning.
-    - For the final, above_family, binning, report the lowest common ancestor, regardless of the rank.     
+    - For the final, above_family, binning, report the lowest common ancestor, regardless of the rank.  
+    
+*The "Top.." thresholds*
+The main %identity thresholds (`--Species`,`--Genus`,`--Family`,`--AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 would correspond to 97.8, so alignments below 97.8 would be discarded prio to binning. In the example below, a "Top.." of 5 would correspond to 94.8, so alignments below 93.8 would be discarded prio to binning.    
+
+```
+qseqid taxids pident
+query1 1234 99.8
+query1 1234 99.6
+query1 12345 97.7
+query1 12345 97.6
+query1 12345 97.6
+query1 123456 94.8
+query1 123456 94.8
+query1 123456 93.6
+```
                 
 
 

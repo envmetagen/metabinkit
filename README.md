@@ -65,16 +65,29 @@ Usage: metabin -i xxx ...
 
 The minimum required input for metabin is:
 
--i : a tab-separated file with three columns: qseqid, taxids, pident
+-i : a tab-separated file with two compulsory columns: qseqid, pident and EITHER one column, taxid, OR seven columns, K,P,C,O,F,G,S
         qseqid: id of the query sequence
-        taxids: NCBI taxid of the alignment subject sequence
         pident: the percentage identity of the alignment
--D : a path to a local copy of the NCBI taxonomy folder (installed by metabinkit by default)
+        taxids: NCBI taxid of the alignment subject sequence        
+        K,P,C,O,F,G,S: kingdom, pylum, class, order, family, genus, species
+        
+
+Using K,P,C,O,F,G,S does not require using NCBI taxonomy.
 
 Optional inputs include:
 
+     
+-D : a path to a local copy of the NCBI taxonomy folder (installed by metabinkit by default), required if K,P,C,O,F,G,S  are not provided
+
 --SpeciesBL : a file with one taxid per line 
-                This is used to essentially ignore particular species when performing the binning
+                This is used to remove particular species when performing the binning, requires -i to have taxids column
+                Useful to exclude particular species that are present in alignment results, but are known not to occur in the DNA samples
+             
+  --GenusBL : similar to SpeciesBL. Providing a genus-level taxid will disable all taxa within this genus
+                #what happens if species-level taxid provided here?
+  --FamilyBL : similar to SpeciesBL. Providing a genus-level taxid will disable all taxa within this family
+                
+                
 
 
 ##### Examples

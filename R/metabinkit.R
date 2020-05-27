@@ -20,7 +20,6 @@
 
 metabinkit.version <- "0.0.4"
 
-message("metabinkit v",metabinkit.version)
 ## Ensure that we are using a recent version of R
 ##
 R.version <- getRversion()
@@ -38,7 +37,9 @@ if ( is.null(mbk.local.lib.path) ) {
 }
 source(paste0(mbk.local.lib.path,"/lca.R"))
 
-
+print.version <- function() {
+    message("metabinkit version: ",metabinkit.version)
+}
 ##
 ## Binning
 ##

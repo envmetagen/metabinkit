@@ -18,11 +18,10 @@
 #
 #
 # =========================================================
-metabinkit_version="0.0.4"
 
 PATH2SCRIPT=$(dirname "${BASH_SOURCE[0]}" )
 ## load shell functions
-#source $PATH2SCRIPT/metabinkit_shared.sh
+source $PATH2SCRIPT/metabinkit_shared.sh
 PATH=$PATH:$PATH2SCRIPT/
 
 set -eu -o pipefail
@@ -36,8 +35,8 @@ check=0
 
 function check_db {
 
-    db=$1
-    fasta=$2
+    local db=$1
+    local fasta=$2
     
     echo "Checking database..."
     set +e
@@ -48,7 +47,7 @@ function check_db {
     fi
     set -e
     ## Quick query
-    tmpfile=$(mktemp)
+    local tmpfile=$(mktemp)
     head -n 2 $fasta > $tmpfile
     metabinkit_blast -f $tmpfile  -D $db -o $tmpfile.res -M 1
     if  [ "$(cut -f 2,3,4 $tmpfile.res | tail -n 1 | tr '\t' ' ')" != "0.0 100.000 100" ]; then
@@ -93,25 +92,29 @@ metabibkit_blastgendb -f fasta file -t taxid_map -o db [options]
  -o outfile
  -c                 - check database after creating it
  -t threads         - maximum number of threads (default:$threads)
+ -v                 - print version and exit
  -h                 - provides usage information
 
 EOF
 }
 
+check_blast_version 
 
 ####################################################
 #
-
-while getopts "f:T:o:t:cVdh"  Option; do
-    case $Option in
+OPTERR=0
+while getopts "f:T:o:t:cVvdh"  Option; do
+    case ${Option} in
 	f ) infasta=$OPTARG;;
 	T ) taxid_mapfile=$OPTARG;;
 	o ) outfile=$OPTARG;;
 	t ) threads=$OPTARG;;
 	c ) check=1;;
 	V ) set -x;;
+	v ) print_metabinkit_version && exit 0;;
 	d ) set -x;;
 	h) usage; exit;;
+	*) echo "ERROR: invalid option." ; usage; exit 1;;
     esac
 done
 

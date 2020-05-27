@@ -38,8 +38,9 @@ option_list = list(
                 help="TSV file name", metavar="filename"),
     make_option(c("-o", "--out"), type="character", default=NULL, 
                 help="output file prefix ", metavar="filename"),
-    make_option(c("-s", "--subspecies"), type="double", default=99.5, 
-                help="subspecies %id threshold [default= %default]", metavar="double"),
+# TODO: v2    
+#    make_option(c("-s", "--subspecies"), type="double", default=99.5, 
+#                help="subspecies %id threshold [default= %default]", metavar="double"),
     make_option(c("-S", "--Species"), type="double", default=96.0, 
                 help="species %id threshold [default= %default]", metavar="double"),
     make_option(c("-G", "--Genus"), type="double", default=92.0, 

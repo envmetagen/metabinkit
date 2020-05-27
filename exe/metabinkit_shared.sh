@@ -25,7 +25,7 @@ function print_metabinkit_version {
     echo "metabinkit version: $metabinkit_version"
 }
 
-function check_blastn_version {
+function check_blast_version {
     min_version_required="2.10.0"
     
     local BLAST_VERSION=$(blastn -version | tail -n 1 | cut -f 4 -d\ |sed "s/,$//")

@@ -75,7 +75,7 @@ The minimum required input for metabin is:
 1. The `--input` file is loaded and the headers are checked.
 2. (optional) If a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid].
    - This is useful, for example, to remove any known or suspected erroneous database entries by their Accession Number.
-3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and the NCBI taxonomy folder (specified by `-D`, installed by metabinkit by default).
+3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and the NCBI taxonomy folder (specified by `--db`, installed by metabinkit by default).
 4. (optional) Blacklisting
    - If a `species.blacklist` file was provided to the `--SpeciesBL` argument, remove all rows that contain this species.
    - If a `genus.blacklist` file was provided to the `--GenusBL` argument, remove all rows that contain this genus.
@@ -97,7 +97,14 @@ The minimum required input for metabin is:
     - If the lowest common ancestor is at the respective binning rank, consider complete, otherwise carry over to the next binning.
     - For the final, above_family, binning, report the lowest common ancestor, regardless of the rank.  
     
-*The "Top.." thresholds*
+##### Other arguments
+
+`-M, --minimal_cols` Include only the seqid and lineage information in the output table (default=FALSE)
+`-o, --out=FILENAME` output file name
+		
+
+
+##### *The "Top.." thresholds*
 
 The main %identity thresholds (`--Species`,`--Genus`,`--Family`,`--AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
 

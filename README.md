@@ -65,10 +65,10 @@ Usage: metabin -i xxx ...
 
 The minimum required input for metabin is:
 `--input`: a tab-separated file with two compulsory columns: qseqid, pident AND `taxid` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
- - qseqid: id of the query sequence
- - pident: the percentage identity of the alignment
- - taxids: NCBI taxid of the database subject sequence        
- - K,P,C,O,F,G,S: kingdom, pylum, class, order, family, genus, species of the database subject sequence         
+ - `qseqid`: id of the query sequence
+ - `pident`: the percentage identity of the alignment
+ - `taxids`: NCBI taxid of the database subject sequence        
+ - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the database subject sequence         
 
 ##### How it works
 

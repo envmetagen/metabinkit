@@ -11,7 +11,7 @@ Set of programs to perform taxonomic binning.
 
 
 ### Overview
-From metagenomic or metabarcoding data, it is often necessary to assign taxonomy to DNA sequences. This is generally performed by aligning sequences to a reference database, usually resulting in multiple database alignments for each query sequence. Based on alignment results, metabinkit provides functionality to assign a single taxon to a query sequence, using user-defined percentage identity thresholds. Functionality is also available to create BLAST databases and perform BLAST alignments.  
+From metagenomic or metabarcoding data, it is often necessary to assign taxonomy to DNA sequences. This is generally performed by aligning sequences to a reference database, usually resulting in multiple database alignments for each query sequence. Using these alignment results, metabinkit assigns a single taxon to each query sequence, based on user-defined percentage identity thresholds. In essence, for each query, the alignments are filtered based on the percentage identity thresholds and the lowest common ancestor for all alignments passing the filters is determined. Although the metabin program is not limited to BLAST alignments, and can accept alignment results performed using any software, provided the input format is correct, functionality is also available to create BLAST databases and perform BLAST alignments, which can be passed directly to metabin.  
 
 ### Docker
 

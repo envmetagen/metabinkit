@@ -3,7 +3,8 @@ name: Docker
 on:
   release:
     types:
-      - [created]  
+      - [published]
+          
     # Publish `master` as Docker `latest` image.
     branches:
       - master

@@ -158,12 +158,16 @@ binned <- metabin(ifile=opt$input,
 ##              disabledTaxaFiles = disabledTaxaFiles)
 if (!is.null(binned)) {
     ofile <- paste0(opt$out,".tsv")
+    oifile <- paste0(opt$out,".info.tsv")
     if (opt$minimal_cols) {
         binned$table <- binned$table[,c("qseqid","K","P","C","O","F","G","S"),drop=FALSE]
     }
-    write.table(x = binned$table,file = ofile,sep="\t",quote = F,row.names = F)
+    write.table(x = binned$table,file = ofile,sep="\t",quote = FALSE,row.names = FALSE)
     pinfo("binned table written to ",ofile)
-    print(binned$stats)
+    ## Save stats
+    df <- t(data.frame(binned$stats,check.names=FALSE))
+    write.table(x=df,file=oifile,sep="\t",quote=FALSE,col.names=FALSE,row.names=TRUE)
+    pinfo("information stats written to ",oifile)
 }
 t2<-Sys.time()
 t3<-round(difftime(t2,t1,units = "mins"),digits = 2)

@@ -115,9 +115,9 @@ metabin <- function(ifile,
     btab <- btab.o[,c(expected.cols,expected.tax.cols),drop=FALSE]
     rm(btab.o)
 
-    ##preparing some things for final step
+    ## record the numbers
     stats <- list()
-    stats$total_hits <- length(btab$qseqid) #for info later
+    stats$total_hits <- nrow(btab)
     stats$total_queries<- length(unique(btab$qseqid))
 
     ##################################################################
@@ -133,9 +133,13 @@ metabin <- function(ifile,
     if (!is.null(blacklists$genus.level)) pinfo(verbose=!quiet,"# Taxa disabled at genus level:",length(blacklists.children$genus.level))
     if (!is.null(blacklists$family.level)) pinfo(verbose=!quiet,"# Taxa disabled at family level:",length(blacklists.children$family.level))
 
+    n.bef <- nrow(btab)
     btab<-apply.blacklists(btab,blacklists.children,level="species")
     btab<-apply.blacklists(btab,blacklists.children,level="genus")
     btab<-apply.blacklists(btab,blacklists.children,level="family")
+    n.aft <- nrow(btab)
+    stats$blacklisted <- n.bef-n.aft
+    pinfo("Entries blacklisted at species/genus/family level:",stats$blacklisted)
     ##################################################################
     ## unassigned/not binned
     btab.u <- btab[!duplicated(btab$qseqid),,drop=FALSE]
@@ -172,9 +176,11 @@ metabin <- function(ifile,
                 btab.sp<- btab.sp[toremove,,drop=FALSE]
             count.aft <- nrow(btab.sp)
             sp.filter.n <- count.bef-count.aft
+            stats$species.level.sp.filter <- sp.filter.n
             pinfo(verbose=!quiet,"Excluded ",sp.filter.n," entries")
         } else {
             pinfo(verbose=!quiet,"Considering species with 'sp.', numbers or more than one space")
+            stats$species.level.sp.filter <- 0
         }
         
         ## get top

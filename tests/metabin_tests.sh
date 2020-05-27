@@ -34,6 +34,7 @@ must_fail "metabin -i tests/test_files/in1.blast.tsv --FamilyBL   &> /dev/null"
 ## 97 % for genus level
 ## 95 % for family level
 ## 93 % for higher-than-family level;
+must_succeed "metabin --version"
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
 # check output
 must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tests/test_files/out1.tsv|sort ) "

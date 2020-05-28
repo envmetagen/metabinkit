@@ -45,15 +45,21 @@ Option 2: to use git to download the repository  with the entire code history, t
 
 A full installation of metabinkit requires third-party components. A script (install.sh) is provided to facilitate the installation of metabinkit and some dependencies, others need to be already installed in the system (R 3.6.0 or above). 
 
-To install metabinkit, type:
+To install metabinkit the home folder, type:
 
     ./install.sh  -i $HOME
 
-to install the software to the home folder. A file metabinkit_env.sh will be created on the toplevel installation folder ($HOME in the above example) with the configuration setup for the shell. To enable the configuration is necessary to load the configuration with the source command, e.g., 
+A file metabinkit_env.sh will be created on the toplevel installation folder ($HOME in the above example) with the configuration setup for the shell. To enable the configuration is necessary to load the configuration with the source command, e.g., 
 
     source $HOME/metabinkit_env.sh
 
 or add the above line to the $HOME/.bash_profile file.
+
+To only install certain programs/dependencies use the `-x` argument, e.g.
+
+`./install.sh  -i $HOME -x taxonkit`
+
+Available options for `-x` are: `taxonkit`, `blast`, `metabinkit`, `R_packages`, `taxonomy_db`
 
 ### Programs
 
@@ -61,24 +67,30 @@ or add the above line to the $HOME/.bash_profile file.
 
 Usage: metabin -i xxx ...
 
+run
+
+`metabin -h`
+
+for a list of all options and defaults
+
 ##### Expected file formats and contents
 
 The minimum required input for metabin is:
-`--input`: a tab-separated file with two compulsory columns: `qseqid` and `pident`; as well as a single column `taxid` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
+`-i, --input`: a tab-separated file with two compulsory columns: `qseqid` and `pident`; as well as a single column `taxid` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
  - `qseqid`: id of the query sequence
  - `pident`: the percentage identity of the alignment
  - `taxids`: NCBI taxid of the database subject sequence        
  - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the database subject sequence 
  
- Other columns may be present and will be ignored, unless specified by the `--FilterCol` argument (see How it Works)
+ Other columns may be present and will be ignored, unless specified by the `--FilterCol` argument (see **How it Works**)
  
  
 ##### How it works
 
-1. The `--input` file is loaded and the headers are checked.
-2. (optional) If a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid].
+1. The `-i, --input` file is loaded and the headers are checked.
+2. (optional) If a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `-i, --input` file containing the corresponding values are removed. The values are searched for in the column of the `-i, --input` file specified by `--FilterCol` [default=sseqid].
    - This is useful, for example, to remove any known or suspected erroneous database entries by their Accession Number.
-3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and the NCBI taxonomy folder (specified by `--db`, installed by metabinkit by default).
+3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and the NCBI taxonomy folder (specified by `-D, --db`, installed by metabinkit by default).
 4. (optional) Blacklisting
    - If a `species.blacklist` file was provided to the `--SpeciesBL` argument, remove all rows that contain this species.
    - If a `genus.blacklist` file was provided to the `--GenusBL` argument, remove all rows that contain this genus.
@@ -86,7 +98,7 @@ The minimum required input for metabin is:
      - Useful to exclude particular taxa that are present in alignment results, but are known *for certain* not to occur in the DNA samples.
      **but see issues**
 5. Binning at species rank
-    - Remove alignments below the `--Species` %identity threshold.
+    - Remove alignments below the `-S, --Species` %identity threshold.
     - (optional) If each of the following are true:
       - `--sp_discard_sp` Discard species with sp. in the name
       -	`--sp_discard_mt2w` Discard species with more than two words in the name
@@ -97,19 +109,19 @@ The minimum required input for metabin is:
     - If the lowest common ancestor is at the species rank, this will be the final bin, otherwise carry over to genus-level binning.
  6. Binning at genus, family and above_family ranks. For each rank:
     - Apply only to queries that were not already binned at previous rank.
-    - Remove alignments below the respective %identity threshold;`--Genus`,`--Family`,`--AboveF`.
+    - Remove alignments below the respective %identity threshold;`-G, --Genus`,`-F, --Family`,`-A, --AboveF`.
     - Remove alignments below the respective "Top" %identity threshold;`--TopGenus`,`--TopFamily`,`--TopAF`.  
     - For each query, get the lowest common ancestor of all alignments passing the filters.
     - If the lowest common ancestor is at the respective binning rank, consider complete, otherwise carry over to the next binning.
     - For the final, above_family, binning, report the lowest common ancestor, regardless of the rank.  
- 7. The output is saved in file specified by `--out` and comprises the columns:
+ 7. The output is saved in file specified by `-o, --out` and comprises the columns:
     - `qseqid`: id of the query sequence
     - `pident`: the maximum %identity of alignments used to generate the lowest common ancestor 
     - `min_pident`: the minimum %identity of alignments used to generate the lowest common ancestor 	
     - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the assigned bin
     - (optional) If the `-M, --minimal_cols` argument is TRUE, only `qseqid` and `K`,`P`,`C`,`O`,`F`,`G`,`S` columns will be ouput
     - **will need to add desigations (mbk:lca, mbk:npf etc..)**
- 8. A second output is created, called FILENAME.info.tsv, where FILENAME = `--out` containing summary information.
+ 8. A second output is created, called FILENAME.info.tsv, where FILENAME = `-o, --out` containing summary information.
  
  ```
  total_hits	134002
@@ -204,7 +216,7 @@ loaded via a namespace (and not attached):
 
 ##### *The "Top.." thresholds*
 
-The main %identity thresholds (`--Species`,`--Genus`,`--Family`,`--AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
+The main %identity thresholds (`-S, --Species`,`-G, --Genus`,`_F, --Family`,`-A, --AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
 
 ```
 qseqid taxids pident

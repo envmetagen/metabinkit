@@ -67,11 +67,7 @@ Available options for `-x` are: `taxonkit`, `blast`, `metabinkit`, `R_packages`,
 
 Usage: metabin -i xxx ...
 
-run
-
-`metabin -h`
-
-for a list of all options and defaults
+run `metabin -h` for a list of all options and defaults
 
 ##### Expected file formats and contents
 

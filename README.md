@@ -267,6 +267,12 @@ settings			bin             reason
 2. In the classical seven rank taxonomy, the NCBI taxonomy almost always has information at the species, genus and family ranks, but is often missing this information for phylum, class and order rank, making it difficult to apply thresholds at every level. For example, the NCBI taxid 570251, a species of Platyhelminthes, *Catenula turgida*, has the taxonomy  Eukaryota, Platyhelminthes, Catenulida, unknown, Catenulidae, Catenula, Catenula turgida
 3. The `--TopAF` argument is effectively an order-level threshold, and `metabin` will assign at order rank where possible (i.e. the lowest common ancestor is at the order rank and this order is not "unknown"). Where order-level assignation fails it will report the lowest common ancestor regardless of the rank.   
 
+#### I have performed alignments, but do not have NCBI taxids, how can I use metabin?
+
+1. Providing the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns in the `-i, --input` file will avoid using the NCBI taxonomy
+2. If you have neither the NCBI taxids nor the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns and only have taxon names, NCBI taxids can be generated from these using the [NCBI TaxIdentifier](https://www.ncbi.nlm.nih.gov/Taxonomy/TaxIdentifier/tax_identifier.cgi). Be careful to double check the results make sense, and understand the error codes (e.g. duplicates, not found etc.). Or consider using [taxonkit](https://bioinf.shenwei.me/taxonkit/)
+3. Consider using `metabinblast` to align sequences to your reference database. This will output the taxids of the reported alignments.  
+
 
 
 

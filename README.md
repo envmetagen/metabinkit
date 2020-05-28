@@ -148,8 +148,13 @@ taxids	qseqid	pident
 ```
 
 call metabin **rerun once new defaults for tops have been updated**
+Explanation: Do not filter any alignments based on Accession Number or blacklisted taxa. Do not apply any "Top.." thresholds. Attempt to bin alignments with the following %identity thresholds: species-96%, genus-96%, family-90%, above family-89%. Use `taxids` column to retrieve taxonomy.
+
+`$ metabin -i metabinkit/tests/test_files/in0.blast.tsv -o out0.bins`
+
+screen output (stderr)
+
 ```
-$ metabin -i metabinkit/tests/test_files/in0.blast.tsv -o out0.bins.tsv
 metabinkit version: 0.0.5
 [info] Starting Binning
 [info] Read 12259 entries from metabinkit/tests/test_files/in0.blast.tsv
@@ -179,8 +184,8 @@ metabinkit version: 0.0.5
 [info] Note: If none of the hits for a BLAST query pass the binning thesholds, the results will be NA for all levels.
                  If the LCA for a query is above kingdom, e.g. cellular organisms or root, the results will be 'unknown' for all levels.
                  Queries that had no BLAST hits, or did not pass the filter.blast step will not appear in results.  
-[info] binned table written to out0.bins.tsv.tsv
-[info] information stats written to out0.bins.tsv.info.tsv
+[info] binned table written to out0.bins.tsv
+[info] information stats written to out0.bins.info.tsv
 [info] Binning complete in 1.83 min
 R version 3.6.0 (2019-04-26)
 Platform: x86_64-pc-linux-gnu (64-bit)
@@ -208,6 +213,19 @@ loaded via a namespace (and not attached):
 [1] compiler_3.6.0 magrittr_1.5   tools_3.6.0    getopt_1.20.3  stringi_1.4.6 
 [6] stringr_1.4.0 
 ```
+
+view results
+
+```
+$ head -4 out0.bins.tsv 
+qseqid	pident	min_pident	K	P	C	O	F	G	S
+6fcff7c8-2031-4e3a-a8f0-72dc2da71c79_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD11-A-UNIO-RUN7	97.015	-2.985	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+d36ef3ba-f3d5-4952-b683-301f1a959cfa_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD11-A-UNIO-RUN7	100	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+9ef96e73-a5b6-4c4f-bc59-2b8238281d77_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	97.059	-2.941	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+```
+
+
+
 
 #### metabinblast -
 

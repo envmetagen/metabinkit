@@ -131,7 +131,7 @@ query1 123456 93.6
 ```
 #Query1
 P	C	O	F	pident
-phy1	cla1	ord1	fam1	85
+phy1	cla1	ord1	fam1	85 
 phy1	cla1	ord1	fam1	84
 phy1	cla1	ord1	fam1	84
 phy1	cla1	ord1	fam1	83
@@ -141,14 +141,15 @@ phy1	cla1	ord2	fam3	74
 phy1	cla1	ord2	fam3	70
 phy1	cla2	ord3	fam4	60
 
-settings			bin
---TopFamily=1,--Family=70	fam1
---TopFamily=2,--Family=70	fam1
---TopFamily=5,--Family=70	fam1
---TopFamily=8,--Family=70	ord1
---TopFamily=10,--Family=70	ord1
---TopFamily=15,--Family=70	cla1
---TopFamily=30,--Family=70	phy1
+settings			bin             reason
+--TopFamily=1,--Family=70	fam1 alignments below 70 are removed, additionally alignments below 84 are removed
+--TopFamily=2,--Family=70	fam1 alignments below 70 are removed, additionally alignments below 83 are removed
+--TopFamily=5,--Family=70	fam1 alignments below 70 are removed, additionally alignments below 80 are removed
+--TopFamily=8,--Family=70	ord1 alignments below 70 are removed, additionally alignments below 77 are removed
+--TopFamily=10,--Family=70	ord1 alignments below 70 are removed, additionally alignments below 75 are removed
+--TopFamily=15,--Family=70	cla1 alignments below 70 are removed, additionally alignments below 70 are removed
+--TopFamily=30,--Family=70	phy1 alignments below 70 are removed, additionally alignments below 55 are removed
+
 ```
                 
 

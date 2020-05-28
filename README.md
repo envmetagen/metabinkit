@@ -294,7 +294,7 @@ settings			bin             reason
 
 #### How do I choose thresholds?
 
-`metabin` is not a classifer, in that it does not attempt to find optimal binning thresholds. All settings are user-defined. The thresholds should be based on an analysis of the target amplicon. For further reading consider exploring:
+`metabin` is not a classifer, in that it does not attempt to find optimal binning thresholds. All settings are user-defined. The thresholds should be based on an analysis of the target DNA region. It is possible that a future version of metabinkit will include classifer functionality. For further reading consider exploring:
 
 - [Alberdi et al. 2017 Scrutinizing key steps for reliable metabarcoding of environmental samples](https://doi.org/10.1111/2041-210X.12849)
 - [Richardson et al. 2016 Evaluating and optimizing the performance of software commonly used for the taxonomic classification of DNA metabarcoding sequence data](https://doi.org/10.1111/1755-0998.12628)

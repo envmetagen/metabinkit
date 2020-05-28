@@ -66,7 +66,7 @@ option_list = list(
                 help="Column name to look for the values found the the file provided in the --Filter parameter  [default= %default]", metavar="filename"),
 
     ## tops,tpoS,topG,topF,topAbs
-    make_option(c("--TopSpecies"), type="integer", default=1, 
+    make_option(c("--TopSpecies"), type="integer", default=100, 
                 help="TODO [default= %default]", metavar="integer"),
     make_option(c("--TopGenus"), type="integer", default=1, 
                 help="TODO [default= %default]", metavar="intefer"),
@@ -130,6 +130,8 @@ if (!is.null(opt$FamilyBL)) {
 if(is.null(opt$FilterCol) && !is.null(opt$FilterFile)) {
     stop("--FilterFile needs to be provided with --FilterCol")
 }
+
+##
 
 filter.list <- NULL
 if (!is.null(opt$FilterFile)) {

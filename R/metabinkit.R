@@ -56,6 +56,11 @@ grep.filter <- function(re,df,lookup.column="S",invert=FALSE,...) {
     res$df <- df
     return(res)
 }
+set_within_limit <- function(v,min,max) {
+    return(min(max(v,min),max))
+}
+
+
 ##
 ## Binning
 ##
@@ -92,6 +97,10 @@ metabin <- function(ifile,
     library(data.table)
     options(datatable.fread.input.cmd.message=FALSE)
 
+    topS <- set_within_limit(topS,0,100)
+    topG <- set_within_limit(topG,0,100)
+    topF <- set_within_limit(topF,0,100)
+    topAbs <- set_within_limit(topAbs,0,100)
     ## start timer
     t1<-Sys.time()
     

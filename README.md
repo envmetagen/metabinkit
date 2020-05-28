@@ -94,6 +94,7 @@ The minimum required input for metabin is:
      - Useful to exclude particular taxa that are present in alignment results, but are known *for certain* not to occur in the DNA samples.
      **but see issues**
 5. Binning at species rank
+    - Remove alignments that do not contain species rank information for the database reference alignment (i.e. where column `S`="unknown")
     - Remove alignments below the `-S, --Species` %identity threshold.
     - (optional) If each of the following are true:
       - `--sp_discard_sp` Discard species with sp. in the name
@@ -105,6 +106,7 @@ The minimum required input for metabin is:
     - If the lowest common ancestor is at the species rank, this will be the final bin, otherwise carry over to genus-level binning.
  6. Binning at genus, family and above_family ranks. For each rank:
     - Apply only to queries that were not already binned at previous rank.
+    - Remove alignments that do not contain the respective rank information for the database reference alignment
     - Remove alignments below the respective %identity threshold;`-G, --Genus`,`-F, --Family`,`-A, --AboveF`.
     - Remove alignments below the respective "Top" %identity threshold;`--TopGenus`,`--TopFamily`,`--TopAF`.  
     - For each query, get the lowest common ancestor of all alignments passing the filters.
@@ -207,10 +209,11 @@ loaded via a namespace (and not attached):
 [6] stringr_1.4.0 
 ```
 
+#### metabinblast -
 
+### FAQs
 
-
-##### *The "Top.." thresholds*
+#### How do "Top.." thresholds work and what are their effects
 
 The main %identity thresholds (`-S, --Species`,`-G, --Genus`,`_F, --Family`,`-A, --AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
 
@@ -252,7 +255,19 @@ settings			bin             reason
 
 ```
 
+#### Why is only the classical seven-rank taxonomy considered?
+
+1. This is the usual format used in this field of research, and can be extracted from most databases
+2. Version 2 will be extended to include subspecies
+3. Catering for all potential ranks would produce different outputs which would complicate downstream analyses
+
+#### Why are binning thresholds specifically implemented at species, genus and family ranks, but for above family are combined? 
+
+1. `metabin` will report the final bins obtained for all ranks, even if they could not be assigned at family rank.
+2. The NCBI taxonomy almost always has information at the species, genus and family ranks, but is often missing this information for order rank and above, making it difficult to apply thresholds at every level. For example, taxid    
 
 
-#### metabinblast -
+
+
+
 

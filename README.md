@@ -94,7 +94,7 @@ The minimum required input for metabin is:
      - Useful to exclude particular taxa that are present in alignment results, but are known *for certain* not to occur in the DNA samples.
      **but see issues**
 5. Binning at species rank
-    - Remove alignments that do not contain species rank information for the database reference alignment (i.e. where column `S`="unknown")
+    - Remove alignments that do not contain species rank information for the database reference alignment (i.e. where column `S`="unknown"). This often happens when database entries are assigned to a taxon at a higher taxonomic rank. For example, [GenBank: AB714021.1](https://www.ncbi.nlm.nih.gov/nuccore/385251100) has the taxid 1176287, which equates to Metazoa, Nematoda, unknown, unknown, unknown, unknown, unknown in the classical seven-rank taxonomy.  
     - Remove alignments below the `-S, --Species` %identity threshold.
     - (optional) If each of the following are true:
       - `--sp_discard_sp` Discard species with sp. in the name

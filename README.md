@@ -11,7 +11,7 @@ Set of programs to perform taxonomic binning.
 
 
 ### Overview
-From metagenomic or metabarcoding data, it is often necessary to assign taxonomy to DNA sequences. This is generally performed by aligning sequences to a reference database, usually resulting in multiple database alignments for each query sequence. Using these alignment results, metabinkit assigns a single taxon to each query sequence, based on user-defined percentage identity thresholds. In essence, for each query, the alignments are filtered based on the percentage identity thresholds and the lowest common ancestor for all alignments passing the filters is determined. The metabin program is not limited to BLAST alignments, and can accept alignment results performed using any software, provided the input format is correct. However, functionality is also available to create BLAST databases and to perform BLAST alignments, which can be passed directly to metabin.  
+From metagenomic or metabarcoding data, it is often necessary to assign taxonomy to DNA sequences. This is generally performed by aligning sequences to a reference database, usually resulting in multiple database alignments for each query sequence. Using these alignment results, metabinkit assigns a single taxon to each query sequence, based on user-defined percentage identity thresholds. In essence, for each query, the alignments are filtered based on the percentage identity thresholds and the lowest common ancestor for all alignments passing the filters is determined. The metabin program is not limited to BLAST alignments, and can accept alignment results produced using any program, provided the input format is correct. However, functionality is also available to create BLAST databases and to perform BLAST alignments, which can be passed directly to metabin.  
 
 ### Docker
 
@@ -64,18 +64,21 @@ Usage: metabin -i xxx ...
 ##### Expected file formats and contents
 
 The minimum required input for metabin is:
-`--input`: a tab-separated file with two compulsory columns: qseqid, pident AND `taxid` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
- - qseqid: id of the query sequence
- - pident: the percentage identity of the alignment
- - taxids: NCBI taxid of the database subject sequence        
- - K,P,C,O,F,G,S: kingdom, pylum, class, order, family, genus, species of the database subject sequence         
-
+`--input`: a tab-separated file with two compulsory columns: `qseqid` and `pident`; as well as a single column `taxid` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
+ - `qseqid`: id of the query sequence
+ - `pident`: the percentage identity of the alignment
+ - `taxids`: NCBI taxid of the database subject sequence        
+ - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the database subject sequence 
+ 
+ Other columns may be present and will be ignored, unless specified by the `--FilterCol` argument (see How it Works)
+ 
+ 
 ##### How it works
 
 1. The `--input` file is loaded and the headers are checked.
 2. (optional) If a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `--input` file containing the corresponding values are removed. The values are searched for in the column of the `--input` file specified by `--FilterCol` [default=sseqid].
    - This is useful, for example, to remove any known or suspected erroneous database entries by their Accession Number.
-3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and the NCBI taxonomy folder (specified by `-D`, installed by metabinkit by default).
+3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and the NCBI taxonomy folder (specified by `--db`, installed by metabinkit by default).
 4. (optional) Blacklisting
    - If a `species.blacklist` file was provided to the `--SpeciesBL` argument, remove all rows that contain this species.
    - If a `genus.blacklist` file was provided to the `--GenusBL` argument, remove all rows that contain this genus.
@@ -97,9 +100,16 @@ The minimum required input for metabin is:
     - If the lowest common ancestor is at the respective binning rank, consider complete, otherwise carry over to the next binning.
     - For the final, above_family, binning, report the lowest common ancestor, regardless of the rank.  
     
-*The "Top.." thresholds*
+##### Other arguments
 
-The main %identity thresholds (`--Species`,`--Genus`,`--Family`,`--AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 would correspond to 97.8, so alignments below 97.8 would be discarded prio to binning. In the example below, a "Top.." of 5 would correspond to 94.8, so alignments below 93.8 would be discarded prio to binning.    
+`-M, --minimal_cols` Include only the seqid and lineage information in the output table (default=FALSE)
+`-o, --out=FILENAME` output file name
+		
+
+
+##### *The "Top.." thresholds*
+
+The main %identity thresholds (`--Species`,`--Genus`,`--Family`,`--AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
 
 ```
 qseqid taxids pident
@@ -111,6 +121,31 @@ query1 12345 97.6
 query1 123456 94.8
 query1 123456 94.8
 query1 123456 93.6
+```
+
+"Top.." will mainly affect the resolution of the results. The lower the "Top.." value, the greater the number of alignments discarded. As is also required for the main %identity thresholds, "Top.." thresholds should be identifed empirically. Below is an illustration of how "Top.." can affect results, when using an identical main %identity. 
+
+```
+#Query1
+P	C	O	F	pident
+phy1	cla1	ord1	fam1	85
+phy1	cla1	ord1	fam1	84
+phy1	cla1	ord1	fam1	84
+phy1	cla1	ord1	fam1	83
+phy1	cla1	ord1	fam2	79
+phy1	cla1	ord1	fam2	78
+phy1	cla1	ord2	fam3	74
+phy1	cla1	ord2	fam3	70
+phy1	cla2	ord3	fam4	60
+
+settings			bin
+--TopFamily=1,--Family=70	fam1
+--TopFamily=2,--Family=70	fam1
+--TopFamily=5,--Family=70	fam1
+--TopFamily=8,--Family=70	ord1
+--TopFamily=10,--Family=70	ord1
+--TopFamily=15,--Family=70	cla1
+--TopFamily=30,--Family=70	phy1
 ```
                 
 

@@ -72,7 +72,7 @@ run `metabin -h` for a list of all options and defaults
 ##### Expected file formats and contents
 
 The minimum required input for metabin is:
-`-i, --input`: a tab-separated file with two compulsory columns: `qseqid` and `pident`; as well as a single column `taxid` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
+`-i, --input`: a tab-separated file with two compulsory columns: `qseqid` and `pident`; as well as a single column `taxids` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
  - `qseqid`: id of the query sequence
  - `pident`: the percentage identity of the alignment
  - `taxids`: NCBI taxid of the database subject sequence        

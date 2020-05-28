@@ -225,6 +225,32 @@ d36ef3ba-f3d5-4952-b683-301f1a959cfa_runid=407cb32920f83b2252d840c6a949244d8c2a3
 9ef96e73-a5b6-4c4f-bc59-2b8238281d77_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	97.059	-2.941	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
 ```
 
+Example 2. Custom settings
+
+Inputs:
+
+```
+$ head -n 4 metabinkit/tests/test_files/in1.blast.tsv 
+taxids	qseqid	pident	qcovs	saccver	staxid	ssciname	old_taxids	K	P	C	O	F	G	S
+6573	2a8b3c1d-018b-4b9b-933f-eacb26617c02_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD27-A-UNIO-RUN7	68.868	98	XM_021507581.16573	Mizuhopecten yessoensis	6573	Eukaryota	Mollusca	Bivalvia	Pectinoida	Pectinidae	Mizuhopecten	Mizuhopecten yessoensis
+6579	6636e6bc-8729-4013-a303-858d07e783d5_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD23-A-UNIO-RUN7	63.736	99	LR736849.1	6579	Pecten maximus	6579	Eukaryota	Mollusca	Bivalvia	Pectinoida	Pectinidae	Pecten	Pecten maximus
+6579	5ea8b133-7a4c-479d-9211-7fe0392e1b05_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	64.828	99	LR736843.1	6579	Pecten maximus	6579	Eukaryota	Mollusca	Bivalvia	Pectinoida	Pectinidae	Pecten	Pecten maximus
+```
+
+From previous experience we have identified a sequence in genbank that appears erroneous, so we provide that in a file.
+
+6573
+
+run metabin **rerun once new defaults for tops have been updated**
+
+`$ metabin -i in1.blast.tsv -o out1.bins -S 99 -G 97 -F 95 -A 90 --SpeciesBL testspecies2exclude.txt --FilterFile acc2exclude.tsv --FilterCol saccver --TopSpecies 2 --TopGenus 2 --TopFamily 2 --TopAF 2 --sp_discard_sp --sp_discard_mt2w --sp_discard_num`
+
+Explanation: First remove any alignments that have the erroneuos Accession Number. During species-level binning remove any species that we have blacklisted. Furthermore, during species-level binning do not consider species with "sp.", more than two spaces, or numbers in their names. Apply a "Top.." threshold of 2 for all binning rounds. Attempt to bin alignments with the following %identity thresholds: species-99%, genus-97%, family-95%, above family-90%. Use the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns as the taxonomy.
+
+screen output (stderr)
+
+**not complete**
+
 #### metabinkit_blast
 
 Usage: metabinkit_blast -i xxx ...

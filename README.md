@@ -224,10 +224,11 @@ d36ef3ba-f3d5-4952-b683-301f1a959cfa_runid=407cb32920f83b2252d840c6a949244d8c2a3
 9ef96e73-a5b6-4c4f-bc59-2b8238281d77_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	97.059	-2.941	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
 ```
 
+#### metabinkit_blast
 
+Usage: metabinkit_blast -i xxx ...
 
-
-#### metabinblast -
+run `metabin -h` for a list of all options and defaults
 
 ### FAQs
 

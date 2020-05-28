@@ -139,7 +139,7 @@ taxids	qseqid	pident
 
 call metabin
 ```
-tutorial@tutorial-VirtualBox:~/TOOLS$ metabin -i metabinkit/tests/test_files/in0.blast.tsv -o out0.bins.tsv
+$ metabin -i metabinkit/tests/test_files/in0.blast.tsv -o out0.bins.tsv
 metabinkit version: 0.0.5
 [info] Starting Binning
 [info] Read 12259 entries from metabinkit/tests/test_files/in0.blast.tsv

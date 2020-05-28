@@ -94,14 +94,14 @@ The minimum required input for metabin is:
      - Useful to exclude particular taxa that are present in alignment results, but are known *for certain* not to occur in the DNA samples.
      **but see issues**
 5. Binning at species rank
-    - Remove alignments that do not contain species rank information for the database reference alignment (i.e. where column `S`="unknown"). This often happens when database entries are assigned to a taxon at a higher taxonomic rank.  
+    - Remove alignments that do not contain species rank information for the database reference alignment (i.e. where column `S`="unknown").   
     - Remove alignments below the `-S, --Species` %identity threshold.
     - (optional) If each of the following are true:
       - `--sp_discard_sp` Discard species with sp. in the name
       -	`--sp_discard_mt2w` Discard species with more than two words in the name
       -	`--sp_discard_num` Discard species with numbers in the name
       - These are useful to avoid final species-level bins such as "Rana sp.", "Rana isolate X4". For example, [GenBank: AB714021.1](https://www.ncbi.nlm.nih.gov/nuccore/385251100) has the taxid 1176287, which equates to Metazoa, Nematoda, unknown, unknown, unknown, unknown, Nematoda sp. ZTSP69 in the classical seven-rank taxonomy. 
-    - Remove alignments below the `--TopSpecies` %identity threshold (for more on the "Top.." arguments see **below**).
+    - Remove alignments below the `--TopSpecies` %identity threshold (for more on the "Top.." arguments see **below**). The default is 100, which effectively means it is not used.
     - For each query, get the lowest common ancestor of all alignments that passed the previous filters.
     - If the lowest common ancestor is at the species rank, this will be the final bin, otherwise carry over to genus-level binning.
  6. Binning at genus, family and above_family ranks. For each rank:
@@ -213,7 +213,7 @@ loaded via a namespace (and not attached):
 
 ### FAQs
 
-#### How do "Top.." thresholds work and what are their effects
+#### How do "Top.." thresholds work and what are their effects?
 
 The main %identity thresholds (`-S, --Species`,`-G, --Genus`,`_F, --Family`,`-A, --AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
 
@@ -264,7 +264,8 @@ settings			bin             reason
 #### Why are binning thresholds specifically implemented at species, genus and family ranks, but for above family are combined? 
 
 1. `metabin` will report the final bins obtained for all ranks, even if they could not be assigned at family rank.
-2. The NCBI taxonomy almost always has information at the species, genus and family ranks, but is often missing this information for order rank and above, making it difficult to apply thresholds at every level. For example, taxid    
+2. In the classical seven rank taxonomy, the NCBI taxonomy almost always has information at the species, genus and family ranks, but is often missing this information for phylum, class and order rank, making it difficult to apply thresholds at every level. For example, the NCBI taxid 570251, a species of Platyhelminthes, *Catenula turgida*, has the taxonomy  Eukaryota, Platyhelminthes, Catenulida, unknown, Catenulidae, Catenula, Catenula turgida
+3. The `--TopAF` argument is effectively an order-level threshold, and `metabin` will assign at order rank where possible (i.e. the lowest common ancestor is at the order rank and this order is not "unknown"). Where order-level assignation fails it will report the lowest common ancestor regardless of the rank.   
 
 
 

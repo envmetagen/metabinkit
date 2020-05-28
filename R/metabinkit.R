@@ -40,6 +40,22 @@ source(paste0(mbk.local.lib.path,"/lca.R"))
 print.version <- function() {
     message("metabinkit version: ",metabinkit.version)
 }
+
+## re: regular expression/pattern
+## df: dataframe
+## ...
+grep.filter <- function(re,df,lookup.column="S",invert=FALSE,...) {
+    res <- list(df=NULL,nremoved=0)
+    count.bef <- nrow(df)
+    toremove <- -grep(re,df[,lookup.column],ignore.case = TRUE,invert=invert,...)
+    if (length(toremove)>0)
+        df<-df[toremove,,drop=FALSE]
+    count.aft <- nrow(df)
+    res$nremoved <- count.bef-count.aft
+    ## it should be == length(toremove) ;-)
+    res$df <- df
+    return(res)
+}
 ##
 ## Binning
 ##
@@ -62,7 +78,9 @@ metabin <- function(ifile,
                     ## full.force=F, ##??
                     filter.col=NULL,
                     filter=NULL,
-                    consider_sp.=FALSE,
+                    sp.consider.sp=FALSE,
+                    sp.consider.numbers=FALSE,
+                    sp.consider.mt2w=FALSE,
                     quiet=FALSE) {
     
     ####################
@@ -106,7 +124,7 @@ metabin <- function(ifile,
         pinfo(" Trying to get taxonomic information from the database in ",taxDir," ...")
         ## 
         btab.o <- add.lineage.df(btab.o,taxDir=taxDir,taxCol="taxids")
-        pinfo(" Trying to get taxonomic information from the database in ",taxDir," ...done.")
+        pinfo(" taxonomic information retrieval complete.")
         ## Double check that all cols are present
         not.found <- expected.tax.cols[!expected.tax.cols%in%colnames(btab.o)]
         if ( length(not.found) > 0 ) {
@@ -166,30 +184,31 @@ metabin <- function(ifile,
         btab.sp<-btab.sp[above.threshold,,drop=FALSE]
         not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.sp$qseqid]
         btab.u[btab.u$qseqid%in%not.passing.ids,"S"] <- NA
-        
-        if(consider_sp.==F){
+
+        ## multiple filters at species level
+        stats$species.level.sp.filter <- 0
+        if(sp.consider.sp==FALSE){
             pinfo(verbose=!quiet,"Not considering species with 'sp.', numbers or more than one space")
-            count.bef <- nrow(btab.sp)
-            toremove <- -grep(" sp\\.",btab.sp$S,ignore.case = TRUE,invert=FALSE)
-            if (length(toremove)>0)
-                btab.sp<-btab.sp[toremove,,drop=FALSE]
+            res <- grep.filter(" sp\\.",df=btab.sp)
+            btab.sp <- res$df
+            stats$species.level.sp.filter <- res$nremoved
+        }
 
-            ## More than two spaces
-            toremove <- -grep("[^\\s]+\\s+[^\\s]+\\s+[^\\s].*",btab.sp$S,ignore.case = TRUE,perl=TRUE,invert=FALSE)
-            if (length(toremove)>0)
-                btab.sp <- btab.sp[toremove,,drop=FALSE]
+        stats$species.level.mt2w.filter <- 0
+        if(sp.consider.mt2w==FALSE){
+            pinfo(verbose=!quiet,"Not considering species with more than two words")
+            res <- grep.filter("[^\\s]+\\s+[^\\s]+\\s+[^\\s].*",df=btab.sp,perl=TRUE,invert=FALSE)
+            btab.sp <- res$df
+            stats$species.level.mt2w.filter <- res$nremoved
+        }
 
-            ## shouldn't the number and spaces be a diffent option?
-            toremove <- -grep("\\d",btab.sp$S,perl=TRUE,invert=FALSE)
-            if (length(toremove)>0)
-                btab.sp<- btab.sp[toremove,,drop=FALSE]
-            count.aft <- nrow(btab.sp)
-            sp.filter.n <- count.bef-count.aft
-            stats$species.level.sp.filter <- sp.filter.n
-            pinfo(verbose=!quiet,"Excluded ",sp.filter.n," entries")
-        } else {
-            pinfo(verbose=!quiet,"Considering species with 'sp.', numbers or more than one space")
-            stats$species.level.sp.filter <- 0
+        stats$species.level.numbers.filter <- 0
+        if(sp.consider.numbers==FALSE){
+            pinfo(verbose=!quiet,"Not considering species with numbers")
+            res <- grep.filter("\\d",df=btab.sp,perl=TRUE,invert=FALSE)
+            btab.sp <- res$df
+            stats$species.level.numbers.filter <- res$nremoved
+            rm(res)
         }
         
         ## get top

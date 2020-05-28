@@ -78,11 +78,14 @@ option_list = list(
     make_option(c("-v","--version"), action = "store_true", default = FALSE,
                 help = "print version and exit"),
     ## discard sp
-    make_option(c("--discard_sp"), action = "store_true", default = FALSE,
-                help = "Discard species with sp., numbers or more than one space [%default]"),
+    make_option(c("--sp_discard_sp"), action = "store_true", default = FALSE,
+                help = "Discard species with sp. in the name"),
+    make_option(c("--sp_discard_mt2w"), action = "store_true", default = FALSE,
+                help = "Discard species with more than two words"),
+    make_option(c("--sp_discard_num"), action = "store_true", default = FALSE,
+                help = "Discard species with numbers"),
     make_option(c("-M","--minimal_cols"), action = "store_true", default = FALSE, help = "Include only the seqid and lineage information in the output table [%default]")
-
-    
+        
     ##make_option(c("-O", "--Order"), type="double", default=75.0, 
     ##            help="Order %id threshold [default= %default]", metavar="double"),
     ##make_option(c("-C", "--Class"), type="double", default=65.0, 
@@ -138,7 +141,6 @@ if (!is.null(opt$FilterFile)) {
 pinfo("Starting Binning")
 t1<-Sys.time()
 
-
 binned <- metabin(ifile=opt$input,
                   taxDir=opt$db,
                   spident=opt$Species,
@@ -154,7 +156,9 @@ binned <- metabin(ifile=opt$input,
                   family.blacklist=family.blacklist,
                   filter.col=opt$FilterCol,
                   filter=filter.list,
-                  consider_sp.=!opt$discard_sp)
+                  sp.consider.mt2w=!opt$sp_discard_mt2w,
+                  sp.consider.numbers=!opt$sp_discard_num,
+                  sp.consider.sp=!opt$sp_discard_sp)
             
 ##              disabledTaxaFiles = disabledTaxaFiles)
 if (!is.null(binned)) {

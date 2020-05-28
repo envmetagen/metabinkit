@@ -102,19 +102,28 @@ metabin <- function(ifile,
     expected.tax.cols <- c("K","P","C","O","F","G","S")
     not.found <- expected.tax.cols[!expected.tax.cols%in%colnames(btab.o)]
     if ( length(not.found) > 0 ) {
-        perror(fatal=FALSE," WARNING! missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
+        message(" WARNING! missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
+        pinfo(" Trying to get taxonomic information from the database in ",taxDir," ...")
         ## 
         btab.o <- add.lineage.df(btab.o,taxDir=taxDir,taxCol="taxids")
+        pinfo(" Trying to get taxonomic information from the database in ",taxDir," ...done.")
+        ## Double check that all cols are present
         not.found <- expected.tax.cols[!expected.tax.cols%in%colnames(btab.o)]
         if ( length(not.found) > 0 ) {
             perror(fatal=TRUE," Missing columns in input table with taxonomic information:",paste(not.found,collapse=","))
+        }
+        ## Missing taxids
+        num.tnf.sp <- sum(btab.o$S=="mbk:tnf")
+        num.tnf.g <- sum(btab.o$G=="mbk:tnf")
+        num.tnf.f <- sum(btab.o$F=="mbk:tnf")
+        if ( num.tnf.sp >0 || num.tnf.g>0 || num.tnf.g >0 ) {
+            message("WARNING: Some taxids were not found in the taxonomy database, consider checking if they are correct and/or updating the taxonomy database. All taxids not found (tnf) are marked in the final table as mbk:tnf.")
         }
     }
     
     ## keep only the necessary columns
     btab <- btab.o[,c(expected.cols,expected.tax.cols),drop=FALSE]
     rm(btab.o)
-
     ## record the numbers
     stats <- list()
     stats$total_hits <- nrow(btab)
@@ -458,7 +467,10 @@ add.lineage.df<-function(dframe,taxDir,taxCol="taxids") {
     dframe$S<-as.character(dframe$S)
     
     ##change empty cells to "unknown"
-    dframe[,(length(dframe)-6):length(dframe)][dframe[,(length(dframe)-6):length(dframe)]==""]<- "unknown"
+    ##dframe[,(length(dframe)-6):length(dframe)][dframe[,(length(dframe)-6):length(dframe)]==""]<- "unknown"
+
+    ## tnf: taxid not found
+    dframe[,(length(dframe)-6):length(dframe)][dframe[,(length(dframe)-6):length(dframe)]==""]<- "mbk:tnf"
     
     
     dframe$path=NULL
@@ -479,9 +491,6 @@ get.taxids.children <-function(taxids,taxonomy_data_dir=NULL){
 
     ###############
     ## get children
-    ## this code will not work if the list of ids is big (~200 ids)
-    #system2(command = "taxonkit",args =  c("list","--ids",paste(as.character(df$taxids),collapse = ","),"--indent", "''","--data-dir",ncbiTaxDir)
-                                        #      ,stdout = taxids_fileOut,stderr = "",wait = T)
     ## usw a wrapper to be able to deal with big lists of taxids
     cmd <- paste0("taxonkit_children.sh ",taxids_fileIn," ",taxids_fileOut)
     if (!is.null(taxonomy_data_dir)) {

@@ -89,8 +89,8 @@ The minimum required input for metabin is:
     - Remove alignments below the `--Species` %identity threshold.
     - (optional) If each of the following are true:
       - `--sp_discard_sp` Discard species with sp. in the name
-      -	`--sp_discard_mt2w` Discard species with more than two words
-      -	`--sp_discard_num` Discard species with numbers
+      -	`--sp_discard_mt2w` Discard species with more than two words in the name
+      -	`--sp_discard_num` Discard species with numbers in the name
         - Useful to avoid final species-level bins such as "Rana sp.", "Rana isolate X4", ...
     - Remove alignments below the `--TopSpecies` %identity threshold (for more on the "Top.." arguments see **below**).
     - For each query, get the lowest common ancestor of all alignments that passed the previous filters.

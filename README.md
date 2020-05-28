@@ -99,12 +99,13 @@ The minimum required input for metabin is:
     - For each query, get the lowest common ancestor of all alignments passing the filters.
     - If the lowest common ancestor is at the respective binning rank, consider complete, otherwise carry over to the next binning.
     - For the final, above_family, binning, report the lowest common ancestor, regardless of the rank.  
-    
-##### Other arguments
-
-`-M, --minimal_cols` Include only the seqid and lineage information in the output table (default=FALSE)
-`-o, --out=FILENAME` output file name
-		
+ 7. The output is saved in file specified by `--out` and comprises the columns:
+    - `qseqid`: id of the query sequence
+    - `pident`: the maximum %identity of alignments used to generate the lowest common ancestor 
+    - `min_pident`: the minimum %identity of alignments used to generate the lowest common ancestor 	
+    - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the assigned bin
+    - (optional) If the `-M, --minimal_cols` argument is TRUE, only `qseqid` and `K`,`P`,`C`,`O`,`F`,`G`,`S` columns will be ouput
+    - **will need to add desigations (mbk:lca, mbk:npf etc..)**
 
 
 ##### *The "Top.." thresholds*

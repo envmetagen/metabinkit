@@ -45,7 +45,7 @@ Option 2: to use git to download the repository  with the entire code history, t
 
 A full installation of metabinkit requires third-party components. A script (install.sh) is provided to facilitate the installation of metabinkit and some dependencies, others need to be already installed in the system (R 3.6.0 or above). 
 
-To install metabinkit the home folder, type:
+To install metabinkit to the home folder, type:
 
     ./install.sh  -i $HOME
 
@@ -53,7 +53,7 @@ A file metabinkit_env.sh will be created on the toplevel installation folder ($H
 
     source $HOME/metabinkit_env.sh
 
-or add the above line to the $HOME/.bash_profile file.
+This needs to be run each time a terminal is opened, or add the above line to the $HOME/.bash_profile file.
 
 To only install certain programs/dependencies use the `-x` argument, e.g.
 
@@ -94,13 +94,13 @@ The minimum required input for metabin is:
      - Useful to exclude particular taxa that are present in alignment results, but are known *for certain* not to occur in the DNA samples.
      **but see issues**
 5. Binning at species rank
-    - Remove alignments that do not contain species rank information for the database reference alignment (i.e. where column `S`="unknown"). This often happens when database entries are assigned to a taxon at a higher taxonomic rank. For example, [GenBank: AB714021.1](https://www.ncbi.nlm.nih.gov/nuccore/385251100) has the taxid 1176287, which equates to Metazoa, Nematoda, unknown, unknown, unknown, unknown, unknown in the classical seven-rank taxonomy.  
+    - Remove alignments that do not contain species rank information for the database reference alignment (i.e. where column `S`="unknown"). This often happens when database entries are assigned to a taxon at a higher taxonomic rank.  
     - Remove alignments below the `-S, --Species` %identity threshold.
     - (optional) If each of the following are true:
       - `--sp_discard_sp` Discard species with sp. in the name
       -	`--sp_discard_mt2w` Discard species with more than two words in the name
       -	`--sp_discard_num` Discard species with numbers in the name
-        - Useful to avoid final species-level bins such as "Rana sp.", "Rana isolate X4", ...
+        - Useful to avoid final species-level bins such as "Rana sp.", "Rana isolate X4". For example, [GenBank: AB714021.1](https://www.ncbi.nlm.nih.gov/nuccore/385251100) has the taxid 1176287, which equates to Metazoa, Nematoda, unknown, unknown, unknown, unknown, Nematoda sp. ZTSP69 in the classical seven-rank taxonomy. 
     - Remove alignments below the `--TopSpecies` %identity threshold (for more on the "Top.." arguments see **below**).
     - For each query, get the lowest common ancestor of all alignments that passed the previous filters.
     - If the lowest common ancestor is at the species rank, this will be the final bin, otherwise carry over to genus-level binning.

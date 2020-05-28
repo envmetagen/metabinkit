@@ -230,11 +230,13 @@ Usage: metabinkit_blast -i xxx ...
 
 run `metabin -h` for a list of all options and defaults
 
+#### metabinkit_blastgendb
+
 ### FAQs
 
 #### How do "Top.." thresholds work and what are their effects?
 
-The main %identity thresholds (`-S, --Species`,`-G, --Genus`,`_F, --Family`,`-A, --AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
+The main %identity thresholds (`-S, --Species`,`-G, --Genus`,`_F, --Family`,`-A, --AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are relative minimum thresholds, applied after the main %identity. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
 
 ```
 qseqid taxids pident
@@ -273,6 +275,8 @@ settings			bin             reason
 --TopFamily=30,--Family=70	phy1 alignments below 70 are removed, additionally alignments below 55 are removed
 
 ```
+
+Using a very low "Top.." threshold, e.g. 0.001, unless justified, is likely prone to over-classifying the sequence to the incorrect taxonomy, as many very similar alignments will be discarded. Nevertheless, if the best alignment for a query has e.g. a %identity of 85, and the family level threshold (`-F, --Family`) is low e.g. 70%, it is reasonable to apply a `--TopFamily` threshold to only consider alignments within a certain range of the best alignment, increasing the likelihood of binning at family level.
 
 #### Why is only the classical seven-rank taxonomy considered?
 

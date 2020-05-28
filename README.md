@@ -63,7 +63,7 @@ Available options for `-x` are: `taxonkit`, `blast`, `metabinkit`, `R_packages`,
 
 ### Programs
 
-#### metabin -
+#### metabin
 
 Usage: metabin -i xxx ...
 
@@ -291,6 +291,17 @@ settings			bin             reason
 1. Providing the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns in the `-i, --input` file will avoid using the NCBI taxonomy
 2. If you have neither the NCBI taxids nor the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns and only have taxon names, NCBI taxids can be generated from these using the [NCBI TaxIdentifier](https://www.ncbi.nlm.nih.gov/Taxonomy/TaxIdentifier/tax_identifier.cgi). Be careful to double check the results make sense, and understand the error codes (e.g. duplicates, not found etc.). Or consider using [taxonkit](https://bioinf.shenwei.me/taxonkit/)
 3. Consider using `metabinblast` to align sequences to your reference database. This will output the taxids of the reported alignments.  
+
+#### How do I choose thresholds?
+
+`metabin` is not a classifer, in that it does not attempt to find optimal binning thresholds. All settings are user-defined. The thresholds should be based on an analysis of the target amplicon. For further reading consider exploring:
+
+- [Alberdi et al. 2017 Scrutinizing key steps for reliable metabarcoding of environmental samples](https://doi.org/10.1111/2041-210X.12849)
+- [Richardson et al. 2016 Evaluating and optimizing the performance of software commonly used for the taxonomic classification of DNA metabarcoding sequence data](https://doi.org/10.1111/1755-0998.12628)
+- [Elbrecht et al. 2017 PrimerMiner : an r package for development and in silico validation of DNA metabarcoding primers](https://doi.org/10.1111/2041-210X.12687)
+- [Ficetola et al. 2010 An In silico approach for the evaluation of DNA barcodes](https://doi.org/10.1186/1471-2164-11-434)
+- [Riaz et al. 2011 ecoPrimers: inference of new DNA barcode markers from whole genome sequence analysis](https://doi.org/10.1093/nar/gkr732)
+
 
 
 

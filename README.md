@@ -147,10 +147,11 @@ taxids	qseqid	pident
 6579	5ea8b133-7a4c-479d-9211-7fe0392e1b05_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	64.828
 ```
 
-call metabin **rerun once new defaults for tops have been updated**
-Explanation: Do not filter any alignments based on Accession Number or blacklisted taxa. Do not apply any "Top.." thresholds. Attempt to bin alignments with the following %identity thresholds: species-96%, genus-96%, family-90%, above family-89%. Use `taxids` column to retrieve taxonomy.
+run metabin **rerun once new defaults for tops have been updated**
 
 `$ metabin -i metabinkit/tests/test_files/in0.blast.tsv -o out0.bins`
+
+Explanation: Do not filter any alignments based on Accession Number or blacklisted taxa. Do not apply any "Top.." thresholds. Attempt to bin alignments with the following %identity thresholds: species-96%, genus-96%, family-90%, above family-89%. Use `taxids` column to retrieve taxonomy.
 
 screen output (stderr)
 

@@ -108,6 +108,8 @@ The minimum required input for metabin is:
     - **will need to add desigations (mbk:lca, mbk:npf etc..)**
 
 
+##### Examples
+
 ##### *The "Top.." thresholds*
 
 The main %identity thresholds (`--Species`,`--Genus`,`--Family`,`--AboveF`) are absolute minimum thresholds. In contrast, the "Top.." %identity thresholds (`--TopSpecies`,`--TopGenus`,`--TopFamily`,`--TopAF`) are additional relative minimum thresholds. For each query, the "Top.." threshold is the %identity of the best hit minus the "Top.." value. In the example below, a "Top.." of 2 corresponds to 97.8 and alignments below this are discarded prior to binning. A "Top.." of 5 corresponds to 94.8, so alignments below this are discarded.    
@@ -149,9 +151,6 @@ settings			bin
 --TopFamily=30,--Family=70	phy1
 ```
                 
-
-
-##### Examples
 
 #### metabinblast -
 

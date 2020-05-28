@@ -45,9 +45,21 @@ must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tes
 
 must_succeed "metabin -M -i tests/test_files/in0.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
 
-#must_succeed "metabin -M -i tests/test_files/in3.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
+must_succeed "metabin -M -i tests/test_files/in3.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
 
-must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --discard_sp -M "
+must_succeed "metabin -M -i tests/test_files/in3_missing_taxids.blast.tsv -o .metabin.test2.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
+
+## Previous two runs should produce a table with the same number of lines
+must_succeed "[ $(cat .metabin.test.out.tsv|wc -l) == $(cat .metabin.test2.out.tsv|wc -l) ]"
+
+must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_sp --sp_discard_num --sp_discard_mt2w -M "
+
+must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_sp -M "
+
+must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_num -M "
+
+must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_mt2w -M "
+
 # check output
 must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tests/test_files/out4.tsv|sort ) "
 
@@ -70,7 +82,7 @@ echo 45949 > ./blacklist.txt
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FilterFile ./blacklist.txt --FilterCol taxids"
 must_succeed "[ $(cat .metabin.test.out.tsv|grep -c "Corbicula fluminea") == 0 ]"
 
-## File not present or not give
+## File not present or not given
 must_fail "metabin -i tests/test_files/in1.blast.tsv --Filter   &> /dev/null"
 must_fail "metabin -i tests/test_files/in1.blast.tsv --Filter  _file_does_not_exist  &> /dev/null"
 

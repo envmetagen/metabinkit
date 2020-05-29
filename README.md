@@ -128,15 +128,17 @@ The minimum required input for metabin is:
   8. A second output file is created, called FILENAME.info.tsv, where FILENAME = `-o, --out` containing summary information.
  
  ```
-total_hits	134002
-total_queries	2828
-blacklisted	0
-species.level.sp.filter	6
-binned.species.level	432
-binned.genus.level	1151
-binned.family.level	773
-binned.htf.level	472
-not.binned	0
+total_hits      0
+total_queries   0
+species.level.sp.filter 0
+species.level.mt2w.filter       0
+species.level.numbers.filter    0
+species.neg.filter      0
+binned.species.level    0
+binned.genus.level      0
+binned.family.level     0
+binned.htf.level        0
+not.binned      0
 ```
 
 

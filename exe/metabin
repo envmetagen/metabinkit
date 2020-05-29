@@ -181,6 +181,9 @@ if (!is.null(binned)) {
 }
 t2<-Sys.time()
 t3<-round(difftime(t2,t1,units = "mins"),digits = 2)
+vfile <- paste0(opt$out,".versions.txt")
+pinfo("Versions info written to ",vfile)
 pinfo("Binning complete in ", t3, " min")
+sink(file=vfile)
 sessionInfo()
 q(status=0)

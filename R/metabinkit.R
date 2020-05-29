@@ -344,7 +344,7 @@ metabin <- function(ifile,
     pinfo(verbose=!quiet,"Complete. ",stats$total_hits, " hits from ", stats$total_queries," queries processed in ",t3," mins.")
     
     pinfo(verbose=!quiet,"
-Note: If none of the alignments for a query passed the binning thesholds, the results will be NA for all levels (if --no_mbk option was used).
+Note: If none of the alignments for a query passed the binning thresholds, the results will be NA for all levels (if --no_mbk option was used).
 By default, when --no_mbk parameter is used, if the binning fails the following codes are used to explain the motive:
 - mbk:bl-S,mbk:bl-G,mbk:bl-F - taxid blacklisted at species, genus or family (respectively)
 - mbk:nb-thr - pident was below the threshold

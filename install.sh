@@ -197,7 +197,7 @@ function install_metabinkit {
 }
 
 function usage {
-    echo "Usage: install.sh [-i folder_to_install_bins -x soft name -h -H]
+    echo "Usage: install.sh [-i toplevel_folder_to_install_mbk -x soft name -h -H]
 Options:
   -h     - print this help information"
 }
@@ -227,7 +227,8 @@ INSTALL_DIR=$(readlink -f $INSTALL_DIR)
 TMP_DIR=$(mktemp -d)
 mkdir -p $TMP_DIR
 
-BLAST_IDIR=$INSTALL_DIR/blast/${blast_VERSION}
+#BLAST_IDIR=$INSTALL_DIR/blast/${blast_VERSION}
+BLAST_IDIR=$INSTALL_DIR
 
 if [ "$MODE-" == "all-" ]; then
     for t in $ALL_TOOLS; do

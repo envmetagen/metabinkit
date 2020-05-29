@@ -83,7 +83,7 @@ The minimum required input for metabin is:
  
 ##### How it works
 
-
+![Image of metabin](https://github.com/envmetagen/metabinkit/blob/master/metabin.png)
 
 
 ##### Examples

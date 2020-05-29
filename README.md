@@ -83,63 +83,7 @@ The minimum required input for metabin is:
  
 ##### How it works
 
-1. The `-i, --input` file is loaded and the headers are checked.
-2. (optional) If a `FilterFile` was provided to the `--FilterFile` argument, all rows in the `-i, --input` file containing the corresponding values are removed. The values are searched for in the column of the `-i, --input` file specified by `--FilterCol` [default=sseqid].
-   - This is useful, for example, to remove any known or suspected erroneous database entries by their Accession Number.
-3. Check if the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns are provided. If not, create them using the `taxids` column and the NCBI taxonomy folder (specified by `-D, --db`, installed by metabinkit by default).
-4. (optional) Blacklisting
-   - If a `species.blacklist` file was provided to the `--SpeciesBL` argument, remove all rows that contain this species.
-   - If a `genus.blacklist` file was provided to the `--GenusBL` argument, remove all rows that contain this genus.
-   - If a `family.blacklist` file was provided to the `--FamilyBL` argument, remove all rows that contain this family.
-     - Useful to exclude particular taxa that are present in alignment results, but are known *for certain* not to occur in the DNA samples.
-     **but see issues**
-5. Binning at species rank
-    - Remove alignments that do not contain species rank information for the database reference alignment (i.e. where column `S`="unknown").   
-    - Remove alignments below the `-S, --Species` %identity threshold.
-    - (optional) If each of the following are true:
-      - `--sp_discard_sp` Discard species with sp. in the name
-      -	`--sp_discard_mt2w` Discard species with more than two words in the name
-      -	`--sp_discard_num` Discard species with numbers in the name
-      - These are useful to avoid final species-level bins such as "Rana sp.", "Rana isolate X4". For example, [GenBank: AB714021.1](https://www.ncbi.nlm.nih.gov/nuccore/385251100) has the taxid 1176287, which equates to Metazoa, Nematoda, unknown, unknown, unknown, unknown, Nematoda sp. ZTSP69 in the classical seven-rank taxonomy. 
-    - Remove alignments below the `--TopSpecies` %identity threshold (for more on the "Top.." arguments see **below**). The default is 100, which effectively means it is not used.
-    - For each query, get the lowest common ancestor of all alignments that passed the previous filters.
-    - If the lowest common ancestor is at the species rank, this will be the final bin, otherwise carry over to genus-level binning.
- 6. Binning at genus, family and above_family ranks. For each rank:
-    - Apply only to queries that were not already binned at previous rank.
-    - Remove alignments that do not contain the respective rank information for the database reference alignment
-    - Remove alignments below the respective %identity threshold;`-G, --Genus`,`-F, --Family`,`-A, --AboveF`.
-    - Remove alignments below the respective "Top" %identity threshold;`--TopGenus`,`--TopFamily`,`--TopAF`.  
-    - For each query, get the lowest common ancestor of all alignments passing the filters.
-    - If the lowest common ancestor is at the respective binning rank, consider complete, otherwise carry over to the next binning.
-    - For the final, above_family, binning, report the lowest common ancestor, regardless of the rank.  
- 7. The output is saved in file specified by `-o, --out` and comprises the columns:
-    - `qseqid`: id of the query sequence
-    - `pident`: the maximum %identity of alignments used to generate the lowest common ancestor 
-    - `min_pident`: the minimum %identity of alignments used to generate the lowest common ancestor 	
-    - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the assigned bin
-    - (optional) If the `-M, --minimal_cols` argument is TRUE, only `qseqid` and `K`,`P`,`C`,`O`,`F`,`G`,`S` columns will be ouput
-    - **will need to add desigations (mbk:lca, mbk:npf etc..)**
-      By default, when --no_mbk parameter is used, if the binning fails the following codes are used to explain the underlying reason:
-        - mbk:bl-S,mbk:bl-G,mbk:bl-F - taxid blacklisted at species, genus or family (respectively)
-        - mbk:nb-thr - pident was below the threshold
-        - mbk:nb-lca - unable to find a lowest common ancestor
-        - mbk:tnf - the taxid was not found in the taxonomy database
-      If none of the alignments for a query passed the binning thresholds, the results will be NA for all levels (if --no_mbk option was used).
-  8. A second output file is created, called FILENAME.info.tsv, where FILENAME = `-o, --out` containing summary information.
- 
- ```
-total_hits      0
-total_queries   0
-species.level.sp.filter 0
-species.level.mt2w.filter       0
-species.level.numbers.filter    0
-species.neg.filter      0
-binned.species.level    0
-binned.genus.level      0
-binned.family.level     0
-binned.htf.level        0
-not.binned      0
-```
+
 
 
 ##### Examples

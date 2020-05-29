@@ -77,6 +77,8 @@ option_list = list(
 
     make_option(c("-v","--version"), action = "store_true", default = FALSE,
                 help = "print version and exit"),
+    make_option(c("--no_mbk"), action = "store_true", default = FALSE,
+                help = "Do not use mbk: codes in the output file to explain why a sequence was not binned at a given level (NA is used throughout)"),
     ## discard sp
     make_option(c("--sp_discard_sp"), action = "store_true", default = FALSE,
                 help = "Discard species with sp. in the name"),
@@ -158,6 +160,7 @@ binned <- metabin(ifile=opt$input,
                   family.blacklist=family.blacklist,
                   filter.col=opt$FilterCol,
                   filter=filter.list,
+                  no_mbk=opt$no_mbk,
                   sp.consider.mt2w=!opt$sp_discard_mt2w,
                   sp.consider.numbers=!opt$sp_discard_num,
                   sp.consider.sp=!opt$sp_discard_sp)

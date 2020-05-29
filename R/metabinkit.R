@@ -84,6 +84,7 @@ metabin <- function(ifile,
                     ## full.force=F, ##??
                     filter.col=NULL,
                     filter=NULL,
+                    species.neg=NULL,
                     sp.consider.sp=FALSE,
                     sp.consider.numbers=FALSE,
                     sp.consider.mt2w=FALSE,
@@ -213,6 +214,18 @@ metabin <- function(ifile,
         rm(res)
     }
 
+    ## Negative Filter
+    stats$species.neg.filter <- 0L
+    if ( !is.null(species.neg) ) {
+        pinfo(verbose=!quiet,"Not considering species with ",paste(species.neg,sep=","))
+        for ( f in species.neg ) {
+            res <- grep.filter(f,df=btab,perl=TRUE,invert=FALSE)
+            btab <- res$df
+            stats$species.neg.filter=res$nremoved+stats$species.neg.filter
+        }
+    }
+
+    
     btab.sp<-btab[grep("(unknown|mbk:bl-)",btab$S,perl=TRUE,invert=TRUE),,drop=FALSE]
     bres <- binAtLevel(btab,btab.l=btab.sp,"S",min_pident=spident,top=topS,quiet=quiet,expected.tax.cols=expected.tax.cols)
     binned.sp <- bres$binned

@@ -54,6 +54,8 @@ option_list = list(
     make_option(c("-D", "--db"), type="character", default=default.taxonkit.db.dir, 
                 help="directory containing the taxonomy db (nodes.dmp and names.dmp) [default= %default]", metavar="double"),
 
+    make_option(c("--SpeciesNegFilter"), type="character", default=NULL, 
+                help="negative filter (file with one word per line) [default= %default]", metavar="filename"),
     make_option(c("--SpeciesBL"), type="character", default=NULL, 
                 help="species blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
     make_option(c("--GenusBL"), type="character", default=NULL, 
@@ -114,19 +116,25 @@ print.version()
 species.blacklist <- NULL
 genus.blacklist <- NULL
 family.blacklist <- NULL
+species.neg <- NULL
 
 ## load blacklists
 if (!is.null(opt$SpeciesBL)) {
     if (!file.exists(opt$SpeciesBL) ) perror(fatal=TRUE,"file ",opt$SpeciesBL, " not found")
-    species.blacklist <- as.vector(read.table(file=opt$SpeciesBL,header=F,comment.char = "#",sep="\t",quote=""))
+    species.blacklist <- as.vector(read.table(file=opt$SpeciesBL,header=F,comment.char = "#",sep="\t",quote="")$V1)
 }
 if (!is.null(opt$GenusBL)) {
     if (!file.exists(opt$GenusBL) ) perror(fatal=TRUE,"file ",opt$GenusBL, " not found")
-    genus.blacklist <- as.vector(read.table(file=opt$GenusBL,header=F,comment.char = "#",sep="\t",quote=""))
+    genus.blacklist <- as.vector(read.table(file=opt$GenusBL,header=F,comment.char = "#",sep="\t",quote="")$V1)
 }
 if (!is.null(opt$FamilyBL)) {
     if (!file.exists(opt$FamilyBL) ) perror(fatal=TRUE,"file ",opt$FamilyBL, " not found")
-    family.blacklist <- as.vector(read.table(file=opt$FamilyBL,header=F,comment.char = "#",sep="\t",quote=""))
+    family.blacklist <- as.vector(read.table(file=opt$FamilyBL,header=F,comment.char = "#",sep="\t",quote="")$V1)
+}
+
+if (!is.null(opt$SpeciesNegFilter)) {
+    if (!file.exists(opt$SpeciesNegFilter) ) perror(fatal=TRUE,"file ",opt$SpeciesNegFilter, " not found")
+    species.neg <- as.vector(read.table(file=opt$SpeciesNegFilter,header=F,comment.char = "#",sep="\t",quote="")$V1)
 }
 
 if(is.null(opt$FilterCol) && !is.null(opt$FilterFile)) {
@@ -160,6 +168,7 @@ binned <- metabin(ifile=opt$input,
                   family.blacklist=family.blacklist,
                   filter.col=opt$FilterCol,
                   filter=filter.list,
+                  species.neg=species.neg,
                   no_mbk=opt$no_mbk,
                   sp.consider.mt2w=!opt$sp_discard_mt2w,
                   sp.consider.numbers=!opt$sp_discard_num,

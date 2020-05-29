@@ -5,18 +5,7 @@ PATH2SCRIPT=$(dirname "${BASH_SOURCE[0]}" )
 set -u
 source $PATH2SCRIPT/tests_aux.sh
 
-function comp_tables {
-    f1=$1
-    f2=$2
-    #t1=$(mktemp)
-    #t2=$(mktemp)
-    t1=$f1.tmp
-    t2=$f2.tmp
-    #tail -n +2 $f1|sort > $t1
-    #tail -n +2 $f2|sort > $t2
-    
-    #rm -f $t1 $t2
-}
+
 echo "*** metabin tests"
 
 set +xe
@@ -36,18 +25,23 @@ must_fail "metabin -i tests/test_files/in1.blast.tsv --FamilyBL   &> /dev/null"
 ## 93 % for higher-than-family level;
 must_succeed "metabin --version"
 must_succeed "metabin -v"
-must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
+must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --no_mbk --TopSpecies 1"
 # check output
-must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tests/test_files/out1.tsv|sort ) "
+must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort -k 1,1h) <(tail -n +2  tests/test_files/out1.tsv|sort -k1,1h ) "
 
-must_succeed "metabin -M -i tests/test_files/in2.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
+
+# metabin  -i ex0.tsv -o .ex0 -S 99.0 -G 97.0 -F 95.0 -A 93.0 --TopSpecies 1
+# metabin  -i ex1.tsv -o .ex0 -S 99.0 -G 93.0 -F 92.0 -A 91.0 --TopSpecies 100 --TopGenus 10
+# lca
+
+must_succeed "metabin -M -i tests/test_files/in2.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0  --no_mbk --TopSpecies 1"
 must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tests/test_files/out2.tsv|sort ) "
 
 must_succeed "metabin -M -i tests/test_files/in0.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
 
-must_succeed "metabin -M -i tests/test_files/in3.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
+must_succeed "metabin -M -i tests/test_files/in3.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0  --no_mbk --TopSpecies 1"
 
-must_succeed "metabin -M -i tests/test_files/in3_missing_taxids.blast.tsv -o .metabin.test2.out -S 99.0 -G 97.0 -F 95.0 -A 93.0"
+must_succeed "metabin -M -i tests/test_files/in3_missing_taxids.blast.tsv -o .metabin.test2.out -S 99.0 -G 97.0 -F 95.0 -A 93.0  --no_mbk --TopSpecies 1"
 
 ## Previous two runs should produce a table with the same number of lines
 must_succeed "[ $(cat .metabin.test.out.tsv|wc -l) == $(cat .metabin.test2.out.tsv|wc -l) ]"
@@ -58,15 +52,16 @@ must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 
 
 must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_num -M "
 
-must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_mt2w -M "
+must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_mt2w -M  --no_mbk --TopSpecies 1"
 
 # check output
 must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tests/test_files/out4.tsv|sort ) "
 
 #############################
 ## blacklisting
+# familiesBL: Bivalvia
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FamilyBL tests/test_files/families2exclude.txt"
-must_succeed "[ `cat .metabin.test.out.tsv|wc -l ` == 1 ]"
+must_succeed "[ `grep -c "Unionidae" .metabin.test.out.tsv ` == 0 ]"
 
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --GenusBL tests/test_files/genera2exclude.txt"
 
@@ -74,6 +69,7 @@ must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out 
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --SpeciesBL tests/test_files/ids2exclude.txt"
 must_succeed "[ `grep -c 'Sinanodonta woodiana' .metabin.test.out.tsv` == 0 ]"
 
+# GeneraBL=Corbicula
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --SpeciesBL tests/test_files/ids2exclude.txt --GenusBL tests/test_files/genera2exclude.txt"
 must_succeed "[ `grep -c 'Sinanodonta woodiana' .metabin.test.out.tsv` == 0 ]"
 

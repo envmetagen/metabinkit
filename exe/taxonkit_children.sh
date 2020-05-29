@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #######################################################################
-# Nuno A. Fonseca (nuno dot fonseca at gmail dot com)
+# Copyright 2020
 #
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

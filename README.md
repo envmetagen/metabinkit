@@ -72,7 +72,7 @@ run `metabin -h` for a list of all options and defaults
 ##### Expected file formats and contents
 
 The minimum required input for metabin is:
-`-i, --input`: a tab-separated file with two compulsory columns: `qseqid` and `pident`; as well as a single column `taxids` OR seven columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
+`-i, --input`: a tab-separated file with three compulsory columns: `qseqid`, `pident`, and `taxids`, plus, optionally, seven columns more columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
  - `qseqid`: id of the query sequence
  - `pident`: the percentage identity of the alignment
  - `taxids`: NCBI taxid of the database subject sequence        
@@ -119,10 +119,16 @@ The minimum required input for metabin is:
     - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the assigned bin
     - (optional) If the `-M, --minimal_cols` argument is TRUE, only `qseqid` and `K`,`P`,`C`,`O`,`F`,`G`,`S` columns will be ouput
     - **will need to add desigations (mbk:lca, mbk:npf etc..)**
- 8. A second output is created, called FILENAME.info.tsv, where FILENAME = `-o, --out` containing summary information.
+      By default, when --no_mbk parameter is used, if the binning fails the following codes are used to explain the underlying reason:
+        - mbk:bl-S,mbk:bl-G,mbk:bl-F - taxid blacklisted at species, genus or family (respectively)
+        - mbk:nb-thr - pident was below the threshold
+        - mbk:nb-lca - unable to find a lowest common ancestor
+        - mbk:tnf - the taxid was not found in the taxonomy database
+      If none of the alignments for a query passed the binning thresholds, the results will be NA for all levels (if --no_mbk option was used).
+  8. A second output file is created, called FILENAME.info.tsv, where FILENAME = `-o, --out` containing summary information.
  
  ```
- total_hits	134002
+total_hits	134002
 total_queries	2828
 blacklisted	0
 species.level.sp.filter	6

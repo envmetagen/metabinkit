@@ -191,7 +191,7 @@ metabin <- function(ifile,
     ## multiple filters at species level
     stats$species.level.sp.filter <- 0L
     if(sp.consider.sp==FALSE){
-        pinfo(verbose=!quiet,"Not considering species with 'sp.', numbers or more than one space")
+        pinfo(verbose=!quiet,"Not considering species with 'sp.'")
         res <- grep.filter(" sp\\.",df=btab)
         btab <- res$df
         stats$species.level.sp.filter <- res$nremoved

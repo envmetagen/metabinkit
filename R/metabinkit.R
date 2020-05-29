@@ -73,7 +73,8 @@ metabin <- function(ifile,
                     topS=1,
                     topG=1,
                     topF=1,
-                    topAbs=1, # 
+                    topAbs=1, #
+                    no_mbk=FALSE,
                     species.blacklist=NULL,
                     genus.blacklist=NULL,
                     family.blacklist=NULL,
@@ -123,7 +124,6 @@ metabin <- function(ifile,
         btab.o <- btab.o[!btab.o[,filter.col]%in%filter,,drop=FALSE]
         pinfo("Filtered table (",nrow(btab.o),") using ",filter.col," column.")
     }
-
     
     ## check if lineage information is available
     expected.tax.cols <- c("K","P","C","O","F","G","S")
@@ -149,8 +149,18 @@ metabin <- function(ifile,
     }
     
     ## keep only the necessary columns
-    btab <- btab.o[,c(expected.cols,expected.tax.cols),drop=FALSE]
+    btab <- btab.o[,c(expected.cols,expected.tax.cols),drop=FALSE]   
     rm(btab.o)
+
+    cols <- colnames(btab)
+    ## add a numeric index column (spedup lookups)
+    btab <- cbind(idx=as.integer(rownames(btab)),btab)
+    
+    ## min_pident (NA if not binned)
+    btab$min_pident <- NA
+    ## reorder cols
+    btab <- btab[,c("idx","min_pident",cols),drop=FALSE]
+
     ## record the numbers
     stats <- list()
     stats$total_hits <- nrow(btab)
@@ -161,113 +171,73 @@ metabin <- function(ifile,
     blacklists <- list(species.level=species.blacklist,
                   family.level=family.blacklist,
                   genus.level=genus.blacklist)
+    #blacklists$family.level
     ##
     blacklists.children <- lapply(blacklists,get.taxids.children,taxonomy_data_dir=taxDir)
 
     ## some info...
-    if (!is.null(blacklists$species.level)) pinfo(verbose=!quiet,"# Taxa disabled at species level:",length(blacklists.children$species.level))
-    if (!is.null(blacklists$genus.level)) pinfo(verbose=!quiet,"# Taxa disabled at genus level:",length(blacklists.children$genus.level))
-    if (!is.null(blacklists$family.level)) pinfo(verbose=!quiet,"# Taxa disabled at family level:",length(blacklists.children$family.level))
+    if (!is.null(blacklists$species.level)) pinfo(verbose=!quiet,"Maximum # Taxa disabled at species level:",length(blacklists.children$species.level))
+    if (!is.null(blacklists$genus.level)) pinfo(verbose=!quiet,"Maximum # Taxa disabled at genus level:",length(blacklists.children$genus.level))
+    if (!is.null(blacklists$family.level)) pinfo(verbose=!quiet,"Maximum # Taxa disabled at family level:",length(blacklists.children$family.level))
 
-    n.bef <- nrow(btab)
-    btab<-apply.blacklists(btab,blacklists.children,level="species")
-    btab<-apply.blacklists(btab,blacklists.children,level="genus")
-    btab<-apply.blacklists(btab,blacklists.children,level="family")
-    n.aft <- nrow(btab)
-    stats$blacklisted <- n.bef-n.aft
-    pinfo("Entries blacklisted at species/genus/family level:",stats$blacklisted)
-    ##################################################################
-    ## unassigned/not binned
-    btab.u <- btab[!duplicated(btab$qseqid),,drop=FALSE]
+
     ##################################################################
     ##species-level assignments
-    pinfo(verbose=!quiet,"binning at species level")    
-    btab.sp<-btab[btab$S!="unknown",,drop=FALSE]
-    binned.sp <- NULL
-    if (nrow(btab.sp)>0) {
-        ## apply filters
-        above.threshold <- btab.sp$pident>=spident
-        pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",spident)
-        
-        not.passing.ids <- unique(btab.sp$qseqid[!above.threshold])
-        btab.sp<-btab.sp[above.threshold,,drop=FALSE]
-        not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.sp$qseqid]
-        btab.u[btab.u$qseqid%in%not.passing.ids,"S"] <- NA
-
-        ## multiple filters at species level
-        stats$species.level.sp.filter <- 0
-        if(sp.consider.sp==FALSE){
-            pinfo(verbose=!quiet,"Not considering species with 'sp.', numbers or more than one space")
-            res <- grep.filter(" sp\\.",df=btab.sp)
-            btab.sp <- res$df
-            stats$species.level.sp.filter <- res$nremoved
-        }
-
-        stats$species.level.mt2w.filter <- 0
-        if(sp.consider.mt2w==FALSE){
-            pinfo(verbose=!quiet,"Not considering species with more than two words")
-            res <- grep.filter("[^\\s]+\\s+[^\\s]+\\s+[^\\s].*",df=btab.sp,perl=TRUE,invert=FALSE)
-            btab.sp <- res$df
-            stats$species.level.mt2w.filter <- res$nremoved
-        }
-
-        stats$species.level.numbers.filter <- 0
-        if(sp.consider.numbers==FALSE){
-            pinfo(verbose=!quiet,"Not considering species with numbers")
-            res <- grep.filter("\\d",df=btab.sp,perl=TRUE,invert=FALSE)
-            btab.sp <- res$df
-            stats$species.level.numbers.filter <- res$nremoved
-            rm(res)
-        }
-        
-        ## get top
-        pinfo(verbose=!quiet,"applying species top threshold of ",topS)
-        btab.sp<-get.top(btab.sp,topN=topS)
-        ## LCA
-        lca.sp <- get.lowest.common.ancestor(btab.sp)
-        binned.sp <- get.binned(btab.sp,lca.sp,"S",expected.tax.cols)
-        btab <- btab[!btab$qseqid%in%binned.sp$qseqid,,drop=FALSE]
-        rm(lca.sp)
+    pinfo(verbose=!quiet,"binning at species level")
+    ## blacklists
+    btab<-apply.blacklists(btab,blacklists.children,level="S",mark.bl="mbk:bl-S")
+    
+    ## multiple filters at species level
+    stats$species.level.sp.filter <- 0L
+    if(sp.consider.sp==FALSE){
+        pinfo(verbose=!quiet,"Not considering species with 'sp.', numbers or more than one space")
+        res <- grep.filter(" sp\\.",df=btab)
+        btab <- res$df
+        stats$species.level.sp.filter <- res$nremoved
     }
-    if (nrow(btab)>0)
-        btab$S <- NA
+    
+    stats$species.level.mt2w.filter <- 0L
+    if(sp.consider.mt2w==FALSE){
+        pinfo(verbose=!quiet,"Not considering species with more than two words")
+        res <- grep.filter("[^\\s]+\\s+[^\\s]+\\s+[^\\s].*",df=btab,perl=TRUE,invert=FALSE)
+        btab <- res$df
+        stats$species.level.mt2w.filter <- res$nremoved
+    }
+    
+    stats$species.level.numbers.filter <- 0L
+    if(sp.consider.numbers==FALSE){
+        pinfo(verbose=!quiet,"Not considering species with numbers")
+        res <- grep.filter("\\d",df=btab,perl=TRUE,invert=FALSE)
+        btab <- res$df
+        stats$species.level.numbers.filter <- res$nremoved
+        rm(res)
+    }
+
+    btab.sp<-btab[grep("(unknown|mbk:bl-)",btab$S,perl=TRUE,invert=TRUE),,drop=FALSE]
+    bres <- binAtLevel(btab,btab.l=btab.sp,"S",min_pident=spident,top=topS,quiet=quiet,expected.tax.cols=expected.tax.cols)
+    binned.sp <- bres$binned
+    stats$binned.species.level <- bres$nbinned
+    btab <- bres$btab
+
     rm(btab.sp)
-    stats$binned.species.level <- nrow(binned.sp)
-    pinfo(verbose=!quiet,"binned ",nrow(binned.sp)," sequences at species level")
+    rm(bres)
+    pinfo(verbose=!quiet,"binned ",stats$binned.species.level," sequences at species level")
     ##################################################################
     ##genus-level assignments
     pinfo(verbose=!quiet,"binning at genus level") 
     ##reason - can have g=unknown and s=known (e.g. Ranidae isolate), these should be removed
     ##can have g=unknown and s=unknown (e.g. Ranidae), these should be removed
     ##can have g=known and s=unknown (e.g. Leiopelma), these should be kept
-    btab.g<-btab[btab$G!="unknown",,drop=FALSE]  
-    binned.g <- NULL
-    if ( nrow(btab.g) > 0 ) {
-        ## apply filters
-                                        #btab.g<-apply.blacklists(btab.g,blacklists.children,level="genus")
-        above.threshold <- btab.g$pident>=gpident
-        pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",gpident)
-        not.passing.ids <- unique(btab.g$qseqid[!above.threshold])
-        btab.g<-btab.g[above.threshold,,drop=FALSE]
-        not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.g$qseqid]
-        btab.u[btab.u$qseqid%in%not.passing.ids,"G"] <- NA
+    btab<-apply.blacklists(btab,blacklists.children,level="G",mark.bl="mbk:bl-G")    
+    btab.g<-btab[grep("(unknown|mbk:bl-)",btab$G,perl=TRUE,invert=TRUE),,drop=FALSE]
 
-        ## get top
-        pinfo(verbose=!quiet,"applying genus top threshold of ",topG)
-        btab.g<-get.top(btab.g,topN=topG)
-        ## LCA
-        lca.g <- get.lowest.common.ancestor(btab.g)
-        binned.g <- get.binned(btab.g,lca.g,"G",expected.tax.cols)
-        
-        btab <- btab[!btab$qseqid%in%binned.g$qseqid,,drop=FALSE]
-        rm(lca.g)
-    }
-    if (nrow(btab)>0)
-        btab$G <- NA
-
+    bres <- binAtLevel(btab,btab.l=btab.g,"G",min_pident=gpident,top=topG,quiet=quiet,expected.tax.cols=expected.tax.cols)
+    binned.g <- bres$binned
+    stats$binned.genus.level <- bres$nbinned
+    btab <- bres$btab
     rm(btab.g)
-    stats$binned.genus.level <- nrow(binned.g)
-    pinfo(verbose=!quiet,"binned ",nrow(binned.g)," sequences at genus level")
+    rm(bres)
+    pinfo(verbose=!quiet,"binned ",stats$binned.genus.level," sequences at genus level")
     #################################################################
     ##family-level assignments
     pinfo(verbose=!quiet,"binning at family level")
@@ -283,80 +253,74 @@ metabin <- function(ifile,
     ##can have f=unknown, g=unknown, s=unknown, these should be removed
 
     ## Bastian: not sure if the following conditions are correct
-    btab.f<-btab[btab$F!="unknown" || btab$G!="unknown" || btab$S!="unknown",,drop=FALSE]
-    btab.f <- btab.f[!is.na(btab.f$qseqid),,drop=FALSE]
-    binned.f <- NULL
-    ## apply filters
-    ##btab.f<-apply.blacklists(btab.f,blacklists.children,level="family")
-    if ( nrow(btab.f) > 0 ) {
-        above.threshold <- btab.f$pident>=fpident
-        pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",fpident)
-        
-        not.passing.ids <- unique(btab.f$qseqid[!above.threshold])
-        btab.f<-btab.f[above.threshold,,drop=FALSE]
-        not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.f$qseqid]
-        btab.u[btab.u$qseqid%in%not.passing.ids,"F"] <- NA
-        
-        pinfo(verbose=!quiet,"applying family top threshold of ",topF)
-        btab.f<-get.top(btab.f,topN=topF)
-        ## LCA
-        lca.f <- get.lowest.common.ancestor(btab.f)
-        binned.f <- get.binned(btab.f,lca.f,"F",expected.tax.cols)
-        btab <- btab[!btab$qseqid%in%binned.f$qseqid,,drop=FALSE]
-        rm(lca.f)
-    }
-    if (nrow(btab)>0)
-        btab$F <- NA
+    btab<-apply.blacklists(btab,blacklists.children,level="F",mark.bl="mbk:bl-F")
+    btab.f<-btab[grep("(unknown|mbk:bl-)",btab$F,perl=TRUE,invert=TRUE),,drop=FALSE]
+    bres <- binAtLevel(btab,btab.l=btab.f,"F",min_pident=fpident,top=topF,quiet=quiet,expected.tax.cols=expected.tax.cols)
+    binned.f <- bres$binned
+    stats$binned.family.level <- bres$nbinned
+    btab <- bres$btab
     rm(btab.f)
-    stats$binned.family.level <- nrow(binned.f)
-    pinfo(verbose=!quiet,"binned ",nrow(binned.f)," sequences at family level")
+    rm(bres)
+    pinfo(verbose=!quiet,"binned ",stats$binned.family.level," sequences at family level")
     ##################################################################
     ##higher-than-family-level assignments
     pinfo(verbose=!quiet,"binning at higher-than-family level")
     btab.htf<-btab[btab$K!="unknown",,drop=FALSE]
-    ## apply filters
-    above.threshold <- btab.htf$pident>=abspident
-    pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",abspident)
-    not.passing.ids <- unique(btab.htf$qseqid[!above.threshold])
-    btab.htf<-btab.htf[above.threshold,,drop=FALSE]
-    not.passing.ids <- not.passing.ids[!not.passing.ids%in%btab.htf$qseqid]
-    btab.u[btab.u$qseqid%in%not.passing.ids,c("O","C","P","K")] <- NA
-    pinfo(verbose=!quiet,"applying htf top threshold of ",topAbs)
-    btab.htf<-get.top(btab.htf,topN=topAbs)
-    ## LCA
-    lca.htf <- get.lowest.common.ancestor(btab.htf)
-    binned.htf <- get.binned(btab.htf,lca.htf,c("O","C","P","K"),expected.tax.cols)
-    rm(lca.htf)
+    bres <- binAtLevel(btab,btab.l=btab.htf,c("O","C","P","K"),min_pident=abspident,top=topAbs,quiet=quiet,expected.tax.cols=expected.tax.cols)
+    binned.htf <- bres$binned
+    stats$binned.htf.level <- bres$nbinned
+    btab <- bres$btab
+    
     rm(btab.htf)
-    pinfo(verbose=!quiet,"binned ",nrow(binned.htf)," sequences at higher than family level")
-    stats$binned.htf.level <- nrow(binned.htf)
+    pinfo(verbose=!quiet,"binned ",stats$binned.htf.level," sequences at higher than family level")
     
     #######################################################################
     ##combine binned/assigned
     atab <- rbind(binned.sp,binned.g,binned.f,binned.htf)
     pinfo(verbose=!quiet,"Total number of binned ",nrow(atab)," sequences")
-    
-    ## 
+
     ###################################################################
     ## unassigned/not binned
-    ## remove the binned qseqid    
-    btab.u <- btab.u[!btab.u$qseqid%in%atab$qseqid,,drop=FALSE]
-    ## remove the extra column
-    btab.u <- btab.u[,!colnames(btab.u)%in%c("taxids"),drop=FALSE]
+    ## remove the binned qseqid
+    btab.u <- btab[!btab$qseqid%in%atab$qseqid,,drop=FALSE]
+    ## use data.table
     if (nrow(btab.u)>0) {
+        setDT(btab.u)
+        btab.u <- btab.u[btab.u[, .I[pident==max(pident)], by=qseqid]$V1]
+        ## discard ties
+        btab.u <- btab.u[!duplicated(btab.u$qseqid),,drop=FALSE]
+        btab.u <- as.data.frame(btab.u)
+    }
+    
+    if (nrow(btab.u)==0) {
         ##btab.u[,expected.tax.cols] <- "unknown"
-        btab.u$min_pident <- NA
-    } else {
+        ##btab.u$min_pident <- NA
+    ##} else {
         ## empty matrix
         d<-data.frame(matrix(nrow=0,ncol=1))
         colnames(d) <- c("min_pident")
         btab.u <- cbind(btab.u,d)
+    } else {
+        ## remove the extra column
+        btab.u <- btab.u[,!colnames(btab.u)%in%c("taxids"),drop=FALSE]
     }
+        
     
     stats$not.binned <- nrow(btab.u)
-    pinfo(verbose=!quiet,"not binned ",nrow(btab.u)," sequences")
+    pinfo(verbose=!quiet,"not binned ",stats$not.binned," sequences")
 
+    
     ftab <- rbind(atab,btab.u[,colnames(atab),drop=FALSE])
+    ## Hide explanation (backwards compatibility)
+    if (no_mbk==TRUE) {
+        for ( c in expected.tax.cols ) {
+            ftab[grep("mbk:",x=ftab[,c],fixed=TRUE),c] <- NA
+        }
+    }
+
+    ## remove the idx column
+    ftab <- ftab[,-grep("idx",colnames(ftab)),drop=FALSE]
+
     ############################################################
     ## Wrapping up
     t2<-Sys.time()
@@ -374,7 +338,54 @@ metabin <- function(ifile,
 }
 
 
+binAtLevel <- function(btab,btab.l,level,min_pident,top,expected.tax.cols,quiet=FALSE) {
+    binned.l <- NULL
+    nbinned <- NULL
+    if ( nrow(btab.l) > 0 ) {
+        above.threshold <- btab.l$pident>=min_pident
+        pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",min_pident)
+        not.passing.ids <- btab.l$idx[!above.threshold]
+        btab.l<-btab.l[above.threshold,,drop=FALSE]
+        btab[as.character(not.passing.ids),level] <- "mbk:nb-thr"
+        ## keep all ids
+        ids <- btab.l$idx
+        ## get top
+        pinfo(verbose=!quiet,"applying top threshold of ",top)
+        btab.l<- get.top(btab.l,topN=top)
+        ## LCA
+        lca.l <- get.lowest.common.ancestor(btab.l)
+        binned.l <- get.binned(btab.l,lca.l,level,expected.tax.cols)
+        ## remove binned entries
+        btab <- btab[!btab$qseqid%in%binned.l$qseqid,,drop=FALSE]
+        ## mark remaining entries
+        btab[btab$idx%in%as.character(ids),level] <- "mbk:nb-lca"
+        nbinned <- nrow(binned.l)
+        rm(lca.l)
+    }
+    if (is.null(nbinned)) nbinned <- 0L
+    return(list(btab=btab,binned=binned.l,nbinned=nbinned))
+}
+
 get.binned <- function(tab,lca,taxlevel,taxcols=c("K","P","C","O","F","G","S")) {
+    get.binned.ids <- function(lca,taxlevel) {
+        return(lca[lca[,taxlevel]!="mbk:nb-lca","qseqid"])
+    }
+    binned.ids <- c()
+    ##if (nrow(lca)>0) 
+    binned.ids <- unique(unlist(lapply(taxlevel,FUN=get.binned.ids,lca=lca)))  
+    binned <- tab[tab$qseqid%in%binned.ids,c("idx","qseqid","pident","min_pident"),drop=FALSE]
+    binned <- binned[!duplicated(binned$qseqid),,drop=FALSE]
+    binned <- cbind(binned,lca[match(binned$qseqid,lca$qseqid),taxcols,drop=FALSE])
+    nb <- tab$idx[tab$idx%in%binned$idx]
+    return(binned)
+    #idx <- max(which(colnames(binned) %in% taxlevel))+1
+    #if ( idx < length(colnames(binned)) && nrow(binned)>0) {
+        ## all levels below the one where the binning has occured are set to NA
+        ## do nothing when taxlevel=S        
+        #binned[,seq(idx,length(colnames(binned)))] <- NA
+}
+
+get.binned0 <- function(tab,lca,taxlevel,taxcols=c("K","P","C","O","F","G","S")) {
     get.binned.ids <- function(lca,taxlevel) {
         return(lca[lca[,taxlevel]!="unknown","qseqid"])
     }
@@ -386,7 +397,7 @@ get.binned <- function(tab,lca,taxlevel,taxcols=c("K","P","C","O","F","G","S")) 
     binned <- cbind(binned,lca[match(binned$qseqid,lca$qseqid),taxcols,drop=FALSE])
     idx <- max(which(colnames(binned) %in% taxlevel))+1
     if ( idx < length(colnames(binned)) && nrow(binned)>0) {
-        ## all levels below the one where the binned was made are set to NA
+        ## all levels below the one where the binning has occured are set to NA
         ## do nothing when taxlevel=S        
         binned[,seq(idx,length(colnames(binned)))] <- NA
     }
@@ -423,27 +434,24 @@ get.lowest.common.ancestor <- function(tab) {
     return(lcasp)
 }
 
-apply.blacklists <- function(tab,blacklists,level="species") {
+apply.blacklists <- function(tab,blacklists,level="S",mark.bl="mbk:bl") {
     bl <- NULL
     if (is.null(blacklists)) return(tab)
-    if (level=="species") {
-            bl <- unique(blacklists$species.level)
+    if (level=="S") {
+        bl <- unique(c(blacklists$genus.level,
+                     blacklists$species.level,
+                     blacklists$family.level))
     } else {
-        if (level=="genus") {
-            bl=unique(blacklists$genus.level)
+        if (level=="G") {
+            bl=unique(c(blacklists$genus.level,blacklists$family.level))
         } else {
-            bl=unique(blacklists$family.level)
+            ## level==F
+            bl=blacklists$family.level
         }
     }
-    tab <- tab[!tab$taxids %in% bl,,drop=FALSE]
+    if (length(bl)==0) return(tab)
+    tab[tab$taxids %in% bl,level] <- mark.bl
     return(tab)
-}
-
-get.topdf <- function(pident,groupby,top) {
-    topdf <- aggregate(x=pident,by=list(groupby),FUN=max)
-    colnames(topdf)<-c("qseqid","pident")
-    topdf$min_pident<-topdf$pident-top
-    return(topdf)
 }
 
 get.top <- function(tab,topN) {
@@ -453,9 +461,19 @@ get.top <- function(tab,topN) {
         tab <- cbind(tab,d)
         return(tab)
     }
-    topdf <- get.topdf(tab[,"pident"],tab$qseqid,topN)
-    tab$min_pident <- topdf[match(tab$qseqid,topdf$qseqid),"min_pident"]
-    tab<-tab[tab$pident>tab$min_pident,,drop=FALSE]
+    ## top hit for each qseqid
+    setDT(tab)
+    tab.a <- tab[tab[, .I[pident==max(pident)], by=qseqid]$V1]
+    ## discard ties
+    tab.a <- tab.a[!duplicated(tab.a$qseqid),,drop=FALSE]
+    tab.a <- as.data.frame(tab.a)
+    tab <- as.data.frame(tab)
+    rownames(tab.a) <- tab.a$qseqid
+    tab.a$minp <- tab.a$pident-topN
+    tab.a$minp[tab.a$minp<0] <- 0
+    ## add minp
+    tab$min_pident <- tab.a[tab$qseqid,"minp"]
+    tab<-tab[tab$pident>=tab$min_pident,,drop=FALSE]
     tab <- tab[!is.na(tab$qseqid),,drop=FALSE]
     return(tab)
 }
@@ -483,7 +501,7 @@ add.lineage.df<-function(dframe,taxDir,taxCol="taxids") {
     dframe<-merge(dframe,lineage[,c("taxids","path")],by.x = taxCol,by.y = "taxids")
     dframe$old_taxids<-dframe[,taxCol]
     #dframe$taxids<-dframe$new_taxids
-    dframe$new_taxids=NULL
+    dframe$new_taxids <- NULL
     dframe<-cbind(dframe,do.call(rbind, stringr::str_split(dframe$path,";")))
     colnames(dframe)[(length(dframe)-6):length(dframe)]<-c("K","P","C","O","F","G","S")
     dframe$K<-as.character(dframe$K)
@@ -501,7 +519,7 @@ add.lineage.df<-function(dframe,taxDir,taxCol="taxids") {
     dframe[,(length(dframe)-6):length(dframe)][dframe[,(length(dframe)-6):length(dframe)]==""]<- "mbk:tnf"
     
     
-    dframe$path=NULL
+    dframe$path <- NULL
     unlink(taxids_fileIn)
     unlink(taxids_fileOut)
     return(dframe)
@@ -521,6 +539,7 @@ get.taxids.children <-function(taxids,taxonomy_data_dir=NULL){
     ## get children
     ## usw a wrapper to be able to deal with big lists of taxids
     cmd <- paste0("taxonkit_children.sh ",taxids_fileIn," ",taxids_fileOut)
+    cmd <- paste0("/home/nf/Research/Projects/WIP/CIBIO/MetaEnv/metabinkit/tmp/metabinkit/exe/taxonkit_children.sh ",taxids_fileIn," ",taxids_fileOut)
     if (!is.null(taxonomy_data_dir)) {
         cmd <- paste0(cmd," ",taxonomy_data_dir)
     }
@@ -536,13 +555,13 @@ get.taxids.children <-function(taxids,taxonomy_data_dir=NULL){
 
 add.unknown.lca<-function(lca.out){
   
-  lca.out$binpath[is.na(lca.out$binpath)]<-"unknown;unknown;unknown;unknown;unknown;unknown;unknown"
-  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==5]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==5],";unknown")
-  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==4]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==4],";unknown;unknown")
-  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==3]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==3],";unknown;unknown;unknown")
-  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==2]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==2],";unknown;unknown;unknown;unknown")
-  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==1]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==1],";unknown;unknown;unknown;unknown;unknown")
-  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==0]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==0],";unknown;unknown;unknown;unknown;unknown;unknown")
+  lca.out$binpath[is.na(lca.out$binpath)]<-"mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca"
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==5]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==5],";mbk:nb-lca")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==4]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==4],";mbk:nb-lca;mbk:nb-lca")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==3]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==3],";mbk:nb-lca;mbk:nb-lca;mbk:nb-lca")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==2]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==2],";mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==1]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==1],";mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca")
+  lca.out$binpath[stringr::str_count(lca.out$binpath,";")==0]<-paste0(lca.out$binpath[stringr::str_count(lca.out$binpath,";")==0],";mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca;mbk:nb-lca")
   
   return(lca.out)
 }

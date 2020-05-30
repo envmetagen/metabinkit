@@ -241,8 +241,6 @@ else
 fi
 
 
- 
-
 echo "---------------------------------------------------"
 echo "metabinkit and dependecies installed on $INSTALL_DIR"
 echo "All done."

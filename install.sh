@@ -95,13 +95,17 @@ function install_blast {
 	pinfo "Installing blast to $BLAST_IDIR..."
 	pushd $TMP_DIR
 	rm -f tmp.tar.gz
+	set +e
+	if [ ! -e $BLAST_IDIR/bin ]; then
+	    mkdir -p $BLAST_IDIR/bin
+	fi
+	if [ ! -e $BLAST_IDIR/db ]; then
+	    mkdir -p $BLAST_IDIR/db
+	fi
+	set -e
 	wget -c $blast_URL -O tmp.tar.gz
 	tar zxvpf tmp.tar.gz
 	rm -f tmp.tar.gz
-	set +e
-	mkdir -p $BLAST_IDIR/bin
-	mkdir -p $BLAST_IDIR/db
-	set -e
 	cp ncbi-blast-${blast_VERSION}+/bin/* $BLAST_IDIR/bin
 	## taxonomy
 	wget -c ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz

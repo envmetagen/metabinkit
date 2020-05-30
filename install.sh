@@ -73,7 +73,7 @@ function install_taxonkit {
     rm -f tmp.tar.gz
     wget -c  $TAXONKIT_URL -O tmp.tar.gz
     tar xzvf tmp.tar.gz
-    mkdir -p $INSTALL_DIR
+    mkdir -p $INSTALL_DIR/bin
     chmod +x taxonkit
     mv taxonkit $INSTALL_DIR/bin
     rm -f tmp.tar.gz

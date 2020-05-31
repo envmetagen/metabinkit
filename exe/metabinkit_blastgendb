@@ -140,6 +140,7 @@ if [ "$outfile-" == "-" ]; then
     exit 1
 fi
 
+mkdir -p $(dirname $outfile)
 
 if [ "$taxid_mapfile-" == "-" ]; then
     taxid_mapfile=$outfile.taxid_map.tsv

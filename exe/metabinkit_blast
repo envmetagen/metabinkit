@@ -72,6 +72,7 @@ metabinkit_blast -f fasta file -D reference_DB -o outfile [options]
  -f fasta_file 
  -D reference_db    - reference Blast indexed database
  -o outfile
+ -O outformat       - output format (default: $outfmt)
  -T taxdir          - folder with NCBI's taxonomy database (default:$taxdir)
  -t threads         - maximum number of threads (default:$threads)
  -m max_hsps        - BLAST's max_hsps paramater (default:$max_hsps)
@@ -97,11 +98,12 @@ EOF
 #
 
 OPTERR=0
-while getopts "P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vvdh"  Option; do
+while getopts "O:P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vvdh"  Option; do
     case $Option in
 	f ) infasta=$OPTARG;;
 	d ) set -x;;
 	D ) refdb=$OPTARG;;
+	O ) outfmt="$OPTARG";;
 	o ) outfile=$OPTARG;;
 	T ) taxdir=$OPTARG;;
 	t ) threads=$OPTARG;;

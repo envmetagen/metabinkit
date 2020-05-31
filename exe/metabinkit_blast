@@ -180,7 +180,8 @@ BLAST_CMD=blastn
 $BLAST_CMD $params  -query $infasta  -out $outfile.tmp -outfmt "$outfmt"
 echo "INFO: blast finished."
 
-HH=$(echo $outfmt| cut -f 2- -d\ |tr " " "\t")
-sed -i  "1i$HH" $outfile.tmp
-mv $outfile.tmp $outfile
+echo $outfmt| cut -f 2- -d\ |tr " " "\t" > $outfile.tmp2
+cat $outfile.tmp >> $outfile.tmp2
+mv $outfile.tmp2 $outfile
+rm -f $outfile.tmp
 exit 0

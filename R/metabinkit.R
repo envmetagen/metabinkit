@@ -110,6 +110,9 @@ metabin <- function(ifile,
     ## lets keep it for now
     btab.o<-data.table::fread(ifile,sep="\t",data.table = F)
     pinfo(verbose=!quiet,"Read ",nrow(btab.o)," entries from ",ifile)
+    if ( nrow(btab.o) == 0 ) {
+        perror(fatal=TRUE,"Unable to proceed - no data")
+    }
     ## are the expected columns present?
     ## accept staxids instead of taxids
     if ( "staxids"%in%colnames(btab.o) && !"taxids"%in%colnames(btab.o)) {

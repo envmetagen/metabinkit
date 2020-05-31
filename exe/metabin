@@ -20,7 +20,6 @@
 #
 # =========================================================
 
-
 ###################################################################
 ## Load auxiliary code
 dir2script <- normalizePath(dirname(strsplit(split="=",x=grep("--file=",fixed=TRUE,value=TRUE,x=commandArgs(trailingOnly = FALSE)))[[1]][2]))

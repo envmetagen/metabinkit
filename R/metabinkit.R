@@ -111,6 +111,11 @@ metabin <- function(ifile,
     btab.o<-data.table::fread(ifile,sep="\t",data.table = F)
     pinfo(verbose=!quiet,"Read ",nrow(btab.o)," entries from ",ifile)
     ## are the expected columns present?
+    ## accept staxids instead of taxids
+    if ( "staxids"%in%colnames(btab.o) && !"taxids"%in%colnames(btab.o)) {
+        pinfo("taxids column not found, using staxids instead")
+        btab.o$taxids <- btab.o$staxids
+    }
     ## qseqid pident taxids
     expected.cols <- c("qseqid","pident","taxids")
     if(!is.null(filter.col) && !is.null(filter)) {

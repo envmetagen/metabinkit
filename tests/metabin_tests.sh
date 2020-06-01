@@ -70,6 +70,8 @@ must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tes
 #############################
 ## blacklisting
 # familiesBL: Bivalvia
+must_fail "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FamilyBL tests/test_files/disabled.taxa.txt"
+
 must_succeed "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FamilyBL tests/test_files/families2exclude.txt"
 must_succeed "[ `grep -c "Unionidae" .metabin.test.out.tsv ` == 0 ]"
 

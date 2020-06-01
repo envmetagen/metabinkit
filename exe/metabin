@@ -117,19 +117,30 @@ genus.blacklist <- NULL
 family.blacklist <- NULL
 species.neg <- NULL
 
+only_taxids <- function(v,file) {
+
+    if (sum(!is.integer(v))>0) {
+        perror(fatal=TRUE,"blacklist file ",file," should only contain integers (taxids) in the first column")
+    }
+}
+
 ## load blacklists
 if (!is.null(opt$SpeciesBL)) {
     if (!file.exists(opt$SpeciesBL) ) perror(fatal=TRUE,"file ",opt$SpeciesBL, " not found")
     species.blacklist <- as.vector(read.table(file=opt$SpeciesBL,header=F,comment.char = "#",sep="\t",quote="")$V1)
+    only_taxids(species.blacklist,f=opt$SpeciesBL)
 }
 if (!is.null(opt$GenusBL)) {
     if (!file.exists(opt$GenusBL) ) perror(fatal=TRUE,"file ",opt$GenusBL, " not found")
     genus.blacklist <- as.vector(read.table(file=opt$GenusBL,header=F,comment.char = "#",sep="\t",quote="")$V1)
+    only_taxids(genus.blacklist,f=opt$GenusBL)
 }
 if (!is.null(opt$FamilyBL)) {
     if (!file.exists(opt$FamilyBL) ) perror(fatal=TRUE,"file ",opt$FamilyBL, " not found")
     family.blacklist <- as.vector(read.table(file=opt$FamilyBL,header=F,comment.char = "#",sep="\t",quote="")$V1)
+    only_taxids(family.blacklist,f=opt$FamilyBL)
 }
+
 
 if (!is.null(opt$SpeciesNegFilter)) {
     if (!file.exists(opt$SpeciesNegFilter) ) perror(fatal=TRUE,"file ",opt$SpeciesNegFilter, " not found")

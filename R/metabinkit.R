@@ -110,9 +110,9 @@ metabin <- function(ifile,
     ## lets keep it for now
     btab.o<-data.table::fread(ifile,sep="\t",data.table = F)
     pinfo(verbose=!quiet,"Read ",nrow(btab.o)," entries from ",ifile)
-    if ( nrow(btab.o) == 0 ) {
-        perror(fatal=TRUE,"Unable to proceed - no data")
-    }
+    #if ( nrow(btab.o) == 0 ) {
+    #    perror(fatal=TRUE,"Unable to proceed - no data")
+    #}
     ## are the expected columns present?
     ## accept staxids instead of taxids
     if ( "staxids"%in%colnames(btab.o) && !"taxids"%in%colnames(btab.o)) {
@@ -164,9 +164,12 @@ metabin <- function(ifile,
     cols <- colnames(btab)
     ## add a numeric index column (spedup lookups)
     btab <- cbind(idx=as.integer(rownames(btab)),btab)
-    
     ## min_pident (NA if not binned)
-    btab$min_pident <- NA
+    if(nrow(btab)>0)
+        btab$min_pident <- NA
+    else {
+        btab$min_pident <- btab$idx
+    }
     ## reorder cols
     btab <- btab[,c("idx","min_pident",cols),drop=FALSE]
 
@@ -339,9 +342,16 @@ metabin <- function(ifile,
         }
     }
 
-    ## remove the idx column
-    ftab <- ftab[,-grep("idx",colnames(ftab)),drop=FALSE]
-
+    ## empty output
+    if (nrow(ftab)==0) {
+        ftab <- btab
+        ## reorder columns
+        ftab <- ftab[,c(expected.cols,"min_pident",expected.tax.cols),drop=FALSE]
+    } else {
+        ## remove the idx column
+        ftab <- ftab[,-grep("idx",colnames(ftab)),drop=FALSE]
+    }
+    
     ############################################################
     ## Wrapping up
     t2<-Sys.time()
@@ -510,16 +520,23 @@ add.lineage.df<-function(dframe,taxDir,taxCol="taxids") {
   
     if(!taxCol %in% colnames(dframe)) {stop(paste0("No column called ",taxCol))}
 
+    if ( nrow(dframe) == 0 ) {
+        pinfo("Skipping taxonomic rerieval - no data")
+        new.cols <- c("old_taxids","K","P","C","O","F","G","S")
+        new.df <- data.frame(matrix(nrow=0,ncol=ncol(dframe)+length(new.cols)))
+        colnames(new.df) <- c(colnames(dframe),new.cols)
+        return(new.df)
+    }
     ##write taxids to file
     taxids_fileIn <- tempfile(pattern = "taxids_", tmpdir = tempdir(), fileext = ".txt")
     taxids_fileOut <- tempfile(pattern = "taxids_", tmpdir = tempdir(), fileext = ".out.txt")
-     write.table(unique(dframe[,taxCol]),file = taxids_fileIn,row.names = FALSE,col.names = FALSE,quote = FALSE)
-
-    ##get taxonomy from taxids and format in 7 levels
+    write.table(unique(dframe[,taxCol]),file = taxids_fileIn,row.names = FALSE,col.names = FALSE,quote = FALSE)
+    
+        ##get taxonomy from taxids and format in 7 levels
     cmd <- paste0("cat ",taxids_fileIn, " | taxonkit lineage --data-dir ", taxDir, " | taxonkit reformat --data-dir ",taxDir," | cut -f 1,3 > ",taxids_fileOut)
- 
+    
     system(cmd)
-
+    
     lineage<-as.data.frame(data.table::fread(file = taxids_fileOut,sep = "\t",header=FALSE))
     colnames(lineage)<-gsub("V1","taxids",colnames(lineage))
     colnames(lineage)<-gsub("V2","path",colnames(lineage))
@@ -527,7 +544,7 @@ add.lineage.df<-function(dframe,taxDir,taxCol="taxids") {
     ##message("replacing taxids with updated taxids. Saving old taxids in old_taxids.")
     dframe<-merge(dframe,lineage[,c("taxids","path")],by.x = taxCol,by.y = "taxids")
     dframe$old_taxids<-dframe[,taxCol]
-    #dframe$taxids<-dframe$new_taxids
+    ##dframe$taxids<-dframe$new_taxids
     dframe$new_taxids <- NULL
     dframe<-cbind(dframe,do.call(rbind, stringr::str_split(dframe$path,";")))
     colnames(dframe)[(length(dframe)-6):length(dframe)]<-c("K","P","C","O","F","G","S")
@@ -541,14 +558,14 @@ add.lineage.df<-function(dframe,taxDir,taxCol="taxids") {
     
     ##change empty cells to "unknown"
     ##dframe[,(length(dframe)-6):length(dframe)][dframe[,(length(dframe)-6):length(dframe)]==""]<- "unknown"
-
+    
     ## tnf: taxid not found
     dframe[,(length(dframe)-6):length(dframe)][dframe[,(length(dframe)-6):length(dframe)]==""]<- "mbk:tnf"
-    
     
     dframe$path <- NULL
     unlink(taxids_fileIn)
     unlink(taxids_fileOut)
+    
     return(dframe)
 }
 

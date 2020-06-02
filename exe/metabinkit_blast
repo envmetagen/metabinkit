@@ -43,6 +43,7 @@ gapextend=2
 reward=1
 penalty=-1
 max_target_seqs=100
+task=blastn
 
 taxdir=
 infasta=
@@ -79,9 +80,10 @@ metabinkit_blast -f fasta file -D reference_DB -o outfile [options]
  -w word_size       - BLAST's word_size paramater (default:$word_size)
  -e evalue          - BLAST's evalue paramater (default:$evalue)
  -I perc_identity   - BLAST's perc_identity paramater (default:$perc_identity)
- -q qcov_hsp_perc   - BLASTS's qcov_hsp_perc paramater (default:$qcov_hsp_perc)
- -G gapopen         - BLASTS's gapopen paramater (default:$gapopen)
- -E gapextend       - BLASTS's gapextend paramater (default:$gapextend)
+ -q qcov_hsp_perc   - BLAST's qcov_hsp_perc paramater (default:$qcov_hsp_perc)
+ -G gapopen         - BLAST's gapopen paramater (default:$gapopen)
+ -E gapextend       - BLAST's gapextend paramater (default:$gapextend)
+ -X task            - BLAST's task parameter (default:$task)
  -r reward
  -p penalty
  -M max_target_seqs
@@ -98,10 +100,11 @@ EOF
 #
 
 OPTERR=0
-while getopts "O:P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vvdh"  Option; do
+while getopts "X:O:P:N:e:G:E:r:p:M:q:I:w:m:t:T:o:D:f:Vvdh"  Option; do
     case $Option in
 	f ) infasta=$OPTARG;;
 	d ) set -x;;
+	X ) task=$OPTARG;;
 	D ) refdb=$OPTARG;;
 	O ) outfmt="$OPTARG";;
 	o ) outfile=$OPTARG;;
@@ -159,7 +162,7 @@ fi
 
 ####################################################################
 ## 
-params="-max_hsps  $max_hsps  -task megablast  -perc_identity $perc_identity  -word_size $word_size -qcov_hsp_perc $qcov_hsp_perc -gapopen $gapopen -gapextend $gapextend -reward $reward -evalue $evalue -max_target_seqs $max_target_seqs -num_threads $threads -db $refdb"
+params="-max_hsps  $max_hsps  -task $task  -perc_identity $perc_identity  -word_size $word_size -qcov_hsp_perc $qcov_hsp_perc -gapopen $gapopen -gapextend $gapextend -reward $reward -evalue $evalue -max_target_seqs $max_target_seqs -num_threads $threads -db $refdb"
 
 if [ "$taxids_blacklist_files-" != "-" ]; then
     ## assumes that the number of files is relative small

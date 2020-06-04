@@ -358,7 +358,7 @@ Using a very low "Top.." threshold, e.g. 0.001, unless justified, is likely pron
 
 1. Providing the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns in the `-i, --input` file will avoid using the NCBI taxonomy
 2. If you have neither the NCBI taxids nor the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns and only have taxon names, NCBI taxids can be generated from these using the [NCBI TaxIdentifier](https://www.ncbi.nlm.nih.gov/Taxonomy/TaxIdentifier/tax_identifier.cgi). Be careful to double check the results make sense, and understand the error codes (e.g. duplicates, not found etc.). Or consider using [taxonkit](https://bioinf.shenwei.me/taxonkit/)
-3. Consider using `metabinblast` to align sequences to your reference database. This will output the taxids of the reported alignments.  
+3. Consider using `metabinkit_blast` to align sequences to your reference database. This will output the taxids of the reported alignments.  
 
 #### How do I choose thresholds?
 

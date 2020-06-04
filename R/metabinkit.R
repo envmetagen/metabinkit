@@ -583,7 +583,6 @@ get.taxids.children <-function(taxids,taxonomy_data_dir=NULL){
     ## get children
     ## usw a wrapper to be able to deal with big lists of taxids
     cmd <- paste0("taxonkit_children.sh ",taxids_fileIn," ",taxids_fileOut)
-    cmd <- paste0("/home/nf/Research/Projects/WIP/CIBIO/MetaEnv/metabinkit/tmp/metabinkit/exe/taxonkit_children.sh ",taxids_fileIn," ",taxids_fileOut)
     if (!is.null(taxonomy_data_dir)) {
         cmd <- paste0(cmd," ",taxonomy_data_dir)
     }

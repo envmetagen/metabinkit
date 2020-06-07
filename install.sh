@@ -205,6 +205,8 @@ function install_metabinkit {
 function usage {
     echo "Usage: install.sh [-i toplevel_folder_to_install_mbk -x soft name -h -H]
 Options:
+  -C     - Conda installation mode
+  -T     - skip installation of taxonkit
   -h     - print this help information"
 }
 
@@ -212,13 +214,16 @@ Options:
 MODE=all
 DEBUG=0
 SKIP_taxonkit=0
+SKIP_R_packages=0
+CONDA_INSTALL=0
 
-while getopts "i:x:ThH"  Option
+while getopts "i:x:CThH"  Option
 do
     case $Option in
 	i ) INSTALL_DIR=$OPTARG;;
 	x ) MODE=$OPTARG;;
 	T ) SKIP_taxonkit=1;;
+	C ) CONDA_INSTALL=1;;
 	h ) usage; exit;;
 	H ) usage; exit;;
 	* ) usage; exit 1;;
@@ -238,12 +243,22 @@ mkdir -p $TMP_DIR
 #BLAST_IDIR=$INSTALL_DIR/blast/${blast_VERSION}
 BLAST_IDIR=$INSTALL_DIR
 
+if [ "$CONDA_INSTALL-" == "1-" ]; then
+    SKIP_taxonkit=1
+    SKIP_R_packages=1
+fi
+
 if [ "$MODE-" == "all-" ]; then
     for t in $ALL_TOOLS; do
 	if [ $t == "taxonkit" ] && [ $SKIP_taxonkit == 1 ]; then
 	    echo "skipping installation of $t "
 	else
-	    install_$t
+	    if [ $t == "R_packages" ] && [ $SKIP_R_packages == 1 ]; then
+		echo "skipping installation of $t "
+	    else
+		
+		install_$t
+	    fi
 	fi
     done
 else

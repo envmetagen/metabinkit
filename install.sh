@@ -211,12 +211,14 @@ Options:
 ## by default install all software
 MODE=all
 DEBUG=0
+SKIP_taxonkit=0
 
-while getopts "i:x:thH"  Option
+while getopts "i:x:ThH"  Option
 do
     case $Option in
 	i ) INSTALL_DIR=$OPTARG;;
 	x ) MODE=$OPTARG;;
+	T ) SKIP_taxonkit=1;;
 	h ) usage; exit;;
 	H ) usage; exit;;
 	* ) usage; exit 1;;
@@ -238,7 +240,11 @@ BLAST_IDIR=$INSTALL_DIR
 
 if [ "$MODE-" == "all-" ]; then
     for t in $ALL_TOOLS; do
-	install_$t
+	if [ $t == "taxonkit" ] && [ $SKIP_taxonkit == 1 ]; then
+	    echo "skipping installation of $t "
+	else
+	    install_$t
+	fi
     done
 else
     install_$MODE

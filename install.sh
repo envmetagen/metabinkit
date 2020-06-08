@@ -237,7 +237,12 @@ if [ ! -e  $INSTALL_DIR ]; then
     mkdir -p $INSTALL_DIR
     echo "Creating $INSTALL_DIR...done."
 fi
-INSTALL_DIR=$(readlink -f $INSTALL_DIR)
+
+if [ "x`uname`" == "xLinux" ] ; then
+    ## readlink does not work in MacOS
+    ## 
+    INSTALL_DIR=$(readlink -f $INSTALL_DIR)
+fi
 
 TMP_DIR=$(mktemp -d)
 mkdir -p $TMP_DIR

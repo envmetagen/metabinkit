@@ -215,6 +215,8 @@ MODE=all
 DEBUG=0
 SKIP_taxonkit=0
 SKIP_R_packages=0
+SKIP_blast=0
+SKIP_taxonomy_db=0
 CONDA_INSTALL=0
 
 while getopts "i:x:CThH"  Option
@@ -246,20 +248,16 @@ BLAST_IDIR=$INSTALL_DIR
 if [ "$CONDA_INSTALL-" == "1-" ]; then
     SKIP_taxonkit=1
     SKIP_R_packages=1
+    SKIP_blast=1
 fi
 
 if [ "$MODE-" == "all-" ]; then
     for t in $ALL_TOOLS; do
-	if [ $t == "taxonkit" ] && [ $SKIP_taxonkit == 1 ]; then
-	    echo "skipping installation of $t "
-	else
-	    if [ $t == "R_packages" ] && [ $SKIP_R_packages == 1 ]; then
-		echo "skipping installation of $t "
-	    else
-		
-		install_$t
-	    fi
-	fi
+	varn="SKIP_$t"
+	case ${!varn} in
+	    1 ) echo "skipping installation of $t ";;
+	    * ) install_$t
+	esac
     done
 else
     install_$MODE

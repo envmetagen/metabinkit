@@ -1,16 +1,30 @@
 ![Image of metabinkit](https://github.com/envmetagen/metabinkit/blob/master/mbk_small.png)
-## metabinkit ![Docker](https://github.com/envmetagen/metabinkit/workflows/Docker/badge.svg?branch=master) [![Dockerhub](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](https://hub.docker.com/r/envmetagen/metabinkit/tags/) [![DOI](https://zenodo.org/badge/265322807.svg)](https://zenodo.org/badge/latestdoi/265322807) [![License](http://img.shields.io/badge/license-GPL%203-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-3.0.html) 
+## metabinkit ![Docker](https://github.com/envmetagen/metabinkit/workflows/Docker/badge.svg?branch=master) [![Dockerhub](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](https://hub.docker.com/r/envmetagen/metabinkit/tags/) [![DOI](https://zenodo.org/badge/265322807.svg)](https://zenodo.org/badge/latestdoi/265322807) [![License](http://img.shields.io/badge/license-GPL%203-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-3.0.html)  [![Anaconda-Server Badge](https://anaconda.org/bioconda/metabinkit/badges/platforms.svg)](https://anaconda.org/bioconda/metabinkit) [![Anaconda-Server Badge](https://anaconda.org/bioconda/metabinkit/badges/version.svg)](https://anaconda.org/bioconda/metabinkit) [![Anaconda-Server Badge](https://anaconda.org/bioconda/metabinkit/badges/installer/conda.svg)](https://conda.anaconda.org/bioconda)
 
 Set of programs to perform taxonomic binning.
 
 1. [Overview](#Overview)
-2. [Docker](#Docker)
-3. [Manual installation](#Manual-installation)
-4. [Metabinkit programs](#Programs)
+2. [Conda](#Conda)
+3. [Docker](#Docker)
+4. [Manual installation](#Manual-installation)
+5. [Metabinkit programs](#Programs)
 
 
 ### Overview
 From metagenomic or metabarcoding data, it is often necessary to assign taxonomy to DNA sequences. This is generally performed by aligning sequences to a reference database, usually resulting in multiple database alignments for each query sequence. Using these alignment results, metabinkit assigns a single taxon to each query sequence, based on user-defined percentage identity thresholds. In essence, for each query, the alignments are filtered based on the percentage identity thresholds and the lowest common ancestor for all alignments passing the filters is determined. The metabin program is not limited to BLAST alignments, and can accept alignment results produced using any program, provided the input format is correct. However, functionality is also available to create BLAST databases and to perform BLAST alignments, which can be passed directly to metabin.  
+
+### Conda   [![Anaconda-Server Badge](https://anaconda.org/bioconda/metabinkit/badges/installer/conda.svg)](https://conda.anaconda.org/bioconda)
+
+Metabinkit is available as a conda package in [Bioconda](https://anaconda.org/bioconda). Simply run the following commands to install metabinkit
+
+     conda install -c bioconda metabinkit
+     conda activate base
+
+or you may also try this if you encounter problems with the command above
+
+     conda create -n your_env_name -c bioconda -c conda-forge metabinkit
+     conda activate your_env_name
+
 
 ### Docker
 

@@ -24,7 +24,7 @@ metabinkit.version <- "0.1.7"
 ##
 R.version <- getRversion()
 currentVersion <- sprintf("%d.%d", R.version$major, R.version$minor)
-if ( R.version$major < 3 || (R.version$major=3 && R.version$minor<6) ) {
+if ( getRversion() < "3.6.0"  ) {
     message("R version:",currentVersion)
     cat("ERROR: R version should be 3.6 or above\n")
     q(status=1)

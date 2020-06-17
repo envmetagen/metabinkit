@@ -28,24 +28,23 @@ or you may also try this if you encounter problems with the command above
 
 ### Docker
 
-A docker image that includes everything required to run with metabinkit is available at DockerHub (https://hub.docker.com/r/envmetagen/metabinkit/tags/). This facilitates the setup and installation of metabinkit, makes it easy to track all software versions used in the analyses, and ensures that only dependency versions compatible with metabinkit are used. See the [Docker userguide](https://docs.docker.com/) for more details.
+A docker image with metabinkit is available at DockerHub (https://hub.docker.com/r/envmetagen/metabinkit/tags/). This facilitates the setup and installation of metabinkit, makes it easy to track all software versions used in the analyses, and ensures that only dependency versions compatible with metabinkit are used. See the [Docker userguide](https://docs.docker.com/) for more details.
 
 Alternatively you may install the software from source following the instructions provided next. A  64bit computer with an up to date Linux OS installed will be required.
-
 
 
 ### Manual installation
 
 #### Supported OS
 
-metabinkit is developed and tested on multiple distributions of Linux (e.g. Fedora, Ubuntu). Consider the Docker container if you use a non-supported OS or OS version.
+metabinkit is developed and tested on multiple distributions of Linux (e.g. Fedora, Ubuntu). Consider the Docker container if you use a non-supported pperating system or operating system version.
 
 
 #### Getting sources
 
 Option 1: download the latest source release tarball from https://github.com/envmetagen/metabinkit/releases, and then from your download directory type:
 
-    tar xzf mtabinkit-x.x.x.tar.gz
+    tar xzf metabinkit-x.x.x.tar.gz
     cd metabinkit-x.x.x
 
 Option 2: to use git to download the repository  with the entire code history, type:
@@ -68,7 +67,7 @@ A file metabinkit_env.sh will be created on the toplevel installation folder ($H
 
 This needs to be run each time a terminal is opened, or add the above line to the $HOME/.bash_profile file.
 
-To only install certain programs/dependencies use the `-x` argument, e.g.
+To install only certain programs/dependencies use the `-x` argument, e.g.
 
 `./install.sh  -i $HOME -x taxonkit`
 
@@ -78,7 +77,7 @@ Available options for `-x` are: `taxonkit`, `blast`, `metabinkit`, `R_packages`,
 
 #### metabin
 
-Usage: metabin -i xxx ...
+Usage: metabin -i filename -o outfile [other options]
 
 run `metabin -h` for a list of all options and defaults
 
@@ -86,10 +85,10 @@ run `metabin -h` for a list of all options and defaults
 
 The minimum required input for metabin is:
 `-i, --input`: a tab-separated file with three compulsory columns: `qseqid`, `pident`, and `taxids`, plus, optionally, seven columns more columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
- - `qseqid`: id of the query sequence
- - `pident`: the percentage identity of the alignment
- - `taxids`: NCBI taxid of the database subject sequence        
- - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the database subject sequence 
+  - `qseqid`: id of the query sequence
+  - `pident`: the percentage identity of the alignment
+  - `taxids`: NCBI taxid of the database subject sequence        
+  - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the database subject sequence 
  
  Other columns may be present and will be ignored, unless specified by the `--FilterCol` argument (see **How it Works**)
  

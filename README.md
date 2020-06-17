@@ -78,7 +78,8 @@ Available options for `-x` are: `taxonkit`, `blast`, `metabinkit`, `R_packages`,
 
 #### metabin
 
-Usage: metabin -i filename -o outfile [other options]
+Usage: 
+`metabin -i filename -o outfile [other options]`
 
 run `metabin -h` for a list of all options and defaults
 

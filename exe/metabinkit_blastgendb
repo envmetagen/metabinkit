@@ -50,7 +50,7 @@ function check_db {
     local tmpfile=$(mktemp)
     head -n 2 $fasta > $tmpfile
     metabinkit_blast -f $tmpfile  -D $db -o $tmpfile.res -M 1
-    if  [ "$(cut -f 2,3,4 $tmpfile.res | tail -n 1 | tr '\t' ' ')" != "0.0 100.000 100" ]; then
+    if  [ "$(cut -f 3,4 $tmpfile.res | tail -n 1 | tr '\t' ' ')" != "100.000 100" ]; then
 	echo "ERROR: query newly created database with $tmpfile did not work as expected"
 	cat $tmpfile.res
 	exit 1

@@ -106,11 +106,11 @@ Example 1. Default settings
 
 Input:
 ```
-$ head -n 4 metabinkit/tests/test_files/in0.blast.tsv 
+head -n 4 metabinkit/tests/test_files/in0.blast.short.tsv 
 taxids	qseqid	pident
-6573	2a8b3c1d-018b-4b9b-933f-eacb26617c02_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD27-A-UNIO-RUN7	68.868
-6579	6636e6bc-8729-4013-a303-858d07e783d5_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD23-A-UNIO-RUN7	63.736
-6579	5ea8b133-7a4c-479d-9211-7fe0392e1b05_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	64.828
+6573	query1	68.868
+6579	query2	63.736
+6579	query3	64.828
 ```
 
 run metabin **rerun once new defaults for tops have been updated**
@@ -122,63 +122,45 @@ Explanation: Do not filter any alignments based on Accession Number or blacklist
 screen output (stderr)
 
 ```
-metabinkit version: 0.0.5
+$ metabin -i in0.blast.short.tsv -o out0.short.bins
+metabinkit version: 0.1.8
 [info] Starting Binning
-[info] Read 12259 entries from metabinkit/tests/test_files/in0.blast.tsv
+[info] Read 12259 entries from in0.blast.short.tsv
  WARNING! missing columns in input table with taxonomic information:K,P,C,O,F,G,S
 [info]  Trying to get taxonomic information from the database in /home/tutorial/TOOLS/metabinkit.install/exe/../db/ ...
 [info]  taxonomic information retrieval complete.
-[info] Entries blacklisted at species/genus/family level:0
 [info] binning at species level
 [info] excluding 10139 entries with pident below 96
-[info] applying species top threshold of 100
-[info] binned 32 sequences at species level
+[info] applying top threshold of 100
+[info] binned 2120 sequences at species level
 [info] binning at genus level
-[info] excluding 8022 entries with pident below 92
-[info] applying genus top threshold of 1
-[info] binned 116 sequences at genus level
+[info] excluding 9022 entries with pident below 92
+[info] applying top threshold of 1
+[info] binned 1117 sequences at genus level
 [info] binning at family level
-[info] excluding 5934 entries with pident below 90
-[info] applying family top threshold of 1
-[info] binned 142 sequences at family level
+[info] excluding 8565 entries with pident below 90
+[info] applying top threshold of 1
+[info] binned 457 sequences at family level
 [info] binning at higher-than-family level
-[info] excluding 3394 entries with pident below 89
-[info] applying htf top threshold of 1
-[info] binned 9 sequences at higher than family level
-[info] Total number of binned 299 sequences
-[info] not binned 1202 sequences
-[info] Complete. 12259 hits from 1501 queries processed in 1.8 mins.
-[info] Note: If none of the hits for a BLAST query pass the binning thesholds, the results will be NA for all levels.
-                 If the LCA for a query is above kingdom, e.g. cellular organisms or root, the results will be 'unknown' for all levels.
-                 Queries that had no BLAST hits, or did not pass the filter.blast step will not appear in results.  
-[info] binned table written to out0.bins.tsv
-[info] information stats written to out0.bins.info.tsv
-[info] Binning complete in 1.83 min
-R version 3.6.0 (2019-04-26)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 18.10
+[info] excluding 8343 entries with pident below 89
+[info] applying top threshold of 1
+[info] binned 222 sequences at higher than family level
+[info] Total number of binned 3916 sequences
+[info] not binned 8343 sequences
+[info] Complete. 12259 hits from 12259 queries processed in 2.39 mins.
+[info] 
+Note: If none of the alignments for a query passed the binning thresholds, the results will be NA for all levels (if --no_mbk option was used).
+By default, when --no_mbk parameter is used, if the binning fails the following codes are used to explain the motive:
+- mbk:bl-S,mbk:bl-G,mbk:bl-F - taxid blacklisted at species, genus or family (respectively)
+- mbk:nb-thr - pident was below the threshold
+- mbk:nb-lca - unable to find a lowest common ancestor
+- mbk:tnf - the taxid was not found in the taxonomy database
 
-Matrix products: default
-BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.8.0
-LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.8.0
 
-locale:
- [1] LC_CTYPE=pt_PT.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=pt_PT.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=pt_PT.UTF-8    LC_MESSAGES=en_US.UTF-8   
- [7] LC_PAPER=pt_PT.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=pt_PT.UTF-8 LC_IDENTIFICATION=C       
-
-attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
-
-other attached packages:
-[1] data.table_1.12.8 optparse_1.6.6   
-
-loaded via a namespace (and not attached):
-[1] compiler_3.6.0 magrittr_1.5   tools_3.6.0    getopt_1.20.3  stringi_1.4.6 
-[6] stringr_1.4.0 
+[info] binned table written to out0.short.bins.tsv
+[info] information stats written to out0.short.bins.info.tsv
+[info] Versions info written to out0.short.bins.versions.txt
+[info] Binning complete in 2.42 min
 ```
 
 view results

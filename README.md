@@ -194,22 +194,29 @@ query762	80.986	NA	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb
 query560	71.942	NA	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr
 ```
 
+
 Example 2. Custom settings
 
 Inputs:
 
 ```
-$ head -n 4 metabinkit/tests/test_files/in1.blast.tsv 
+$ head metabinkit/tests/test_files/in1.blast.short.tsv 
 taxids	qseqid	pident	qcovs	saccver	staxid	ssciname	old_taxids	K	P	C	O	F	G	S
-6573	2a8b3c1d-018b-4b9b-933f-eacb26617c02_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD27-A-UNIO-RUN7	68.868	98	XM_021507581.16573	Mizuhopecten yessoensis	6573	Eukaryota	Mollusca	Bivalvia	Pectinoida	Pectinidae	Mizuhopecten	Mizuhopecten yessoensis
-6579	6636e6bc-8729-4013-a303-858d07e783d5_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD23-A-UNIO-RUN7	63.736	99	LR736849.1	6579	Pecten maximus	6579	Eukaryota	Mollusca	Bivalvia	Pectinoida	Pectinidae	Pecten	Pecten maximus
-6579	5ea8b133-7a4c-479d-9211-7fe0392e1b05_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	64.828	99	LR736843.1	6579	Pecten maximus	6579	Eukaryota	Mollusca	Bivalvia	Pectinoida	Pectinidae	Pecten	Pecten maximus
+41217	query1	69.565	99	KY081324.1	41217	Barbatia lima	41217	Eukaryota	Mollusca	Bivalvia	Arcoida	Arcidae	Barbatia	Barbatia lima
+148819	query1	73.442	99	AF305058.1	148819	Scapharca broughtonii	148819	Eukaryota	Mollusca	Bivalvia	Arcoida	Arcidae	Scapharca	Scapharca broughtonii
+148819	query2	65.775	99	AF305058.1	148819	Scapharca broughtonii	148819	Eukaryota	Mollusca	Bivalvia	Arcoida	Arcidae	Scapharca	Scapharca broughtonii
+148819	query3	73.243	99	AF305058.1	148819	Scapharca broughtonii	148819	Eukaryota	Mollusca	Bivalvia	Arcoida	Arcidae	Scapharca	Scapharca broughtonii
+148819	query4	69.211	99	AF305058.1	148819	Scapharca broughtonii	148819	Eukaryota	Mollusca	Bivalvia	Arcoida	Arcidae	Scapharca	Scapharca broughtonii
+52396	query5	70.629	100	MF326974.1	52396	Lampsilis siliquoidea	52396	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Lampsilis	Lampsilis siliquoidea
+55837	query5	84.722	100	MH349358.1	55837	Unio pictorum	55837	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Unio	Unio pictorum
+55837	query5	84.722	100	MH349357.1	55837	Unio pictorum	55837	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Unio	Unio pictorum
+96912	query5	66.897	100	AY498702.1	96912	Fusconaia flava	96912	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Fusconaia	Fusconaia flava
 ```
 
 From previous experience we have identified entries in genbank that appears erroneous, so we provide a list of those in a file. In this example we are using genbank entries flagged by [Mioduchowska et al. 2018](https://doi.org/10.1371/journal.pone.0199609).
 
 ```
-$ head -n 4 Mioduchowska2018_flaggedAccessions.txt 
+$ head -n 4 metabinkit/tests/test_files/Mioduchowska2018_flaggedAccessions.txt 
 KX531007.1
 KC706821.1
 KJ950123.1
@@ -219,90 +226,77 @@ JQ798675.1
 For the purposes of this example, we are certain that *Mizuhopecten yessoensis* **can not** be in our DNA samples. Note this should be used with caution. An example of where it could be justified to blacklist a taxon is: 1) the taxon is only known from a distant country, with very little or no chance that it is present in the sampled environment, even as a recent invasive; and 2) the taxon has not been worked on in the laboratory that processed the samples. Note also, for example, if providing a file to the `--FamilyBL` argument, all taxa under each taxid provided will be blacklisted when binning at family level. 
 
 ```
-$ head testspecies2exclude.txt 
+$ head metabinkit/tests/test_files/testspecies2exclude.txt 
 6573
 ```
 
-run metabin **rerun once new defaults for tops have been updated**
+run metabin
 
-`$ metabin -i in1.blast.tsv -o out1.bins -S 99 -G 97 -F 95 -A 90 --SpeciesBL testspecies2exclude.txt --FilterFile Mioduchowska2018_flaggedAccessions.txt --FilterCol saccver --TopSpecies 2 --TopGenus 2 --TopFamily 2 --TopAF 2 --sp_discard_sp --sp_discard_mt2w --sp_discard_num`
+`$ metabin -i in1.blast.short.tsv -o out1.blast.short.bins -S 98 -G 94 -F 93 -A 88 --SpeciesBL testspecies2exclude.txt --FilterFile Mioduchowska2018_flaggedAccessions.txt --FilterCol saccver --TopSpecies 2 --TopGenus 2 --TopFamily 2 --TopAF 2 --sp_discard_sp --sp_discard_mt2w --sp_discard_num`
 
-Explanation: First remove any alignments that have one of the flagged Accession Numbers in the `saccver` column. During species-level binning, first remove the species that we have blacklisted. Note that as we only provided a `--SpeciesBL`, these taxa still be considered during binning at other levels. Furthermore, during species-level binning do not consider species with "sp.", more than two spaces, or numbers in their names. Apply a "Top.." threshold of 2 for all binning rounds. Attempt to bin alignments with the following %identity thresholds: species-98%, genus-94%, family-93%, above family-88%. Use the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns as the taxonomy.
+Explanation: First remove any alignments that have one of the flagged Accession Numbers in the `saccver` column. During species-level binning, first remove the species that we have blacklisted. Note that as we only provided a `--SpeciesBL`, these taxa still be considered during binning at other levels. Furthermore, during species-level binning do not consider species with "sp.", more than two spaces, or numbers in their names. Apply a "Top.." threshold of 2 for all taxonomic levels. Attempt to bin alignments with the following %identity thresholds: species-98%, genus-94%, family-93%, above family-88%. Use the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns as the taxonomy.
 
 screen output (stderr)
 
 ```
-metabinkit version: 0.0.5
+metabinkit version: 0.1.8
 [1] TRUE
 [info] Starting Binning
-[info] Read 12259 entries from in1.blast.tsv
+[info] Read 12259 entries from in1.blast.short.tsv
 [info] Filtering table (12259) using saccver column.
 [info] Filtered table (12259) using saccver column.
-[info] # Taxa disabled at species level:1
-[info] Entries blacklisted at species/genus/family level:1
+16:29:14.561 [WARN] taxid 2746931 not found
+[info] Maximum # Taxa disabled at species level:1
 [info] binning at species level
-[info] excluding 11278 entries with pident below 99
-[info] Not considering species with 'sp.', numbers or more than one space
+[info] Not considering species with 'sp.'
 [info] Not considering species with more than two words
 [info] Not considering species with numbers
-[info] applying species top threshold of 2
-[info] binned 72 sequences at species level
+[info] excluding 10453 entries with pident below 98
+[info] applying top threshold of 2
+[info] binned 50 sequences at species level
 [info] binning at genus level
-[info] excluding 8917 entries with pident below 97
-[info] applying genus top threshold of 2
-[info] binned 24 sequences at genus level
+[info] excluding 8367 entries with pident below 94
+[info] applying top threshold of 2
+[info] binned 49 sequences at genus level
 [info] binning at family level
-[info] excluding 8186 entries with pident below 95
-[info] applying family top threshold of 2
-[info] binned 75 sequences at family level
+[info] excluding 7469 entries with pident below 93
+[info] applying top threshold of 2
+[info] binned 139 sequences at family level
 [info] binning at higher-than-family level
-[info] excluding 5936 entries with pident below 90
-[info] applying htf top threshold of 2
-[info] binned 119 sequences at higher than family level
-[info] Total number of binned 290 sequences
-[info] not binned 1211 sequences
+[info] excluding 4298 entries with pident below 88
+[info] applying top threshold of 2
+[info] binned 67 sequences at higher than family level
+[info] Total number of binned 305 sequences
+[info] not binned 1196 sequences
 [info] Complete. 12259 hits from 1501 queries processed in 0.46 mins.
-[info] Note: If none of the hits for a BLAST query pass the binning thesholds, the results will be NA for all levels.
-                 If the LCA for a query is above kingdom, e.g. cellular organisms or root, the results will be 'unknown' for all levels.
-                 Queries that had no BLAST hits, or did not pass the filter.blast step will not appear in results.  
-[info] binned table written to out1.bins.tsv
-[info] information stats written to out1.bins.info.tsv
+[info] 
+Note: By default, if a taxon cannot be assigned at a given taxonomic level the following codes are used to explain the motive:
+- mbk:bl-S,mbk:bl-G,mbk:bl-F - taxid blacklisted at species, genus or family (respectively)
+- mbk:nb-thr - pident was below the threshold
+- mbk:nb-lca - the lowest common ancestor was above this taxonomic level
+- mbk:tnf - the taxid was not found in the taxonomy database
+If --no_mbk option was used the codes will be NA
+
+[info] binned table written to out1.blast.short.bins.tsv
+[info] information stats written to out1.blast.short.bins.info.tsv
+[info] Versions info written to out1.blast.short.bins.versions.txt
 [info] Binning complete in 0.49 min
-R version 3.6.0 (2019-04-26)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 18.10
-
-Matrix products: default
-BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.8.0
-LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.8.0
-
-locale:
- [1] LC_CTYPE=pt_PT.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=pt_PT.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=pt_PT.UTF-8    LC_MESSAGES=en_US.UTF-8   
- [7] LC_PAPER=pt_PT.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=pt_PT.UTF-8 LC_IDENTIFICATION=C       
-
-attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
-
-other attached packages:
-[1] data.table_1.12.8 optparse_1.6.6   
-
-loaded via a namespace (and not attached):
-[1] compiler_3.6.0 magrittr_1.5   tools_3.6.0    getopt_1.20.3  stringi_1.4.6 
-[6] stringr_1.4.0 
 ```
 
 view results
 
 ```
-$ head -4 out1.bins.tsv 
+$ head out1.blast.short.bins.tsv
 qseqid	pident	min_pident	K	P	C	O	F	G	S
-d36ef3ba-f3d5-4952-b683-301f1a959cfa_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD11-A-UNIO-RUN7	100	98	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
-a8ad2550-e5c5-45d5-9e1a-f6114c8631e0_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD22-A-UNIO-RUN7	99.275	97.275	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
-748a7576-3bc0-422d-be69-7970307fa821_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	100	98	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+query16	98.551	96.551	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+query31	98.529	96.529	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Unio	Unio elongatulus
+query122	98.561	96.561	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+query142	100	98	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+query163	99.265	97.265	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Anodonta	Anodonta exulcerata
+query251	100	98	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+query263	98.529	96.529	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Unio	Unio elongatulus
+query270	98.54	97.27	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Unio	Unio elongatulus
+query277	100	98	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
 ```
 
 

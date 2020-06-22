@@ -106,23 +106,29 @@ Example 1. Default settings
 
 Input:
 ```
-head -n 4 metabinkit/tests/test_files/in0.blast.short.tsv 
+head metabinkit/tests/test_files/in0.blast.short.tsv 
 taxids	qseqid	pident
-6573	query1	68.868
-6579	query2	63.736
-6579	query3	64.828
+41217	query1	69.565
+148819	query1	73.442
+148819	query2	65.775
+148819	query3	73.243
+148819	query4	69.211
+52396	query5	70.629
+55837	query5	84.722
+55837	query5	84.722
+96912	query5	66.897
+
 ```
 
-run metabin **rerun once new defaults for tops have been updated**
+run metabin
 
-`$ metabin -i metabinkit/tests/test_files/in0.blast.tsv -o out0.bins`
+`$ metabin -i metabinkit/tests/test_files/in0.blast.short.tsv -o out0.short.bins`
 
-Explanation: Do not filter any alignments based on Accession Number or blacklisted taxa. Do not apply any "Top.." thresholds. Attempt to bin alignments with the default %identity thresholds: species-99%, genus-97%, family-95%, above family-90%. Use `taxids` column to retrieve taxonomy. Out out three files: Main results - out0.short.bins.tsv, Information statistics - out0.short.bins.info.tsv, version info - out0.short.bins.versions.txt
+Explanation: Do not filter any alignments based on Accession Number or blacklisted taxa. Do not apply any "Top.." thresholds. Attempt to bin alignments with the default %identity thresholds: species-99%, genus-97%, family-95%, above family-90%. Use `taxids` column to retrieve taxonomy. Output three files: Main results - out0.short.bins.tsv, Information statistics - out0.short.bins.info.tsv, version info - out0.short.bins.versions.txt
 
 screen output (stderr)
 
 ```
-$ metabin -i in0.blast.short.tsv -o out0.short.bins
 metabinkit version: 0.1.8
 [info] Starting Binning
 [info] Read 12259 entries from in0.blast.short.tsv
@@ -132,35 +138,34 @@ metabinkit version: 0.1.8
 [info] binning at species level
 [info] excluding 11279 entries with pident below 99
 [info] applying top threshold of 100
-[info] binned 980 sequences at species level
+[info] binned 72 sequences at species level
 [info] binning at genus level
-[info] excluding 10289 entries with pident below 97
+[info] excluding 8918 entries with pident below 97
 [info] applying top threshold of 100
-[info] binned 990 sequences at genus level
+[info] binned 24 sequences at genus level
 [info] binning at family level
-[info] excluding 9858 entries with pident below 95
+[info] excluding 8187 entries with pident below 95
 [info] applying top threshold of 100
-[info] binned 431 sequences at family level
+[info] binned 75 sequences at family level
 [info] binning at higher-than-family level
-[info] excluding 8565 entries with pident below 90
+[info] excluding 5937 entries with pident below 90
 [info] applying top threshold of 100
-[info] binned 1293 sequences at higher than family level
-[info] Total number of binned 3694 sequences
-[info] not binned 8565 sequences
-[info] Complete. 12259 hits from 12259 queries processed in 1.84 mins.
+[info] binned 119 sequences at higher than family level
+[info] Total number of binned 290 sequences
+[info] not binned 1211 sequences
+[info] Complete. 12259 hits from 1501 queries processed in 1.69 mins.
 [info] 
-Note: If none of the alignments for a query passed the binning thresholds, the results will be NA for all levels (if --no_mbk option was used).
-By default, when --no_mbk parameter is used, if the binning fails the following codes are used to explain the motive:
+Note: By default, if a taxon cannot be assigned at a given taxonomic level the following codes are used to explain the motive:
 - mbk:bl-S,mbk:bl-G,mbk:bl-F - taxid blacklisted at species, genus or family (respectively)
 - mbk:nb-thr - pident was below the threshold
-- mbk:nb-lca - unable to find a lowest common ancestor
+- mbk:nb-lca - the lowest common ancestor was above this taxonomic level
 - mbk:tnf - the taxid was not found in the taxonomy database
-
+If --no_mbk option was used the codes will be NA
 
 [info] binned table written to out0.short.bins.tsv
 [info] information stats written to out0.short.bins.info.tsv
 [info] Versions info written to out0.short.bins.versions.txt
-[info] Binning complete in 1.87 min
+[info] Binning complete in 1.72 min
 ```
 
 view results
@@ -168,9 +173,25 @@ view results
 ```
 $ head -n 4 out0.short.bins.tsv 
 qseqid	pident	min_pident	K	P	C	O	F	G	S
-query966	99.153	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	Corbicula fluminea
-query971	99.153	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	Corbicula fluminea
-query987	99.153	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	Corbicula fluminea
+query663	100	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+query1227	100	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+query1482	99.265	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+```
+
+some other selected results
+```
+qseqid	pident	min_pident	K	P	C	O	F	G	S
+query283	100	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Unio	Unio elongatulus
+query900	99.242	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Anodonta	Anodonta exulcerata
+query163	99.265	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Anodonta	Anodonta exulcerata
+query487	99.265	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Anodonta	Anodonta exulcerata
+query305	99.153	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	mbk:nb-lca
+query592	98.276	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	mbk:nb-thr
+query1494	99.153	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	mbk:nb-lca
+query589	97.842	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	mbk:nb-lca	mbk:nb-thr
+query557	99.275	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	mbk:nb-lca	mbk:nb-lca
+query762	80.986	NA	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr
+query560	71.942	NA	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr	mbk:nb-thr
 ```
 
 Example 2. Custom settings
@@ -206,7 +227,7 @@ run metabin **rerun once new defaults for tops have been updated**
 
 `$ metabin -i in1.blast.tsv -o out1.bins -S 99 -G 97 -F 95 -A 90 --SpeciesBL testspecies2exclude.txt --FilterFile Mioduchowska2018_flaggedAccessions.txt --FilterCol saccver --TopSpecies 2 --TopGenus 2 --TopFamily 2 --TopAF 2 --sp_discard_sp --sp_discard_mt2w --sp_discard_num`
 
-Explanation: First remove any alignments that have one of the flagged Accession Numbers in the `saccver` column. During species-level binning, first remove the species that we have blacklisted. Note that as we only provided a `--SpeciesBL`, these taxa still be considered during binning at other levels. Furthermore, during species-level binning do not consider species with "sp.", more than two spaces, or numbers in their names. Apply a "Top.." threshold of 2 for all binning rounds. Attempt to bin alignments with the following %identity thresholds: species-99%, genus-97%, family-95%, above family-90%. Use the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns as the taxonomy.
+Explanation: First remove any alignments that have one of the flagged Accession Numbers in the `saccver` column. During species-level binning, first remove the species that we have blacklisted. Note that as we only provided a `--SpeciesBL`, these taxa still be considered during binning at other levels. Furthermore, during species-level binning do not consider species with "sp.", more than two spaces, or numbers in their names. Apply a "Top.." threshold of 2 for all binning rounds. Attempt to bin alignments with the following %identity thresholds: species-98%, genus-94%, family-93%, above family-88%. Use the `K`,`P`,`C`,`O`,`F`,`G`,`S` columns as the taxonomy.
 
 screen output (stderr)
 

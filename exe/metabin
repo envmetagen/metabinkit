@@ -40,14 +40,14 @@ option_list = list(
 # TODO: v2    
 #    make_option(c("-s", "--subspecies"), type="double", default=99.5, 
 #                help="subspecies %id threshold [default= %default]", metavar="double"),
-    make_option(c("-S", "--Species"), type="double", default=96.0, 
+    make_option(c("-S", "--Species"), type="double", default=99.0, 
                 help="species %id threshold [default= %default]", metavar="double"),
-    make_option(c("-G", "--Genus"), type="double", default=92.0, 
+    make_option(c("-G", "--Genus"), type="double", default=97.0, 
                 help="genus %id threshold [default= %default]", metavar="double"),
-    make_option(c("-F", "--Family"), type="double", default=90.0, 
+    make_option(c("-F", "--Family"), type="double", default=95.0, 
                 help="family %id threshold [default= %default]", metavar="double"),
 
-    make_option(c("-A", "--AboveF"), type="double", default=89.0, 
+    make_option(c("-A", "--AboveF"), type="double", default=90.0, 
                 help="above family %id threshold [default= %default]", metavar="double"),
 
     make_option(c("-D", "--db"), type="character", default=default.taxonkit.db.dir, 

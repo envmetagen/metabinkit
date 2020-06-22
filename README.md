@@ -106,7 +106,7 @@ Example 1. Default settings
 
 Input:
 ```
-head metabinkit/tests/test_files/in0.blast.short.tsv 
+$ head metabinkit/tests/test_files/in0.blast.short.tsv 
 taxids	qseqid	pident
 41217	query1	69.565
 148819	query1	73.442

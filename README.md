@@ -89,7 +89,7 @@ The minimum required input for metabin is:
 `-i, --input`: a tab-separated file with three compulsory columns: `qseqid`, `pident`, and `taxids`, plus, optionally, seven columns more columns `K`,`P`,`C`,`O`,`F`,`G`,`S`
   - `qseqid`: id of the query sequence
   - `pident`: the percentage identity of the alignment
-  - `taxids`: NCBI taxid of the database subject sequence        
+  - `taxids`: NCBI taxid of the database subject sequence (`staxid` or `staxids` are also accepted)       
   - `K`,`P`,`C`,`O`,`F`,`G`,`S`: kingdom, pylum, class, order, family, genus, species of the database subject sequence 
  
  Other columns may be present and will be ignored, unless specified by the `--FilterCol` argument (see **How it Works**)
@@ -117,7 +117,7 @@ run metabin **rerun once new defaults for tops have been updated**
 
 `$ metabin -i metabinkit/tests/test_files/in0.blast.tsv -o out0.bins`
 
-Explanation: Do not filter any alignments based on Accession Number or blacklisted taxa. Do not apply any "Top.." thresholds. Attempt to bin alignments with the following %identity thresholds: species-96%, genus-96%, family-90%, above family-89%. Use `taxids` column to retrieve taxonomy.
+Explanation: Do not filter any alignments based on Accession Number or blacklisted taxa. Do not apply any "Top.." thresholds. Attempt to bin alignments with the default %identity thresholds: species-99%, genus-97%, family-95%, above family-90%. Use `taxids` column to retrieve taxonomy. Out out three files: Main results - out0.short.bins.tsv, Information statistics - out0.short.bins.info.tsv, version info - out0.short.bins.versions.txt
 
 screen output (stderr)
 
@@ -130,24 +130,24 @@ metabinkit version: 0.1.8
 [info]  Trying to get taxonomic information from the database in /home/tutorial/TOOLS/metabinkit.install/exe/../db/ ...
 [info]  taxonomic information retrieval complete.
 [info] binning at species level
-[info] excluding 10139 entries with pident below 96
+[info] excluding 11279 entries with pident below 99
 [info] applying top threshold of 100
-[info] binned 2120 sequences at species level
+[info] binned 980 sequences at species level
 [info] binning at genus level
-[info] excluding 9022 entries with pident below 92
-[info] applying top threshold of 1
-[info] binned 1117 sequences at genus level
+[info] excluding 10289 entries with pident below 97
+[info] applying top threshold of 100
+[info] binned 990 sequences at genus level
 [info] binning at family level
-[info] excluding 8565 entries with pident below 90
-[info] applying top threshold of 1
-[info] binned 457 sequences at family level
+[info] excluding 9858 entries with pident below 95
+[info] applying top threshold of 100
+[info] binned 431 sequences at family level
 [info] binning at higher-than-family level
-[info] excluding 8343 entries with pident below 89
-[info] applying top threshold of 1
-[info] binned 222 sequences at higher than family level
-[info] Total number of binned 3916 sequences
-[info] not binned 8343 sequences
-[info] Complete. 12259 hits from 12259 queries processed in 2.39 mins.
+[info] excluding 8565 entries with pident below 90
+[info] applying top threshold of 100
+[info] binned 1293 sequences at higher than family level
+[info] Total number of binned 3694 sequences
+[info] not binned 8565 sequences
+[info] Complete. 12259 hits from 12259 queries processed in 1.84 mins.
 [info] 
 Note: If none of the alignments for a query passed the binning thresholds, the results will be NA for all levels (if --no_mbk option was used).
 By default, when --no_mbk parameter is used, if the binning fails the following codes are used to explain the motive:
@@ -160,17 +160,17 @@ By default, when --no_mbk parameter is used, if the binning fails the following 
 [info] binned table written to out0.short.bins.tsv
 [info] information stats written to out0.short.bins.info.tsv
 [info] Versions info written to out0.short.bins.versions.txt
-[info] Binning complete in 2.42 min
+[info] Binning complete in 1.87 min
 ```
 
 view results
 
 ```
-$ head -4 out0.bins.tsv 
+$ head -n 4 out0.short.bins.tsv 
 qseqid	pident	min_pident	K	P	C	O	F	G	S
-6fcff7c8-2031-4e3a-a8f0-72dc2da71c79_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD11-A-UNIO-RUN7	97.015	-2.985	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
-d36ef3ba-f3d5-4952-b683-301f1a959cfa_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD11-A-UNIO-RUN7	100	0	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
-9ef96e73-a5b6-4c4f-bc59-2b8238281d77_runid=407cb32920f83b2252d840c6a949244d8c2a3bb9_ss_sample_id=Mussels-ITD24-A-UNIO-RUN7	97.059	-2.941	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinanodonta woodiana
+query966	99.153	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	Corbicula fluminea
+query971	99.153	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	Corbicula fluminea
+query987	99.153	0	Eukaryota	Mollusca	Bivalvia	Veneroida	Corbiculidae	Corbicula	Corbicula fluminea
 ```
 
 Example 2. Custom settings

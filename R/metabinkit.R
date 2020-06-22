@@ -362,13 +362,12 @@ metabin <- function(ifile,
     pinfo(verbose=!quiet,"Complete. ",stats$total_hits, " hits from ", stats$total_queries," queries processed in ",t3," mins.")
     
     pinfo(verbose=!quiet,"
-Note: If none of the alignments for a query passed the binning thresholds, the results will be NA for all levels (if --no_mbk option was used).
-By default, when --no_mbk parameter is used, if the binning fails the following codes are used to explain the motive:
+Note: By default, if a taxon cannot be assigned at a given taxonomic level the following codes are used to explain the motive:
 - mbk:bl-S,mbk:bl-G,mbk:bl-F - taxid blacklisted at species, genus or family (respectively)
 - mbk:nb-thr - pident was below the threshold
-- mbk:nb-lca - unable to find a lowest common ancestor
+- mbk:nb-lca - the lowest common ancestor was above this taxonomic level
 - mbk:tnf - the taxid was not found in the taxonomy database
-
+If --no_mbk option was used the codes will be NA
 ")
     res <- list(table=ftab,stats=stats)
     return(res)

@@ -118,7 +118,13 @@ metabin <- function(ifile,
     if ( "staxids"%in%colnames(btab.o) && !"taxids"%in%colnames(btab.o)) {
         pinfo("taxids column not found, using staxids instead")
         btab.o$taxids <- btab.o$staxids
+    } else {
+      if ( "staxid"%in%colnames(btab.o) && !"taxids"%in%colnames(btab.o)) {
+        pinfo("taxids column not found, using staxid instead")
+        btab.o$taxids <- btab.o$staxid
+      }
     }
+
     ## qseqid pident taxids
     expected.cols <- c("qseqid","pident","taxids")
     if(!is.null(filter.col) && !is.null(filter)) {
@@ -157,6 +163,14 @@ metabin <- function(ifile,
         }
     }
     
+    ## check NAs in taxonomy. Should only be an issue if user provided custom taxonomy
+    ## This can happen when the blast database and taxonomy mapping file are merged, but have differences in qseqids/saccvers 
+    countNAs<-sum(is.na(btab.o[,expected.tax.cols]))
+    if(countNAs>0) {
+      perror(countNAs," NAs found in taxonomy columns. Converting NAs to 'unknown', consider checking input taxonomy if this appears erroneous.")
+      btab.o[,expected.tax.cols][is.na(btab.o[,expected.tax.cols])]<-"unknown"
+    }
+    
     ## keep only the necessary columns
     btab <- btab.o[,c(expected.cols,expected.tax.cols),drop=FALSE]   
     rm(btab.o)
@@ -165,9 +179,9 @@ metabin <- function(ifile,
     ## add a numeric index column (spedup lookups)
     btab <- cbind(idx=as.integer(rownames(btab)),btab)
     ## min_pident (NA if not binned)
-    if(nrow(btab)>0)
+    if(nrow(btab)>0) {
         btab$min_pident <- NA
-    else {
+    } else {
         btab$min_pident <- btab$idx
     }
     ## reorder cols
@@ -289,7 +303,8 @@ metabin <- function(ifile,
     ##################################################################
     ##higher-than-family-level assignments
     pinfo(verbose=!quiet,"binning at higher-than-family level")
-    btab.htf<-btab[btab$K!="unknown",,drop=FALSE]
+    btab.htf<-btab[btab$K!="unknown",,drop=FALSE] 
+    #think O makes more sense here, and is lca being reversed?
     bres <- binAtLevel(btab,btab.l=btab.htf,c("O","C","P","K"),min_pident=abspident,top=topAbs,quiet=quiet,expected.tax.cols=expected.tax.cols)
     binned.htf <- bres$binned
     stats$binned.htf.level <- bres$nbinned

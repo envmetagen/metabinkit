@@ -97,6 +97,8 @@ The minimum required input for metabin is:
  
 ##### How it works
 
+Click on image to view larger version
+
 ![Image of metabin](https://github.com/envmetagen/metabinkit/blob/devel/metabin_readme.jpg)
 
 

@@ -84,9 +84,9 @@ metabinkit_blast -f fasta file -D reference_DB -o outfile [options]
  -G gapopen         - BLAST's gapopen paramater (default:$gapopen)
  -E gapextend       - BLAST's gapextend paramater (default:$gapextend)
  -X task            - BLAST's task parameter (default:$task)
- -r reward
- -p penalty
- -M max_target_seqs
+ -r reward	    - BLAST´s reward parameter (default:$reward)
+ -p penalty	    - BLAST´s reward parameter (default:$penalty)
+ -M max_target_seqs - BLAST´s max_target_seqs parameter (default:$max_target_seqs)
  -N taxids_blacklist_files - restrict search to taxids not present in the files provided (separated by comma). This options is incompatible with -P.
  -P taxids_positive_files - restrict search to taxids present in the files provided (separated by comma). This option is incompatible with -N.
  -v                       - print metabinkit version and exits

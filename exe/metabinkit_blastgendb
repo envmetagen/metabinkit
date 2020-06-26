@@ -88,7 +88,7 @@ function usage {
     cat <<EOF
 metabibkit_blastgendb -f fasta file -t taxid_map -o db [options]
  -f fasta_file 
- -T seqid_taxid_map - mapping between the sequence id and the taxid (tab separted). if none is found it will look for taxid=xxxx; in the fasta header after the first space and consider the word up to the first space or | as the sequence id.
+ -T seqid_taxid_map - mapping between the sequence id and the taxid (tab separated). if none is found it will look for taxid=xxxx; in the fasta header after the first space and consider the word up to the first space or | as the sequence id.
  -o outfile
  -c                 - check database after creating it
  -t threads         - maximum number of threads (default:$threads)

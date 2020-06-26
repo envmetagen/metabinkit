@@ -302,11 +302,26 @@ query277	100	98	Eukaryota	Mollusca	Bivalvia	Unionida	Unionidae	Sinanodonta	Sinan
 
 #### metabinkit_blast
 
-Usage: metabinkit_blast -i xxx ...
+A wrapper for running BLAST. Minimum input is a fasta file and a BLAST-formatted database. 
 
-run `metabin -h` for a list of all options and defaults
+Usage: `metabinkit_blast -f fasta file -D reference_DB -o outfile [options]`
+
+run `metabinkit_blast -h` for a list of all options and defaults
+run `blastn -help` for more details about specific options
+
+Note that the defaults run a "thorough" BLAST. That is: it uses the blastn task and a small word size to increase sensitivity; it uses relaxed gap settings and a high query cover percentage to tell BLAST to only report full-length (or almost full-length) alignments; it uses a low minimum percentage identity; it keeps 100 hits per query. These defaults are targeted towards metabarcoding purposes, i.e. we really only care about close to full length alignments (anything less can be misleading) with many alignments (keeping only a few can be misleading), ranging anywhere from 100-50%, which will help to provide accurate taxonomic binning. The relaxed gap settings mean that almost all queries will result in close to full alignments, otherwise we would get many queries without hits. Note that these defaults are at the expense of requiring more CPU time.
+
+The BLAST can be limited to certain sections of the BLAST-formatted database with the `-N` and `P` options.
 
 #### metabinkit_blastgendb
+A wrapper for generated a BLAST-formatted database. Minimum input is a fasta file.
+
+Usage: `metabinkit_blastgendb -f fasta file -t taxid_map -o db [options]`
+run `metabinkit_blastgendb -h` for a list of all options and defaults
+
+To allow full functionality of a BLAST database, taxonomic information is required. This can be provided by specifying a file with `-T`: mapping between the sequence id and the NCBI taxid (tab separated). If none is found it will look for `taxid=xxxx;` in the fasta header after the first space and consider the word up to the first space or | as the sequence id.
+
+Checks on the created database can be included by using the `-c` option. As well as checking that the taxonomic information was correctly added, this performs a small BLAST and checks the results.
 
 ### FAQs
 

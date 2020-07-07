@@ -136,7 +136,7 @@ metabin <- function(ifile,
     ## Filter
     if(!is.null(filter.col) && !is.null(filter)) {
         pinfo("Filtering table (",nrow(btab.o),") using ",filter.col," column.")
-        btab.o <- btab.o[!btab.o[,filter.col]%in%filter,,drop=FALSE]
+        btab.o <- btab.o[!btab.o[,filter.col]%in%filter$V1,,drop=FALSE]
         pinfo("Filtered table (",nrow(btab.o),") using ",filter.col," column.")
     }
     

@@ -155,7 +155,7 @@ if(is.null(opt$FilterCol) && !is.null(opt$FilterFile)) {
 
 filter.list <- NULL
 if (!is.null(opt$FilterFile)) {
-    print(file.exists(opt$FilterFile))
+    ##print(file.exists(opt$FilterFile))
     if (!file.exists(opt$FilterFile) ) perror(fatal=TRUE,"file ",opt$FilterFile, " not found!!!")
     filter.list <- as.vector(read.table(file=opt$FilterFile,header=F,comment.char = "#",sep="\t",quote=""))
     if (length(filter.list)==0) { filter.list <- NULL }

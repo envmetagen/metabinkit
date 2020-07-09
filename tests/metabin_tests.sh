@@ -100,6 +100,12 @@ must_succeed "metabin -i tests/test_files/in1.blast.short.tsv --FilterFile tests
 
 must_succeed "[ $(grep -c -E 'query1\s' .metabin.test.out.tsv) == 0 ]"
 
+must_succeed "metabin -i tests/test_files/in1.blast.short.tsv --FilterFile tests/test_files/in1.blast.short.exclude_single_ID.txt -o .metabin.test.out --FilterCol saccver"
+
+must_succeed "[ $(grep -c -E 'query1\s' .metabin.test.out.tsv) == 1 ]"
+
+must_succeed "[ $(grep -c -E 'query18\s' .metabin.test.out.tsv) == 0 ]"
+
 
 # column not present
 must_fail "metabin -M -i tests/test_files/in1.blast.tsv -o .metabin.test.out -S 99.0 -G 97.0 -F 95.0 -A 93.0 --FilterFile ./blacklist.txt --FilterCol taxids_typo"

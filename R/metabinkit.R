@@ -93,7 +93,7 @@ metabin <- function(ifile,
     ####################
     ## validate arguments
     if(is.null(taxDir)) perror(fatal=TRUE,"taxDir not specified");
-    if(!file.exists(ifile)) perror(fatal=TRUE,"file ", ifile, "not found"); 
+    if(!file.exists(ifile)) perror(fatal=TRUE,"file ", ifile, " not found"); 
 
     ## all arguments look ok, carry on...
     library(data.table)

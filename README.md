@@ -369,7 +369,7 @@ settings			bin             reason
 
 ```
 
-Using a very low "Top.." threshold, e.g. 0.001, unless justified, is likely prone to over-classifying the sequence to the incorrect taxonomy, as many very similar alignments will be discarded. Nevertheless, if the best alignment for a query has e.g. a %identity of 85, and the family level threshold (`-F, --Family`) is low e.g. 70%, it is reasonable to apply a `--TopFamily` threshold to only consider alignments within a certain range of the best alignment, increasing the likelihood of binning at family level.
+Using a very low "Top.." threshold, e.g. 0, may lead to over-classifying the sequence to the incorrect taxonomy, as many very similar alignments will be discarded. Nevertheless, this is still more conservative than, for example, taking only the best alignment, as all alignments that have an identical % identity to the top alignment will be kept. Using a Top threshold is particularly relevant when, for example, a query has a best alignment of 85 % identity and the family level threshold (`-F, --Family`) is low e.g. 70%; in such a case it is reasonable to apply a `--TopFamily` threshold to only consider alignments within a certain range of the best alignment, increasing the likelihood of binning at family level.
 
 #### Why is only the classical seven-rank taxonomy considered?
 

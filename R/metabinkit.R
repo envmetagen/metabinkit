@@ -85,6 +85,7 @@ metabin <- function(ifile,
                     filter.col=NULL,
                     filter=NULL,
                     species.neg=NULL,
+                    rm.predicted=NULL,
                     sp.consider.sp=FALSE,
                     sp.consider.numbers=FALSE,
                     sp.consider.mt2w=FALSE,
@@ -129,6 +130,9 @@ metabin <- function(ifile,
     expected.cols <- c("qseqid","pident","taxids")
     if(!is.null(filter.col) && !is.null(filter)) {
         expected.cols <- c(expected.cols,filter.col)
+    }
+    if(!is.null(rm.predicted)) {
+        expected.cols <- c(expected.cols,rm.predicted)
     }
     not.found <- expected.cols[!expected.cols%in%colnames(btab.o)]
     if ( length(not.found) > 0 ) perror(fatal=TRUE,"missing columns in input table:",paste(not.found,collapse=","))
@@ -207,6 +211,17 @@ metabin <- function(ifile,
     if (!is.null(blacklists$family.level)) pinfo(verbose=!quiet,"Maximum # Taxa disabled at family level:",length(blacklists.children$family.level))
 
 
+##################################################################
+    stats$rm.predicted <- 0L
+    if (!is.null(rm.predicted)) {
+        pinfo(verbose=!quiet,"Not considering in-silico predicted sequences (XM_*,XR_*,XP_*)")
+        rm.predicted.found <- grepl("\\s(3|XM|XR|XP)_.*",btab[,rm.predicted],perl=TRUE)
+        stats$rm.predicted <- sum(rm.predicted.found)
+        if (stats$rm.predicted>0) {
+            btab<-btab[!rm.predicted.found,,drop=FALSE] 
+        }
+        pinfo(verbose=!quiet,"Removed ",stats$rm.predicted," entries")
+    }
     ##################################################################
     ##species-level assignments
     pinfo(verbose=!quiet,"binning at species level")

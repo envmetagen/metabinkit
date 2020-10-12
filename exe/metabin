@@ -154,6 +154,8 @@ if(is.null(opt$FilterCol) && !is.null(opt$FilterFile)) {
 }
 
 ##
+if (!is.null(opt$rm_predicted) && opt$rm_predicted=="NULL" )
+    opt$rm_predicted <- NULL
 
 filter.list <- NULL
 if (!is.null(opt$FilterFile)) {
@@ -164,6 +166,7 @@ if (!is.null(opt$FilterFile)) {
 }
 pinfo("Starting Binning")
 t1<-Sys.time()
+
 
 binned <- metabin(ifile=opt$input,
                   taxDir=opt$db,

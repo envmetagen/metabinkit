@@ -28,6 +28,7 @@ mbk.local.lib.path <- paste0(dir2script,"/../R")
 source(paste0(dir2script,"/../R/metabinkit.R"))
 
 default.taxonkit.db.dir <- paste0(dir2script,"/../db/")
+rm_predicted <- NULL
 
 library(optparse)
 ############################################################
@@ -63,8 +64,9 @@ option_list = list(
                 help="families blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
     make_option(c("--FilterFile"), type="character", default=NULL, 
                 help="file name with the entries from the input to exclude (on entry per line)  [default= %default]", metavar="filename"),
-    make_option(c("--FilterCol"), type="character", default="sseqid", 
-                help="Column name to look for the values found the the file provided in the --Filter parameter  [default= %default]", metavar="filename"),
+    make_option(c("--FilterCol"), type="character", default="sseqid", help="Column name to look for the values found the the file provided in the --Filter parameter  [default= %default]", metavar="filename"),
+                make_option(c("--rm_predicted"), type="character",default=NULL,
+                help="Where to look (column name) for in-silico 'predicted' entries (XM_,XR_, and XP_). If no column is given then  the filter is applied.  [default= %default]",metavar="colname"),
 
     ## tops,tpoS,topG,topF,topAbs
     make_option(c("--TopSpecies"), type="integer", default=100, 
@@ -180,6 +182,7 @@ binned <- metabin(ifile=opt$input,
                   filter=filter.list,
                   species.neg=species.neg,
                   no_mbk=opt$no_mbk,
+                  rm.predicted=opt$rm_predicted,
                   sp.consider.mt2w=!opt$sp_discard_mt2w,
                   sp.consider.numbers=!opt$sp_discard_num,
                   sp.consider.sp=!opt$sp_discard_sp)

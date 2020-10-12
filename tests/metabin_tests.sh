@@ -64,11 +64,11 @@ must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 
 
 must_succeed "metabin -i tests/test_files/in4.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_mt2w -M  --no_mbk --TopSpecies 1"
 
-must_succeed "metabin -i tests/test_files/in5.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_mt2w -M  --no_mbk --TopSpecies 1 --rm_predicted saccver"
 
 # check output
 must_succeed "diff -q <(tail -n +2 .metabin.test.out.tsv|sort) <(tail -n +2  tests/test_files/out4.tsv|sort ) "
 
+must_succeed "metabin -i tests/test_files/in5.blast.tsv -o .metabin.test.out -S 98 -G 95 -F 92 -A 80 --sp_discard_mt2w -M  --no_mbk --TopSpecies 1 --rm_predicted saccver"
 #############################
 ## blacklisting
 # familiesBL: Bivalvia

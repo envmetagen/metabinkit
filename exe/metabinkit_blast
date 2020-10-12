@@ -31,7 +31,7 @@ set -eu -o pipefail
 # Default values
 taxids_blacklist_files=
 taxids_poslist_files=
-outfmt="6 qseqid evalue pident qcovs saccver staxids ssciname sseqid"
+outfmt="6 qseqid evalue pident qcovs saccver staxid ssciname sseqid"
 threads=2
 max_hsps=1
 word_size=6

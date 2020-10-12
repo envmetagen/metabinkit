@@ -68,13 +68,13 @@ option_list = list(
 
     ## tops,tpoS,topG,topF,topAbs
     make_option(c("--TopSpecies"), type="integer", default=100, 
-                help="TODO [default= %default]", metavar="integer"),
+                help=" [default= %default]", metavar="integer"),
     make_option(c("--TopGenus"), type="integer", default=100, 
-                help="TODO [default= %default]", metavar="integer"),
+                help=" [default= %default]", metavar="integer"),
     make_option(c("--TopFamily"), type="integer", default=100, 
-                help="TODO [default= %default]", metavar="integer"),
+                help=" [default= %default]", metavar="integer"),
     make_option(c("--TopAF"), type="integer", default=100, 
-                help="TODO above family? [default= %default]", metavar="integer"),
+                help=" above family? [default= %default]", metavar="integer"),
 
     make_option(c("-v","--version"), action = "store_true", default = FALSE,
                 help = "print version and exit"),

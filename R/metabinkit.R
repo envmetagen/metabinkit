@@ -215,7 +215,7 @@ metabin <- function(ifile,
     stats$rm.predicted <- 0L
     if (!is.null(rm.predicted)) {
         pinfo(verbose=!quiet,"Not considering in-silico predicted sequences (XM_*,XR_*,XP_*)")
-        rm.predicted.found <- grepl("\\s(3|XM|XR|XP)_.*",btab[,rm.predicted],perl=TRUE)
+        rm.predicted.found <- grepl("\\s(XM|XR|XP)_.*",btab[,rm.predicted],perl=TRUE)
         stats$rm.predicted <- sum(rm.predicted.found)
         if (stats$rm.predicted>0) {
             btab<-btab[!rm.predicted.found,,drop=FALSE] 

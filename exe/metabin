@@ -80,6 +80,8 @@ option_list = list(
 
     make_option(c("-v","--version"), action = "store_true", default = FALSE,
                 help = "print version and exit"),
+                make_option(c("-q","--quiet"), action = "store_true", default = FALSE,
+                help = "enable quiet mode (less messages are printed to stdout)"),
     make_option(c("--no_mbk"), action = "store_true", default = FALSE,
                 help = "Do not use mbk: codes in the output file to explain why a sequence was not binned at a given level (NA is used throughout)"),
     ## discard sp
@@ -188,7 +190,8 @@ binned <- metabin(ifile=opt$input,
                   rm.predicted=opt$rm_predicted,
                   sp.consider.mt2w=!opt$sp_discard_mt2w,
                   sp.consider.numbers=!opt$sp_discard_num,
-                  sp.consider.sp=!opt$sp_discard_sp)
+                  sp.consider.sp=!opt$sp_discard_sp,
+                  quiet=!opt$quiet)
             
 ##              disabledTaxaFiles = disabledTaxaFiles)
 if (!is.null(binned)) {

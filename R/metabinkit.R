@@ -544,7 +544,6 @@ get.top <- function(tab,topN) {
     tab$min_pident <- tab.a[tab$qseqid,"minp"]
     tab<-tab[tab$pident>=tab$min_pident,,drop=FALSE]
     tab <- tab[!is.na(tab$qseqid),,drop=FALSE]
-    print(tab)
     ## get the minimum min_pident for each qseqid
     setDT(tab)    
     tab.a <- tab[tab[, .I[pident==min(pident)], by=qseqid]$V1]

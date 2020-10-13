@@ -529,18 +529,31 @@ get.top <- function(tab,topN) {
     }
     ## top hit for each qseqid
     setDT(tab)
+    ## maximum pident per qseqid
     tab.a <- tab[tab[, .I[pident==max(pident)], by=qseqid]$V1]
     ## discard ties
     tab.a <- tab.a[!duplicated(tab.a$qseqid),,drop=FALSE]
-    tab.a <- as.data.frame(tab.a)
+    ##
     tab <- as.data.frame(tab)
+    tab.a <- as.data.frame(tab.a)
     rownames(tab.a) <- tab.a$qseqid
+    ## 
     tab.a$minp <- tab.a$pident-topN
-    tab.a$minp[tab.a$minp<0] <- -1
-    ## add minp
-    tab$min_pident <- tab.a[tab$qseqid,"minp"]+topN
+    #tab.a$minp[tab.a$minp<0] <- -1.0
+    ## add minp - keep the min_pident cutoff
+    tab$min_pident <- tab.a[tab$qseqid,"minp"]
     tab<-tab[tab$pident>=tab$min_pident,,drop=FALSE]
     tab <- tab[!is.na(tab$qseqid),,drop=FALSE]
+    print(tab)
+    ## get the minimum min_pident for each qseqid
+    setDT(tab)    
+    tab.a <- tab[tab[, .I[pident==min(pident)], by=qseqid]$V1]
+    ## discard ties
+    tab.a <- tab.a[!duplicated(tab.a$qseqid),,drop=FALSE]
+    tab <- as.data.frame(tab)
+    tab.a <- as.data.frame(tab.a)
+    rownames(tab.a) <- tab.a$qseqid
+    tab$min_pident <- tab.a[tab$qseqid,"pident"]
     return(tab)
 }
 

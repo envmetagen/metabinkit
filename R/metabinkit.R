@@ -536,9 +536,9 @@ get.top <- function(tab,topN) {
     tab <- as.data.frame(tab)
     rownames(tab.a) <- tab.a$qseqid
     tab.a$minp <- tab.a$pident-topN
-    tab.a$minp[tab.a$minp<0] <- 0
+    tab.a$minp[tab.a$minp<0] <- -1
     ## add minp
-    tab$min_pident <- tab.a[tab$qseqid,"minp"]
+    tab$min_pident <- tab.a[tab$qseqid,"minp"]+topN
     tab<-tab[tab$pident>=tab$min_pident,,drop=FALSE]
     tab <- tab[!is.na(tab$qseqid),,drop=FALSE]
     return(tab)

@@ -19,7 +19,8 @@ cat <<EOF > ifile
 1524214
 EOF
 
-must_succeed "[ `taxonkit_children.sh ifile ofile && cat ofile |wc -l` \> 10 ]"
+must_succeed "taxonkit_children.sh ifile ofile"
+must_succeed "[ `cat ofile |wc -l` \> 10 ]"
 
 echo Failed tests: $num_failed
 echo Number of tests: $num_tests

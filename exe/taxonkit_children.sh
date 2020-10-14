@@ -23,6 +23,9 @@ PATH2SCRIPT=$(dirname "${BASH_SOURCE[0]}" )
 ## taxonkit ok?
 command -v taxonkit  >/dev/null 2>&1 || { echo "ERROR: $cmd  does not seem to be installed.  Aborting." >&2; exit 1; }
 
+if [ "$DEBUG_MODE-" == "1-" ] ; then
+    set -x
+fi
 
 ##
 IFILE=$1
@@ -65,10 +68,10 @@ split -l 400 $IFILE ${OFILE}_i_
 
 touch $OFILE.tmp
 ls -1 ${OFILE}_i_* | while read f; do
-    LIST=$(cat $f|tr "\n" ",")
+    LIST=$(cat $f|tr "\n" ","|sed "s/,$//")
+    echo taxonkit list  --ids $LIST $EXTRA --indent ''
     taxonkit list  --ids $LIST $EXTRA --indent ''  >>  $OFILE.tmp
 done
 mv $OFILE.tmp $OFILE
 rm -f ${OFILE}_i_*
 exit 0
-#    taxonkit list  --ids $LIST $EXTRA --indent '' --show-name | cut -f 2- -d\  >>  $OFILE.tmp

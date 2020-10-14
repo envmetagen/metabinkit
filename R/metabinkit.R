@@ -182,6 +182,8 @@ metabin <- function(ifile,
     cols <- colnames(btab)
     ## add a numeric index column (spedup lookups)
     btab <- cbind(idx=as.integer(rownames(btab)),btab)
+    rownames(btab) <- as.character(btab$idx)
+
     ## min_pident (NA if not binned)
     if(nrow(btab)>0) {
         btab$min_pident <- NA
@@ -283,7 +285,6 @@ metabin <- function(ifile,
     ##can have g=known and s=unknown (e.g. Leiopelma), these should be kept
     btab<-apply.blacklists(btab,blacklists.children,level="G",mark.bl="mbk:bl-G")    
     btab.g<-btab[grep("(unknown|mbk:bl-)",btab$G,perl=TRUE,invert=TRUE),,drop=FALSE]
-
     bres <- binAtLevel(btab,btab.l=btab.g,"G",min_pident=gpident,top=topG,quiet=quiet,expected.tax.cols=expected.tax.cols)
     binned.g <- bres$binned
     stats$binned.genus.level <- bres$nbinned
@@ -315,6 +316,7 @@ metabin <- function(ifile,
     rm(btab.f)
     rm(bres)
     pinfo(verbose=!quiet,"binned ",stats$binned.family.level," sequences at family level")
+
     ##################################################################
     ##higher-than-family-level assignments
     pinfo(verbose=!quiet,"binning at higher-than-family level")
@@ -407,10 +409,11 @@ If --no_mbk option was used the codes will be NA
 binAtLevel <- function(btab,btab.l,level,min_pident,top,expected.tax.cols,quiet=FALSE) {
     binned.l <- NULL
     nbinned <- NULL
+
     if ( nrow(btab.l) > 0 ) {
         above.threshold <- btab.l$pident>=min_pident
         pinfo(verbose=!quiet,"excluding ",sum(!above.threshold)," entries with pident below ",min_pident)
-        not.passing.ids <- btab.l$idx[!above.threshold]
+        not.passing.ids <- as.character(btab.l$idx[!above.threshold])
         btab.l<-btab.l[above.threshold,,drop=FALSE]
         btab[as.character(not.passing.ids),level] <- "mbk:nb-thr"
         ## keep all ids
@@ -424,7 +427,12 @@ binAtLevel <- function(btab,btab.l,level,min_pident,top,expected.tax.cols,quiet=
         ## remove binned entries
         btab <- btab[!btab$qseqid%in%binned.l$qseqid,,drop=FALSE]
         ## mark remaining entries
-        btab[btab$idx%in%as.character(ids),level] <- "mbk:nb-lca"
+        bids <- as.character(btab$idx[btab$idx%in%ids])
+        btab[bids,level] <- "mbk:nb-lca"
+        ## set min_pident
+        rownames(btab.l) <- as.character(btab.l$idx)
+        #rownames(btab) <- as.character(btab$idx)
+        btab[bids,"min_pident"] <- btab.l[bids,"min_pident"]
         nbinned <- nrow(binned.l)
         rm(lca.l)
     }

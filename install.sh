@@ -27,7 +27,7 @@ ALL_TOOLS="taxonkit blast metabinkit R_packages taxonomy_db"
 
 SYSTEM_DEPENCIES="R bash"
 
-blast_VERSION=2.10.0
+blast_VERSION=2.10.1
 blast_URL=ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${blast_VERSION}/ncbi-blast-${blast_VERSION}+-x64-linux.tar.gz
 
 TAXONKIT_VERSION=0.6.0

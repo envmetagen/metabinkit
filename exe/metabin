@@ -64,7 +64,7 @@ option_list = list(
                 help="families blacklist (file with one taxid per line) [default= %default]", metavar="filename"),
     make_option(c("--FilterFile"), type="character", default=NULL, 
                 help="file name with the entries from the input to exclude (on entry per line)  [default= %default]", metavar="filename"),
-    make_option(c("--FilterCol"), type="character", default="sseqid", help="Column name to look for the values found the the file provided in the --Filter parameter  [default= %default]", metavar="filename"),
+    make_option(c("--FilterCol"), type="character", default="sseqid", help="Column name to look for the values found the the file provided in the --Filter parameter  [default= %default]", metavar="column name"),
                 make_option(c("--rm_predicted"), type="character",default=NULL,
                 help="Where to look (column name) for in-silico 'predicted' entries (XM_,XR_, and XP_). If no column is given then  the filter is applied.  [default= %default]",metavar="colname"),
 

@@ -19,7 +19,7 @@
 #
 # =========================================================
 # useful functions
-metabinkit_version="0.2.0"
+metabinkit_version="0.2.1"
 
 function print_metabinkit_version {
     echo "metabinkit version: $metabinkit_version"

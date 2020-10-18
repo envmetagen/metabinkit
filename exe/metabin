@@ -52,7 +52,7 @@ option_list = list(
                 help="above family %id threshold [default= %default]", metavar="double"),
 
     make_option(c("-D", "--db"), type="character", default=default.taxonkit.db.dir, 
-                help="directory containing the taxonomy db (nodes.dmp and names.dmp) [default= %default]", metavar="double"),
+                help="directory containing the taxonomy db (nodes.dmp and names.dmp) [default= %default]", metavar="folder"),
 
     make_option(c("--SpeciesNegFilter"), type="character", default=NULL, 
                 help="negative filter (file with one word per line) [default= %default]", metavar="filename"),

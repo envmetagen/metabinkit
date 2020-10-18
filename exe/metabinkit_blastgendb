@@ -40,6 +40,7 @@ function check_db {
     
     echo "Checking database..."
     set +e
+    # it requires at least 200 samples//sequences
     blastdbcheck -verbosity 2 -db $1 -must_have_taxids
     if [ $? != 0 ]; then
 	echo "ERROR: blast db check failed"
@@ -158,6 +159,18 @@ fi
 CMD=makeblastdb
 ## Subject Scientific Name(s) are separated by a ';'
 $CMD -in $infasta -dbtype nucl -out $outfile -taxid_map $taxid_mapfile -parse_seqids
+
+## copy the taxonomy database
+db_folder=$PATH2SCRIPT/../db
+
+if [ ! -e $db_folder ]; then
+    echo "Error: $dn_folder not found"
+    exit 1
+fi
+
+echo "INFO: copying taxonomy datbase..."
+cp -a $db_folder/*.* $(dirname $outfile)
+echo "INFO: copying taxonomy datbase...done."
 
 if [ $check == 1 ]; then
     check_db $outfile $infasta

@@ -158,7 +158,7 @@ if (version\$major > 3 || (version\$major == 3 && version\$minor>5)) {
 message("_____________________________________________________")
 
 message("Installing packages")
-packages2install<-c("Matrix","data.table","optparse")
+packages2install<-c("Matrix","data.table","optparse","stringr")
 
 for (p in packages2install ) {
   message("PACKAGE:",p,"\n")

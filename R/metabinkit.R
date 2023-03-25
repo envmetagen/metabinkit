@@ -18,7 +18,7 @@
 #
 # =========================================================
 
-metabinkit.version <- "0.2.2"
+metabinkit.version <- "0.2.3"
 
 ## Ensure that we are using a recent version of R
 ##

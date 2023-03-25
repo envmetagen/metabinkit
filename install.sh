@@ -132,7 +132,7 @@ version <- getRversion()
 currentVersion <- sprintf("%d.%d", version\$major, version\$minor)
 message("R version:",version)
 usebiocmanager<-TRUE
-if ( version\$major < 3 || (version\$major>=3 && version\$minor<5) ) {
+if ( version\$major < 3 || (version\$major==3 && version\$minor<5) ) {
   cat("ERROR: R version should be 3.5 or above\n")
   q(status=1)
 }
